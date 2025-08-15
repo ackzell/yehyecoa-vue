@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import Sun from '@/icons/Sun.vue'
-import Moon from '@/icons/Moon.vue'
+import Sun from '@/icons/SunIcon.vue'
+import Moon from '@/icons/MoonIcon.vue'
 
 defineProps<{
   theme: 'dark' | 'light'

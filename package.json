@@ -13,7 +13,9 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "install-in-amoxtli-vue": "cp -r dist/assets ../amoxtli-vue/src/templates/yehyecoa/ && cp dist/index.html ../amoxtli-vue/src/templates/yehyecoa/",
+    "bi": "npm run build && npm run install-in-amoxtli-vue"
   },
   "dependencies": {
     "@vue/repl": "^4.6.3",

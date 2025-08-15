@@ -2,7 +2,7 @@
 import { Repl, useStore } from '@vue/repl'
 import Monaco from '@vue/repl/monaco-editor'
 import '@vue/repl/style.css'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import ReplHeader from './ReplHeader.vue'
 import { useStorage } from '@vueuse/core'
 
@@ -21,22 +21,21 @@ window.addEventListener('resize', setVH)
 setVH()
 
 const store = useStore()
-// TODO: read the contents from an external file
-// so it is easier to have multiple examples
-// within the lessons
-const files = {
-  'src/App.vue': `<script setup lang="ts">
-  import { ref } from 'vue'
 
-  const msg = ref('Hola Mundo!')
-<\/script>
+onMounted(async () => {
+  // Initial load
+  const fileContents = await fetch('/lessonFile.vue').then((r) => r.text())
+  store.setFiles({ 'src/App.vue': fileContents })
 
-<template>
-  <h1>{{ msg }}</h1>
-  <input v-model="msg" />
-</template>`,
-}
-store.setFiles(files)
+  // Live updates via SSE
+  const es = new EventSource('/events')
+  es.addEventListener('fileUpdate', (event) => {
+    const { filename, content } = JSON.parse(event.data)
+    if (filename === 'lessonFile.vue') {
+      store.setFiles({ 'src/App.vue': content })
+    }
+  })
+})
 </script>
 
 <template>
