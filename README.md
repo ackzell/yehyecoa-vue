@@ -1,4 +1,4 @@
-# Yehyecoa
+# yehyecoa-vue
 
 > **[yeh-yeh-CO-ah](https://nahuatl.wired-humanities.org/content/yeyecoa)** in Nahuatl means to try something; to try or experiment with something; to rehearse;
 
