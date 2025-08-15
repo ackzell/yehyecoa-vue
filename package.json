@@ -14,7 +14,7 @@
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "install-in-amoxtli-vue": "cp -r dist ../amoxtli-vue/src/templates/yehyecoa/",
+    "install-in-amoxtli-vue": "cp -r dist/ ../amoxtli-vue/src/templates/yehyecoa",
     "bi": "npm run build && npm run install-in-amoxtli-vue",
     "build-server": "cp server.js dist/server.js",
     "serve": "node dist/server.js"
