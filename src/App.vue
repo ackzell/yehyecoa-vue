@@ -22,10 +22,19 @@ setVH()
 
 const store = useStore()
 
+const errormessage = ref('')
+
 onMounted(async () => {
   // Initial load
-  const fileContents = await fetch('/lessonFile.vue').then((r) => r.text())
-  store.setFiles({ 'src/App.vue': fileContents })
+  try {
+    const fileContents = await fetch('/lessonFile.vue').then((r) => r.text())
+    store.setFiles({ 'src/App.vue': fileContents })
+  } catch {
+    errormessage.value = 'Failed to load lessonFile.vue'
+    console.error(
+      'Failed to load `lessonFile.vue`, makes sure you created one in the root directory.',
+    )
+  }
 
   // Live updates via SSE
   const es = new EventSource('/events')
