@@ -49,20 +49,12 @@ onMounted(async () => {
 
 <template>
   <div class="repl-container">
+    <div v-if="errormessage" class="error">{{ errormessage }}</div>
     <ReplHeader :theme="theme" @set-theme="setTheme" />
-    <Repl
-      :editor="Monaco"
-      :show-compile-output="false"
-      :show-import-map="false"
-      :show-ts-config="false"
-      :theme="theme"
-      @keydown.ctrl.s.prevent
-      @keydown.meta.s.prevent
-      :editor-options="{
+    <Repl :editor="Monaco" :show-compile-output="false" :show-import-map="false" :show-ts-config="false" :theme="theme"
+      @keydown.ctrl.s.prevent @keydown.meta.s.prevent :editor-options="{
         autoSaveText: false,
-      }"
-      :store
-    />
+      }" :store />
   </div>
 </template>
 
