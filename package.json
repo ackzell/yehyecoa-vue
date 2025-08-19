@@ -1,44 +1,46 @@
 {
-  "name": "yehyecoa",
+  "name": "yehyecoa-vue",
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" -- && npm run build-server",
-    "preview": "vite preview",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --build",
-    "lint": "eslint . --fix",
-    "format": "prettier --write src/",
-    "install-in-amoxtli-vue": "cp -r dist/ ../amoxtli-vue/src/templates/yehyecoa",
-    "bi": "npm run build && npm run install-in-amoxtli-vue",
-    "build-server": "cp server.js dist/server.js",
-    "serve": "node dist/server.js"
+ "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev", 
+    "generate": "nuxt generate",
+    "preview": "nuxt preview", 
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lintfix": "eslint . --fix",
+    "prepare": "husky",
+    "install-in-amoxtli-vue": "cp -r .output ../amoxtli-vue/src/templates/yehyecoa",
+    "bi": "npm run build && npm run install-in-amoxtli-vue"
   },
   "dependencies": {
+    "@unocss/core": "^66.0.0",
+    "@unocss/reset": "66.1.0-beta.3",
     "@vue/repl": "^4.6.3",
-    "@vueuse/core": "^13.6.0",
-    "vue": "^3.5.18"
+    "@vueuse/core": "^13.7.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "reka-ui": "^2.2.1",
+    "tw-animate-css": "^1.2.9",
+    "vue": "latest",
+    "vue-router": "latest"
   },
+  "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c",
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.2",
-    "@types/node": "^22.16.5",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/eslint-config-prettier": "^10.2.0",
-    "@vue/eslint-config-typescript": "^14.6.0",
-    "@vue/tsconfig": "^0.7.0",
-    "eslint": "^9.31.0",
-    "eslint-plugin-vue": "~10.3.0",
-    "jiti": "^2.4.2",
-    "npm-run-all2": "^8.0.4",
-    "prettier": "3.6.2",
-    "typescript": "~5.8.0",
-    "vite": "^7.0.6",
-    "vite-plugin-vue-devtools": "^8.0.0",
-    "vue-tsc": "^3.0.4"
+    "@nuxt/eslint": "^1.1.0",
+    "@nuxt/icon": "^1.12.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "@unocss/nuxt": "^66.0.0",
+    "@unocss/preset-web-fonts": "^66.0.0",
+    "@unocss/preset-wind": "^66.0.0",
+    "@vueuse/nuxt": "^12.7.0",
+    "autoprefixer": "^10.4.21",
+    "husky": "^9.1.7",
+    "nuxt": "^3.17.2",
+    "postcss": "^8.5.3",
+    "unocss": "^66.0.0"
   }
 }

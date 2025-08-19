@@ -12,7 +12,7 @@ Most notably, it doesn't allow for switching Vue versions nor it displays the co
 
 ### As part of [amoxtli-vue](https://github.com/ackzell/amoxtli-vue)
 
-This is the playground that will load into a preview pane in the `amoxtli-vue` project. 
+This is the playground that will load into a preview pane in the `amoxtli-vue` project.
 It reads the different [code files in the lessons](https://tutorialkit.dev/guides/creating-content/#a-lesson-code) provided from that repo and loads them into the monaco editor to interact with them.
 
 ![screenshot](docs/amoxtli-integration.png)
@@ -25,46 +25,90 @@ An npm task is available for when you want to see your changes embedded into the
 # build and install on tk project
 npm bi
 ```
-This will first build the project and then copy the required contents from the `/dist` folder into the `amoxtli-vue/src/templates/yehyecoa/` folder.
+
+This will first build the project and then copy the required contents from the `.output` folder into the `amoxtli-vue/src/templates/yehyecoa/` folder.
 
 ### Standalone
+
 > [!Note]
-> Take a look at `amoxtli-vue/src/templates/yehyecoa/server.js` as it contains logic to _notify_ `yehyecoa-vue` when the contents of the file have been updated. This is if you want to dynamically update the contents of the editor (and thus perfect for embedding into a tk webcontainer).
+> This Nuxt project has some server side code to read the contents of the root (where the project is being run / deployed) and looks for a `lessonFile.vue` to be the contents of the playground on load. It also has logic to determine that there were changes on the file and thus will live-update them in the editor.
 
-# Original Readme:
+<todo: list the files that contain such logic here>
 
-## Recommended IDE Setup
+# Nuxt's Readme:
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+# Nuxt Minimal Starter
 
-## Type Support for `.vue` Imports in TS
+Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Setup
 
-## Customize configuration
+Make sure to install dependencies:
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+```bash
+# npm
+npm install
 
-## Project Setup
-
-```sh
+# pnpm
 pnpm install
+
+# yarn
+yarn install
+
+# bun
+bun install
 ```
 
-### Compile and Hot-Reload for Development
+## Development Server
 
-```sh
+Start the development server on `http://localhost:3000`:
+
+```bash
+# npm
+npm run dev
+
+# pnpm
 pnpm dev
+
+# yarn
+yarn dev
+
+# bun
+bun run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+## Production
 
-```sh
+Build the application for production:
+
+```bash
+# npm
+npm run build
+
+# pnpm
 pnpm build
+
+# yarn
+yarn build
+
+# bun
+bun run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+Locally preview production build:
 
-```sh
-pnpm lint
+```bash
+# npm
+npm run preview
+
+# pnpm
+pnpm preview
+
+# yarn
+yarn preview
+
+# bun
+bun run preview
 ```
+
+Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

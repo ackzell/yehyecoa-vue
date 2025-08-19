@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import Sun from '@/icons/SunIcon.vue'
-import Moon from '@/icons/MoonIcon.vue'
+import { onMounted } from 'vue';
 
 defineProps<{
-  theme: 'dark' | 'light'
-}>()
+  theme: 'dark' | 'light';
+}>();
 
 // TODO: implement the download functionality, just like the official playground
-const emit = defineEmits(['set-theme'])
-const cls = document.documentElement.classList
+const emit = defineEmits(['set-theme']);
+const cls = document.documentElement.classList;
 
 function setTheme() {
-  cls.toggle('dark')
-  emit('set-theme', cls.contains('dark') ? 'dark' : 'light')
+  cls.toggle('dark');
+  emit('set-theme', cls.contains('dark') ? 'dark' : 'light');
 }
 
 onMounted(() => {
-  emit('set-theme', cls.contains('dark') ? 'dark' : 'light')
-})
+  emit('set-theme', cls.contains('dark') ? 'dark' : 'light');
+});
 </script>
 
 <template>
@@ -31,11 +29,17 @@ onMounted(() => {
     <div class="links">
       <button
         :title="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`"
-        class="toggle-dark"
         @click="setTheme"
       >
-        <Sun class="light" />
-        <Moon class="dark" />
+        <Icon
+          name="uil:moon"
+          class="w-6 h-6 hidden dark:inline-block"
+        />
+
+        <Icon
+          name="uil:sun"
+          class="w-6 h-6 dark:hidden"
+        />
       </button>
     </div>
   </nav>
