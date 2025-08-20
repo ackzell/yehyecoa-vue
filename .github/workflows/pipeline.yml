@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js from .nvmrc
+      - name: Use Node.js from .node-version
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version-file: .node-version
       - name: Install pnpm
         uses: pnpm/action-setup@v4
       - name: Install dependencies
