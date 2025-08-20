@@ -53,7 +53,10 @@ onMounted(async () => {
 
 <template>
   <div class="repl-container">
-    <div v-if="errormessage" class="error">
+    <div
+      v-if="errormessage"
+      class="error"
+    >
       {{ errormessage }}
     </div>
     <ReplHeader
@@ -62,12 +65,16 @@ onMounted(async () => {
     />
     <Repl
       :editor="Monaco"
-      :show-compile-output="false" :show-import-map="false"
-      :show-ts-config="false" :theme="theme"
+      :show-compile-output="false"
+      :show-import-map="false"
+      :show-ts-config="false"
+      :theme="theme"
       :editor-options="{
         autoSaveText: false,
-      }" :store
-      @keydown.ctrl.s.prevent @keydown.meta.s.prevent
+      }"
+      :store
+      @keydown.ctrl.s.prevent
+      @keydown.meta.s.prevent
     />
   </div>
 </template>

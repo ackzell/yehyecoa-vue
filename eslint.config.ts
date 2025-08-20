@@ -30,10 +30,10 @@ export default antfu({
     // Vue template formatting
     'vue/max-attributes-per-line': [
       'warn', // Use 'warn' instead of 'error' for less strict enforcement
-      {
-        singleline: 3,
-        multiline: 2,
-      },
+      // {
+      //   singleline: 3,
+      //   multiline: 2,
+      // },
     ],
     'vue/first-attribute-linebreak': ['warn', {
       singleline: 'ignore',
