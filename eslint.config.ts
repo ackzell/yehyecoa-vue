@@ -9,8 +9,8 @@ export default antfu({
   },
   typescript: true,
   vue: true,
-  jsonc: false,
-  yaml: false,
+  jsonc: true,
+  yaml: true,
   ignores: [
     '**/fixtures',
   ],
