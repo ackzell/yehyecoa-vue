@@ -1,24 +1,24 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import Sun from '@/icons/SunIcon.vue'
-import Moon from '@/icons/MoonIcon.vue'
+import { onMounted } from 'vue';
+import Moon from '@/icons/MoonIcon.vue';
+import Sun from '@/icons/SunIcon.vue';
 
 defineProps<{
-  theme: 'dark' | 'light'
-}>()
+  theme: 'dark' | 'light';
+}>();
 
 // TODO: implement the download functionality, just like the official playground
-const emit = defineEmits(['set-theme'])
-const cls = document.documentElement.classList
+const emit = defineEmits(['set-theme']);
+const cls = document.documentElement.classList;
 
 function setTheme() {
-  cls.toggle('dark')
-  emit('set-theme', cls.contains('dark') ? 'dark' : 'light')
+  cls.toggle('dark');
+  emit('set-theme', cls.contains('dark') ? 'dark' : 'light');
 }
 
 onMounted(() => {
-  emit('set-theme', cls.contains('dark') ? 'dark' : 'light')
-})
+  emit('set-theme', cls.contains('dark') ? 'dark' : 'light');
+});
 </script>
 
 <template>

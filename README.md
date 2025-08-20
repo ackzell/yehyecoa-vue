@@ -12,7 +12,7 @@ Most notably, it doesn't allow for switching Vue versions nor it displays the co
 
 ### As part of [amoxtli-vue](https://github.com/ackzell/amoxtli-vue)
 
-This is the playground that will load into a preview pane in the `amoxtli-vue` project. 
+This is the playground that will load into a preview pane in the `amoxtli-vue` project.
 It reads the different [code files in the lessons](https://tutorialkit.dev/guides/creating-content/#a-lesson-code) provided from that repo and loads them into the monaco editor to interact with them.
 
 ![screenshot](docs/amoxtli-integration.png)

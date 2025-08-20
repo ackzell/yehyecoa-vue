@@ -1,22 +1,51 @@
-import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import pluginVue from 'eslint-plugin-vue'
-import { globalIgnores } from 'eslint/config'
+import antfu from '@antfu/eslint-config';
 
-// To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
-// import { configureVueProject } from '@vue/eslint-config-typescript'
-// configureVueProject({ scriptLangs: ['ts', 'tsx'] })
-// More info at https://github.com/vuejs/eslint-config-typescript/#advanced-setup
-
-export default defineConfigWithVueTs(
-  {
-    name: 'app/files-to-lint',
-    files: ['**/*.{ts,mts,tsx,vue}'],
+export default antfu({
+  type: 'lib',
+  stylistic: {
+    indent: 2,
+    quotes: 'single',
+    semi: true,
   },
+  typescript: true,
+  vue: true,
+  jsonc: true,
+  yaml: true,
+  ignores: [
+    '**/fixtures',
+  ],
+}, {
+  // Additional config for more specific rules
+  files: ['**/*.vue', '**/*.ts', '**/*.tsx', '**/*.js'],
+  rules: {
+    // TypeScript unused vars with underscore ignore pattern
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
 
-  globalIgnores(['**/public/**', '**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+    // Vue template formatting
+    'vue/max-attributes-per-line': [
+      'warn', // Use 'warn' instead of 'error' for less strict enforcement
+      // {
+      //   singleline: 3,
+      //   multiline: 2,
+      // },
+    ],
+    'vue/first-attribute-linebreak': ['warn', {
+      singleline: 'ignore',
+      multiline: 'below',
+    }],
+    'vue/html-closing-bracket-newline': ['warn', {
+      singleline: 'never',
+      multiline: 'always',
+    }],
 
-  pluginVue.configs['flat/essential'],
-  vueTsConfigs.recommended,
-  skipFormatting,
-)
+    'vue/custom-event-name-casing': ['error', 'kebab-case'],
+    'node/prefer-global/process': ['warn'],
+    'no-console': ['warn'],
+  },
+});

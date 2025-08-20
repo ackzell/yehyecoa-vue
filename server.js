@@ -1,5 +1,5 @@
-import http from 'node:http';
 import fs from 'node:fs';
+import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,7 +21,7 @@ const mimeTypes = {
   '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
   '.txt': 'text/plain',
-  '.wasm': 'application/wasm'
+  '.wasm': 'application/wasm',
 };
 
 // SSE clients
@@ -33,7 +33,8 @@ let indexHTML = '';
 try {
   indexHTML = fs.readFileSync(indexPath, 'utf-8');
   console.log('[startup] Loaded index.html into memory.');
-} catch (err) {
+}
+catch (err) {
   console.error('[startup] Could not read index.html:', err);
 }
 
@@ -44,7 +45,7 @@ function sendSSE(res, event, data) {
 }
 
 function broadcastFileChange(filename, content) {
-  clients.forEach(client => {
+  clients.forEach((client) => {
     sendSSE(client, 'fileUpdate', { filename, content });
   });
 }
@@ -81,14 +82,15 @@ const server = http.createServer((req, res) => {
     req.on('close', () => {
       console.log('[SSE] Client disconnected');
       const idx = clients.indexOf(res);
-      if (idx !== -1) clients.splice(idx, 1);
+      if (idx !== -1)
+        clients.splice(idx, 1);
     });
     return;
   }
 
   // Strip query string/hash
   const cleanUrl = req.url.split('?')[0].split('#')[0];
-  let filePath = path.join(baseDir, cleanUrl);
+  const filePath = path.join(baseDir, cleanUrl);
 
   // Serve preloaded index.html instantly for root
   if (cleanUrl === '/' || cleanUrl === '') {
