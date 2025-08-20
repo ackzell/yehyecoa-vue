@@ -1,60 +1,74 @@
-<script setup lang="ts">
-import { Repl, useStore } from '@vue/repl'
-import Monaco from '@vue/repl/monaco-editor'
-import '@vue/repl/style.css'
 import { onMounted, ref } from 'vue'
-import ReplHeader from './ReplHeader.vue'
-import { useStorage } from '@vueuse/core'
+<script setup lang="ts">
+import { Repl, useStore } from '@vue/repl';
+import Monaco from '@vue/repl/monaco-editor';
+import { useStorage } from '@vueuse/core';
 
-const preferDark = useStorage('vue-sfc-playground-prefer-dark', true)
+import { onMounted, ref } from 'vue';
+import ReplHeader from './ReplHeader.vue';
+import '@vue/repl/style.css';
 
-const theme = ref<'dark' | 'light'>('dark')
+const preferDark = useStorage('vue-sfc-playground-prefer-dark', true);
+
+const theme = ref<'dark' | 'light'>('dark');
 function setTheme(newTheme: 'dark' | 'light') {
-  theme.value = newTheme
-  preferDark.value = newTheme == 'dark'
+  theme.value = newTheme;
+  preferDark.value = newTheme === 'dark';
 }
 
-const setVH = () => {
-  document.documentElement.style.setProperty('--vh', window.innerHeight + `px`)
+function setVH() {
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
 }
-window.addEventListener('resize', setVH)
-setVH()
+window.addEventListener('resize', setVH);
+setVH();
 
-const store = useStore()
+const store = useStore();
 
-const errormessage = ref('')
+const errormessage = ref('');
 
 onMounted(async () => {
   // Initial load
   try {
-    const fileContents = await fetch('/lessonFile.vue').then((r) => r.text())
-    store.setFiles({ 'src/App.vue': fileContents })
-  } catch {
-    errormessage.value = 'Failed to load lessonFile.vue'
+    const fileContents = await fetch('/lessonFile.vue').then(r => r.text());
+    store.setFiles({ 'src/App.vue': fileContents });
+  }
+  catch {
+    errormessage.value = 'Failed to load lessonFile.vue';
     console.error(
+
       'Failed to load `lessonFile.vue`, makes sure you created one in the root directory.',
-    )
+    );
   }
 
   // Live updates via SSE
-  const es = new EventSource('/events')
+  const es = new EventSource('/events');
   es.addEventListener('fileUpdate', (event) => {
-    const { filename, content } = JSON.parse(event.data)
+    const { filename, content } = JSON.parse(event.data);
     if (filename === 'lessonFile.vue') {
-      store.setFiles({ 'src/App.vue': content })
+      store.setFiles({ 'src/App.vue': content });
     }
-  })
-})
+  });
+});
 </script>
 
 <template>
   <div class="repl-container">
-    <div v-if="errormessage" class="error">{{ errormessage }}</div>
-    <ReplHeader :theme="theme" @set-theme="setTheme" />
-    <Repl :editor="Monaco" :show-compile-output="false" :show-import-map="false" :show-ts-config="false" :theme="theme"
-      @keydown.ctrl.s.prevent @keydown.meta.s.prevent :editor-options="{
+    <div v-if="errormessage" class="error">
+      {{ errormessage }}
+    </div>
+    <ReplHeader
+      :theme="theme"
+      @set-theme="setTheme"
+    />
+    <Repl
+      :editor="Monaco"
+      :show-compile-output="false" :show-import-map="false"
+      :show-ts-config="false" :theme="theme"
+      :editor-options="{
         autoSaveText: false,
-      }" :store />
+      }" :store
+      @keydown.ctrl.s.prevent @keydown.meta.s.prevent
+    />
   </div>
 </template>
 
