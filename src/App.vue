@@ -1,12 +1,13 @@
 import { onMounted, ref } from 'vue'
 <script setup lang="ts">
-import { Repl, useStore } from '@vue/repl';
-import Monaco from '@vue/repl/monaco-editor';
-import { useStorage } from '@vueuse/core';
-
-import { onMounted, ref } from 'vue';
-import ReplHeader from './ReplHeader.vue';
 import '@vue/repl/style.css';
+
+import Monaco from '@vue/repl/monaco-editor';
+import { Repl, useStore } from '@vue/repl';
+import { useStorage } from '@vueuse/core';
+import { onMounted, ref } from 'vue';
+
+import ReplHeader from './ReplHeader.vue';
 
 const preferDark = useStorage('vue-sfc-playground-prefer-dark', true);
 
@@ -52,7 +53,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="repl-container">
+  <div class="repl-container font-sans text-primary">
     <div
       v-if="errormessage"
       class="error"

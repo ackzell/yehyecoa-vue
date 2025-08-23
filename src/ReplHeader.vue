@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
+
 import Moon from '@/icons/MoonIcon.vue';
 import Sun from '@/icons/SunIcon.vue';
 
@@ -26,7 +27,7 @@ onMounted(() => {
     <h1>
       <!-- TODO: maybe a logo would be cool -->
       <!-- <img alt="logo" src="/logo.svg" /> -->
-      <span>Vue live playground</span>
+      <span>yehyecoa-vue</span>
     </h1>
     <div class="links">
       <button

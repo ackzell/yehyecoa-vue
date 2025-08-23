@@ -47,5 +47,24 @@ export default antfu({
     'vue/custom-event-name-casing': ['error', 'kebab-case'],
     'node/prefer-global/process': ['warn'],
     'no-console': ['warn'],
+
+    'perfectionist/sort-imports': [
+      'error',
+      {
+        type: 'line-length',
+        order: 'desc',
+        groups: [
+          'side-effect', // CSS imports first
+          'builtin',
+          'external',
+          'internal-type',
+          'internal',
+          ['parent-type', 'sibling-type', 'index-type'],
+          ['parent', 'sibling', 'index'],
+          'object',
+          'unknown',
+        ],
+      },
+    ],
   },
 });
