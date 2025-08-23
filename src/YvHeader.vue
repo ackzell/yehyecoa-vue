@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useSettingsStore } from './composables/settings';
+import { useSettingsStore } from './composables/useSettingsStore';
 
 const { settings, toggleLayout, toggleTheme } = useSettingsStore();
 

@@ -6,7 +6,7 @@ import { Repl, useStore } from '@vue/repl';
 import { onMounted, ref } from 'vue';
 
 import YVHeader from './YvHeader.vue';
-import { useSettingsStore } from './composables/settings';
+import { useSettingsStore } from './composables/useSettingsStore';
 
 const { settings } = useSettingsStore();
 
