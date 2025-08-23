@@ -16,7 +16,7 @@ export default antfu({
   ],
 }, {
   // Additional config for more specific rules
-  files: ['**/*.vue', '**/*.ts', '**/*.tsx', '**/*.js'],
+  files: ['**/*.ts', '**/*.vue', '**/*.tsx', '**/*.js'],
   rules: {
     // TypeScript unused vars with underscore ignore pattern
     '@typescript-eslint/no-unused-vars': [
@@ -30,10 +30,10 @@ export default antfu({
     // Vue template formatting
     'vue/max-attributes-per-line': [
       'warn', // Use 'warn' instead of 'error' for less strict enforcement
-      // {
-      //   singleline: 3,
-      //   multiline: 2,
-      // },
+      {
+        singleline: 4,
+        multiline: 4,
+      },
     ],
     'vue/first-attribute-linebreak': ['warn', {
       singleline: 'ignore',
@@ -66,5 +66,13 @@ export default antfu({
         ],
       },
     ],
+
+    'style/object-curly-newline': ['error', {
+      ImportDeclaration: {
+        multiline: true,
+        minProperties: 3,
+      },
+
+    }],
   },
 });

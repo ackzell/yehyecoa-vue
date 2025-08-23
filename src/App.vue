@@ -1,4 +1,3 @@
-import { onMounted, ref } from 'vue'
 <script setup lang="ts">
 import '@vue/repl/style.css';
 
@@ -7,7 +6,7 @@ import { Repl, useStore } from '@vue/repl';
 import { useStorage } from '@vueuse/core';
 import { onMounted, ref } from 'vue';
 
-import ReplHeader from './ReplHeader.vue';
+import YVHeader from './YvHeader.vue';
 
 const preferDark = useStorage('vue-sfc-playground-prefer-dark', true);
 
@@ -53,14 +52,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="repl-container font-sans text-primary">
+  <div class="repl-container" font-sans text-primary>
     <div
       v-if="errormessage"
       class="error"
     >
       {{ errormessage }}
     </div>
-    <ReplHeader
+    <YVHeader
       :theme="theme"
       @set-theme="setTheme"
     />

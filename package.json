@@ -22,6 +22,8 @@
     "serve": "node dist/server.js"
   },
   "dependencies": {
+    "@iconify-json/carbon": "^1.2.13",
+    "@iconify-json/mynaui": "^1.2.16",
     "@vue/repl": "^4.6.3",
     "@vueuse/core": "^13.6.0",
     "unocss": "^66.4.2",
