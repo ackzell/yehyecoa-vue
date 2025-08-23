@@ -9,11 +9,15 @@ import { onMounted, ref } from 'vue';
 import YVHeader from './YvHeader.vue';
 
 const preferDark = useStorage('vue-sfc-playground-prefer-dark', true);
-
 const theme = ref<'dark' | 'light'>('dark');
 function setTheme(newTheme: 'dark' | 'light') {
   theme.value = newTheme;
   preferDark.value = newTheme === 'dark';
+}
+
+const layout = useStorage<'horizontal' | 'vertical'>('yehyecoa-vue-layout', 'horizontal');
+function toggleLayout() {
+  layout.value = layout.value === 'horizontal' ? 'vertical' : 'horizontal';
 }
 
 function setVH() {
@@ -62,13 +66,15 @@ onMounted(async () => {
     <YVHeader
       :theme="theme"
       @set-theme="setTheme"
+      @toggle-layout="toggleLayout"
     />
     <Repl
       :editor="Monaco"
       :show-compile-output="false"
       :show-import-map="false"
       :show-ts-config="false"
-      :theme="theme"
+      :theme
+      :layout
       :editor-options="{
         autoSaveText: false,
       }"
