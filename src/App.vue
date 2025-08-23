@@ -5,8 +5,8 @@ import Monaco from '@vue/repl/monaco-editor';
 import { Repl, useStore } from '@vue/repl';
 import { onMounted, ref } from 'vue';
 
-import YVHeader from './YvHeader.vue';
-import { useSettingsStore } from './composables/useSettingsStore';
+import { useSettingsStore } from '@/composables/useSettingsStore';
+import YVHeader from '@/components/YvHeader.vue';
 
 const { settings } = useSettingsStore();
 
