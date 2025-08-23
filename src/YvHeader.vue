@@ -1,31 +1,8 @@
 <script setup lang="ts">
-import { useStorage } from '@vueuse/core';
-import { onMounted } from 'vue';
+import { useSettingsStore } from './composables/settings';
 
-defineProps<{
-  theme: 'dark' | 'light';
-}>();
+const { settings, toggleLayout, toggleTheme } = useSettingsStore();
 
-// TODO: implement the download functionality, just like the official playground
-const emit = defineEmits({
-  'set-theme': (theme: 'dark' | 'light') => theme,
-  'toggle-layout': () => true,
-});
-const cls = document.documentElement.classList;
-
-function setTheme() {
-  cls.toggle('dark');
-  emit('set-theme', cls.contains('dark') ? 'dark' : 'light');
-}
-
-const layout = useStorage<'horizontal' | 'vertical'>('yehyecoa-vue-layout', 'horizontal');
-function toggleLayout() {
-  emit('toggle-layout');
-}
-
-onMounted(() => {
-  emit('set-theme', cls.contains('dark') ? 'dark' : 'light');
-});
 </script>
 
 <template>
@@ -41,16 +18,16 @@ onMounted(() => {
     <h1 text-lg font-500 inline-flex items-center>
       <!-- TODO: maybe a logo would be cool -->
       <!-- <img alt="logo" src="/logo.svg" /> -->
-      <span uno-hidden sm:inline-block>yehyecoa-vue</span>
+      <span>yehyecoa-vue</span>
     </h1>
     <div flex gap-2 text-neutral-500>
       <button toolbar-btn @click="toggleLayout">
-        <div :class="layout === 'vertical' ? 'i-mynaui:rectangle' : 'i-mynaui:rectangle-vertical'" />
+        <div :class="settings.layout === 'vertical' ? 'i-mynaui:rectangle' : 'i-mynaui:rectangle-vertical'" />
       </button>
       <button
         toolbar-btn
-        :title="`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`"
-        @click="setTheme"
+        :title="`Switch to ${settings.theme === 'dark' ? 'light' : 'dark'} theme`"
+        @click="toggleTheme"
       >
         <div class="i-carbon:sun dark:i-carbon:moon" />
       </button>

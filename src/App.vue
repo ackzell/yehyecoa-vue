@@ -3,27 +3,18 @@ import '@vue/repl/style.css';
 
 import Monaco from '@vue/repl/monaco-editor';
 import { Repl, useStore } from '@vue/repl';
-import { useStorage } from '@vueuse/core';
 import { onMounted, ref } from 'vue';
 
 import YVHeader from './YvHeader.vue';
+import { useSettingsStore } from './composables/settings';
 
-const preferDark = useStorage('vue-sfc-playground-prefer-dark', true);
-const theme = ref<'dark' | 'light'>('dark');
-function setTheme(newTheme: 'dark' | 'light') {
-  theme.value = newTheme;
-  preferDark.value = newTheme === 'dark';
-}
-
-const layout = useStorage<'horizontal' | 'vertical'>('yehyecoa-vue-layout', 'horizontal');
-function toggleLayout() {
-  layout.value = layout.value === 'horizontal' ? 'vertical' : 'horizontal';
-}
+const { settings } = useSettingsStore();
 
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
 }
 window.addEventListener('resize', setVH);
+
 setVH();
 
 const store = useStore();
@@ -63,18 +54,14 @@ onMounted(async () => {
     >
       {{ errormessage }}
     </div>
-    <YVHeader
-      :theme="theme"
-      @set-theme="setTheme"
-      @toggle-layout="toggleLayout"
-    />
+    <YVHeader />
     <Repl
       :editor="Monaco"
       :show-compile-output="false"
       :show-import-map="false"
       :show-ts-config="false"
-      :theme
-      :layout
+      :theme="settings.theme"
+      :layout="settings.layout"
       :editor-options="{
         autoSaveText: false,
       }"

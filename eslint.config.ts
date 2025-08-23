@@ -67,6 +67,8 @@ export default antfu({
       },
     ],
 
+    'import-x/consistent-type-specifier-style': ['error', 'prefer-top-level'],
+
     'style/object-curly-newline': ['error', {
       ImportDeclaration: {
         multiline: true,
