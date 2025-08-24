@@ -1,25 +1,20 @@
-import { onMounted, ref } from 'vue'
 <script setup lang="ts">
-import { Repl, useStore } from '@vue/repl';
-import Monaco from '@vue/repl/monaco-editor';
-import { useStorage } from '@vueuse/core';
-
-import { onMounted, ref } from 'vue';
-import ReplHeader from './ReplHeader.vue';
 import '@vue/repl/style.css';
 
-const preferDark = useStorage('vue-sfc-playground-prefer-dark', true);
+import Monaco from '@vue/repl/monaco-editor';
+import { Repl, useStore } from '@vue/repl';
+import { onMounted, ref } from 'vue';
 
-const theme = ref<'dark' | 'light'>('dark');
-function setTheme(newTheme: 'dark' | 'light') {
-  theme.value = newTheme;
-  preferDark.value = newTheme === 'dark';
-}
+import { useSettingsStore } from '@/composables/useSettingsStore';
+import YVHeader from '@/components/YvHeader.vue';
+
+const { settings } = useSettingsStore();
 
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
 }
 window.addEventListener('resize', setVH);
+
 setVH();
 
 const store = useStore();
@@ -52,23 +47,21 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="repl-container">
+  <div class="repl-container" font-sans text-primary vaul-drawer-wrapper>
     <div
       v-if="errormessage"
       class="error"
     >
       {{ errormessage }}
     </div>
-    <ReplHeader
-      :theme="theme"
-      @set-theme="setTheme"
-    />
+    <YVHeader />
     <Repl
       :editor="Monaco"
       :show-compile-output="false"
       :show-import-map="false"
       :show-ts-config="false"
-      :theme="theme"
+      :theme="settings.theme"
+      :layout="settings.layout"
       :editor-options="{
         autoSaveText: false,
       }"

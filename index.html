@@ -7,12 +7,12 @@
     <title>Vue live playground</title>
 
      <script>
-      const savedPreferDark = localStorage.getItem(
-        'vue-sfc-playground-prefer-dark',
+      const savedTheme = localStorage.getItem(
+        'yehyecoa-vue-theme',
       )
       if (
-        savedPreferDark === 'true' ||
-        (!savedPreferDark &&
+        savedTheme === 'dark' ||
+        (!savedTheme &&
           window.matchMedia('(prefers-color-scheme: dark)').matches)
       ) {
         document.documentElement.classList.add('dark')

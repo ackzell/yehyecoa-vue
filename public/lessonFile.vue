@@ -3,5 +3,5 @@
 </script>
 
 <template>
-  <h1>hello world </h1>
+  <h1>Hola Mundo! </h1>
 </template>
