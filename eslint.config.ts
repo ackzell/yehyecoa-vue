@@ -77,4 +77,14 @@ export default antfu({
 
     }],
   },
+}, {
+  files: ['**/*.vue'],
+  rules: {
+    // ... your other rules
+
+    // Catch undefined components
+    'vue/no-undef-components': ['error', {
+      ignorePatterns: ['router-link', 'router-view'], // Ignore global components
+    }],
+  },
 });

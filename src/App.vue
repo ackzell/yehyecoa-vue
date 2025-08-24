@@ -47,7 +47,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="repl-container" font-sans text-primary>
+  <div class="repl-container" font-sans text-primary vaul-drawer-wrapper>
     <div
       v-if="errormessage"
       class="error"
