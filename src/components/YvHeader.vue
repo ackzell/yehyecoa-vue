@@ -11,6 +11,10 @@ import {
 } from '@/components/ui/drawer';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
+const emit = defineEmits<{
+  (e: 'save-snapshot'): void;
+}>();
+
 const { settings, toggleLayout, toggleTheme } = useSettingsStore();
 </script>
 
@@ -35,14 +39,24 @@ const { settings, toggleLayout, toggleTheme } = useSettingsStore();
           submenus here
         </div> -->
         <div flex gap-4 text-neutral-500>
+          <button
+            v-tooltip.bottom="'Save snapshot'"
+            class="toolbar-btn"
+            @click="emit('save-snapshot')"
+          >
+            <div class="i-carbon:save" />
+          </button>
+
           <DrawerTrigger>
             <button v-tooltip.bottom="'Open history'" class="toolbar-btn">
               <div class="i-carbon:data-backup" />
             </button>
           </DrawerTrigger>
+
           <button v-tooltip.bottom="`Switch to ${settings.layout === 'vertical' ? 'horizontal' : 'vertical'} layout`" toolbar-btn @click="toggleLayout">
             <div :class="settings.layout === 'vertical' ? 'i-mynaui:rectangle' : 'i-mynaui:rectangle-vertical'" />
           </button>
+
           <button
             v-tooltip.bottom="`Switch to ${settings.theme === 'dark' ? 'light' : 'dark'} theme`"
             toolbar-btn

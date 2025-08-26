@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import '@vue/repl/style.css';
+import { Repl, useStore } from '@vue/repl';
 
 import Monaco from '@vue/repl/monaco-editor';
-import { Repl, useStore } from '@vue/repl';
 import { onMounted, ref } from 'vue';
+import YVHeader from '@/components/YvHeader.vue';
 
 import { useSettingsStore } from '@/composables/useSettingsStore';
-import YVHeader from '@/components/YvHeader.vue';
+import { useSnapshotsDB } from './composables/useSnapshotsDB';
+import '@vue/repl/style.css';
 
 const { settings } = useSettingsStore();
 
@@ -29,10 +30,7 @@ onMounted(async () => {
   }
   catch {
     errormessage.value = 'Failed to load lessonFile.vue';
-    console.error(
-
-      'Failed to load `lessonFile.vue`, makes sure you created one in the root directory.',
-    );
+    console.error('Failed to load `lessonFile.vue`, makes sure you created one in the root directory.');
   }
 
   // Live updates via SSE
@@ -44,6 +42,14 @@ onMounted(async () => {
     }
   });
 });
+
+const dbStore = useSnapshotsDB();
+
+function saveSnapshot() {
+  const contents = store.getFiles();
+  console.log(contents);
+  dbStore.saveSnapshot(contents);
+}
 </script>
 
 <template>
@@ -54,7 +60,7 @@ onMounted(async () => {
     >
       {{ errormessage }}
     </div>
-    <YVHeader />
+    <YVHeader @save-snapshot="saveSnapshot" />
     <Repl
       :editor="Monaco"
       :show-compile-output="false"
