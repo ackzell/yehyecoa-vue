@@ -20,7 +20,7 @@ const fm = useFileManager();
       autoSaveText: false,
     }"
     :store="fm.replStore"
-    @keydown.ctrl.s.prevent
-    @keydown.meta.s.prevent
+    @keydown.ctrl.s.prevent="fm.saveSnapshot()"
+    @keydown.meta.s.capture.prevent="fm.saveSnapshot()"
   />
 </template>

@@ -69,7 +69,15 @@ const fm = useFileManager();
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle>History</DrawerTitle>
-          <DrawerDescription>This is the history for this file</DrawerDescription>
+          <DrawerDescription>
+            <ul>
+              <li v-for="snap in fm.snapshots" :key="snap.id">
+                {{ snap.createdAt.toISOString() }} {{ snap.message }}
+              </li>
+            </ul>
+
+            <!-- {{ fm.liveSnapshots }} -->
+          </DrawerDescription>
         </DrawerHeader>
         <DrawerFooter>
           <button btn>

@@ -1,7 +1,12 @@
-import type { SnapshotType } from '@/db';
+import type { Observable } from 'dexie';
+
+import type { Snapshot, SnapshotType } from '@/db';
+import { liveQuery } from 'dexie';
+
 import { db } from '@/db';
 
 export const snapshots = {
+  liveQuerySnapshots,
   create,
 };
 
@@ -26,4 +31,8 @@ async function create({ sessionId, files, type = 'manual', message = '' }: creat
   });
 
   return snapshotId;
+}
+
+function liveQuerySnapshots(sessionId: number): Observable<Snapshot[]> {
+  return liveQuery(async () => db.snapshots.where({ sessionId }).toArray());
 }

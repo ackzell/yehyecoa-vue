@@ -1,9 +1,11 @@
 import type { ReplStore } from '@vue/repl';
+
 import type { Ref } from 'vue';
 
-import { useStore } from '@vue/repl';
+import type { Snapshot } from '@/db';
 
-import { onMounted, ref } from 'vue';
+import { useStore } from '@vue/repl';
+import { onMounted, ref, watch } from 'vue';
 
 import { sessions } from '@/db/sessions';
 import { snapshots } from '@/db/snapshots';
@@ -11,15 +13,25 @@ import { snapshots } from '@/db/snapshots';
 type FileManager = {
   replStore: ReplStore;
   errorMessage: Ref<string>;
-
+  snapshots: Ref<Snapshot[]>;
   saveSnapshot: () => Promise<void>;
 };
 
-const currentSessionId = ref<number>();
-const replStore = useStore();
-const errorMessage = ref('');
+const fileManagerInstance = ref<FileManager>();
 
 export function useFileManager(): FileManager {
+  if (!fileManagerInstance.value) {
+    fileManagerInstance.value = FileManagerImpl();
+  }
+  return fileManagerInstance.value;
+}
+
+function FileManagerImpl(): FileManager {
+  const currentSessionId = ref<number>();
+  const replStore = useStore();
+  const errorMessage = ref('');
+  const liveSnapshots = ref<Snapshot[]>([]);
+
   async function initSession(): Promise<void> {
     const name = `Session ${crypto.randomUUID().slice(0, 8)}`;
 
@@ -41,6 +53,17 @@ export function useFileManager(): FileManager {
 
     sessions.updateCreatedAt(currentSessionId.value);
   }
+
+  watch(currentSessionId, (newId) => {
+    if (newId) {
+      snapshots.liveQuerySnapshots(newId).subscribe((snaps) => {
+        liveSnapshots.value = snaps;
+        console.log(liveSnapshots);
+      });
+    }
+  }, {
+    immediate: true,
+  });
 
   onMounted(async () => {
     initSession();
@@ -68,6 +91,7 @@ export function useFileManager(): FileManager {
   return {
     replStore,
     errorMessage,
+    snapshots: liveSnapshots,
 
     saveSnapshot,
   };
