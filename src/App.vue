@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import { Repl } from '@vue/repl';
-
-import Monaco from '@vue/repl/monaco-editor';
 import YVHeader from '@/components/YvHeader.vue';
 
-import { useSettingsStore } from '@/composables/useSettingsStore';
+import YvRepl from './components/YvRepl.vue';
 import { useFileManager } from './composables/useFileManager';
 import '@vue/repl/style.css';
 
-const { settings } = useSettingsStore();
 const fileManager = useFileManager();
 
 function setVH() {
@@ -28,20 +24,7 @@ setVH();
       {{ fileManager.errorMessage }}
     </div>
     <YVHeader />
-    <Repl
-      :editor="Monaco"
-      :show-compile-output="false"
-      :show-import-map="false"
-      :show-ts-config="false"
-      :theme="settings.theme"
-      :layout="settings.layout"
-      :editor-options="{
-        autoSaveText: false,
-      }"
-      :store="fileManager.replStore"
-      @keydown.ctrl.s.prevent
-      @keydown.meta.s.prevent
-    />
+    <YvRepl />
   </div>
 </template>
 

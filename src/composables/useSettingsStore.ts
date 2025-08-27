@@ -1,10 +1,6 @@
 import type { RemovableRef } from '@vueuse/core';
 import { useStorage } from '@vueuse/core';
-import {
-  nextTick,
-  onMounted,
-  ref,
-} from 'vue';
+import { nextTick, ref } from 'vue';
 
 type Theme = 'dark' | 'light';
 type Layout = 'horizontal' | 'vertical';
@@ -19,8 +15,6 @@ type YVSettings = {
   theme: RemovableRef<Theme>;
   layout: RemovableRef<Layout>;
 };
-
-console.log(window.matchMedia('(prefers-color-scheme: dark)').matches);
 
 const settings = ref<YVSettings>({
   theme: useStorage<Theme>('yehyecoa-vue-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
@@ -46,9 +40,6 @@ export function useSettingsStore(): YVSettingsStore {
       }
     });
   }
-
-  onMounted(() => {
-  });
 
   return { settings, toggleLayout, toggleTheme };
 }
