@@ -2,6 +2,7 @@ import { db } from '@/db';
 
 export const sessions = {
   create,
+  updateCreatedAt,
 };
 
 async function create(name: string): Promise<number> {
@@ -11,4 +12,9 @@ async function create(name: string): Promise<number> {
     createdAt: currentTime,
     updatedAt: currentTime,
   });
+}
+
+async function updateCreatedAt(sessionId: number): Promise<void> {
+  const currentTime = new Date();
+  await db.sessions.update(sessionId, { updatedAt: currentTime });
 }

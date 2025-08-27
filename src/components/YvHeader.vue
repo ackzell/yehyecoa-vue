@@ -9,13 +9,12 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
+import { useFileManager } from '@/composables/useFileManager';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
-const emit = defineEmits<{
-  (e: 'save-snapshot'): void;
-}>();
-
 const { settings, toggleLayout, toggleTheme } = useSettingsStore();
+
+const fm = useFileManager();
 </script>
 
 <template>
@@ -42,7 +41,7 @@ const { settings, toggleLayout, toggleTheme } = useSettingsStore();
           <button
             v-tooltip.bottom="'Save snapshot'"
             class="toolbar-btn"
-            @click="emit('save-snapshot')"
+            @click="fm.saveSnapshot()"
           >
             <div class="i-carbon:save" />
           </button>

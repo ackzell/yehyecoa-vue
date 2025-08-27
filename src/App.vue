@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { Repl, useStore } from '@vue/repl';
+import { Repl } from '@vue/repl';
 
 import Monaco from '@vue/repl/monaco-editor';
-import { onMounted, ref } from 'vue';
 import YVHeader from '@/components/YvHeader.vue';
 
 import { useSettingsStore } from '@/composables/useSettingsStore';
-import { useSnapshotsDB } from './composables/useSnapshotsDB';
+import { useFileManager } from './composables/useFileManager';
 import '@vue/repl/style.css';
 
 const { settings } = useSettingsStore();
+const fileManager = useFileManager();
 
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
@@ -17,50 +17,17 @@ function setVH() {
 window.addEventListener('resize', setVH);
 
 setVH();
-
-const store = useStore();
-
-const errormessage = ref('');
-
-onMounted(async () => {
-  // Initial load
-  try {
-    const fileContents = await fetch('/lessonFile.vue').then(r => r.text());
-    store.setFiles({ 'src/App.vue': fileContents });
-  }
-  catch {
-    errormessage.value = 'Failed to load lessonFile.vue';
-    console.error('Failed to load `lessonFile.vue`, makes sure you created one in the root directory.');
-  }
-
-  // Live updates via SSE
-  const es = new EventSource('/events');
-  es.addEventListener('fileUpdate', (event) => {
-    const { filename, content } = JSON.parse(event.data);
-    if (filename === 'lessonFile.vue') {
-      store.setFiles({ 'src/App.vue': content });
-    }
-  });
-});
-
-const dbStore = useSnapshotsDB();
-
-function saveSnapshot() {
-  const contents = store.getFiles();
-  console.log(contents);
-  dbStore.saveSnapshot(contents);
-}
 </script>
 
 <template>
   <div class="repl-container" font-sans text-primary vaul-drawer-wrapper>
     <div
-      v-if="errormessage"
+      v-if="fileManager.errorMessage"
       class="error"
     >
-      {{ errormessage }}
+      {{ fileManager.errorMessage }}
     </div>
-    <YVHeader @save-snapshot="saveSnapshot" />
+    <YVHeader />
     <Repl
       :editor="Monaco"
       :show-compile-output="false"
@@ -71,7 +38,7 @@ function saveSnapshot() {
       :editor-options="{
         autoSaveText: false,
       }"
-      :store
+      :store="fileManager.replStore"
       @keydown.ctrl.s.prevent
       @keydown.meta.s.prevent
     />
