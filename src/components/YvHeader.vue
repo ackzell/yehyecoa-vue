@@ -1,25 +1,20 @@
 <script setup lang="ts">
 import {
   Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { useFileManager } from '@/composables/useFileManager';
+import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
+import YvVersioningDrawer from './YvVersioningDrawer/YvVersioningDrawer.vue';
 
 const { settings, toggleLayout, toggleTheme } = useSettingsStore();
 
-const fm = useFileManager();
+const fm = useFileManagerStore();
 </script>
 
 <template>
   <div>
-    <Drawer direction="right">
+    <Drawer v-model:open="fm.isDrawerOpen" :default-open="true" direction="right">
       <nav
         flex="~ justify-between"
         relative p-4 z-999 shadow-md
@@ -35,15 +30,15 @@ const fm = useFileManager();
           <span>yehyecoa-vue</span>
         </h1>
         <!-- <div>
-          submenus here
-        </div> -->
+            submenus here
+          </div> -->
         <div flex gap-4 text-neutral-500>
           <button
             v-tooltip.bottom="'Save snapshot'"
             class="toolbar-btn"
             @click="fm.saveSnapshot()"
           >
-            <div class="i-carbon:save" />
+            <div class="i-mynaui:save" />
           </button>
 
           <DrawerTrigger>
@@ -66,34 +61,11 @@ const fm = useFileManager();
         </div>
       </nav>
 
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>History</DrawerTitle>
-          <DrawerDescription>
-            <ul>
-              <li v-for="snap in fm.snapshots" :key="snap.id">
-                {{ snap.createdAt.toISOString() }} {{ snap.message }}
-              </li>
-            </ul>
-
-            <!-- {{ fm.liveSnapshots }} -->
-          </DrawerDescription>
-        </DrawerHeader>
-        <DrawerFooter>
-          <button btn>
-            Submit
-          </button>
-          <DrawerClose>
-            <button btn-outline w-full>
-              Cancel
-            </button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
+      <YvVersioningDrawer />
     </Drawer>
   </div>
 </template>
 
-<style>
+  <style>
 
-</style>
+  </style>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Repl } from '@vue/repl';
 import Monaco from '@vue/repl/monaco-editor';
-import { useFileManager } from '@/composables/useFileManager';
+import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
 const { settings } = useSettingsStore();
-const fm = useFileManager();
+const fm = useFileManagerStore();
 </script>
 
 <template>
@@ -22,5 +22,7 @@ const fm = useFileManager();
     :store="fm.replStore"
     @keydown.ctrl.s.prevent="fm.saveSnapshot()"
     @keydown.meta.s.capture.prevent="fm.saveSnapshot()"
+    @keydown.ctrl.shift.h.prevent="fm.isDrawerOpen = true"
+    @keydown.meta.shift.h.prevent="fm.isDrawerOpen = true"
   />
 </template>

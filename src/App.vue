@@ -2,10 +2,10 @@
 import YVHeader from '@/components/YvHeader.vue';
 
 import YvRepl from './components/YvRepl.vue';
-import { useFileManager } from './composables/useFileManager';
+import { useFileManagerStore } from './composables/useFileManagerStore';
 import '@vue/repl/style.css';
 
-const fileManager = useFileManager();
+const fileManager = useFileManagerStore();
 
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);

@@ -1,6 +1,6 @@
 import type { Observable } from 'dexie';
 
-import type { Snapshot, SnapshotType } from '@/db';
+import type { Snapshot } from '@/db';
 import { liveQuery } from 'dexie';
 
 import { db } from '@/db';
@@ -8,31 +8,28 @@ import { db } from '@/db';
 export const snapshots = {
   liveQuerySnapshots,
   create,
+  deleteSnapshot,
 };
 
-type createParams = {
-  sessionId: number;
-  files: Record<string, string>;
-  type: SnapshotType;
-  message: string;
-};
-
-async function create({ sessionId, files, type = 'manual', message = '' }: createParams,
-): Promise<number | null> {
-  if (!files || Object.keys(files).length === 0)
-    return null;
+async function create({ sessionId, files, type = 'manual', message = '' }: Omit<Snapshot, 'id' | 'createdAt'>,
+): Promise<Snapshot> {
+  const createdAt = new Date();
 
   const snapshotId = await db.snapshots.add({
     sessionId,
     files: JSON.parse(JSON.stringify(files)), // Deep copy
-    createdAt: new Date(),
+    createdAt,
     type,
     message,
   });
 
-  return snapshotId;
+  return await db.snapshots.get(snapshotId) as Snapshot;
 }
 
 function liveQuerySnapshots(sessionId: number): Observable<Snapshot[]> {
-  return liveQuery(async () => db.snapshots.where({ sessionId }).toArray());
+  return liveQuery(async () => await db.snapshots.where({ sessionId }).reverse().sortBy('createdAt'));
+}
+
+function deleteSnapshot(snapshotId: number): Promise<void> {
+  return db.snapshots.delete(snapshotId);
 }
