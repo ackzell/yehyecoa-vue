@@ -35,7 +35,7 @@ const fm = useFileManagerStore();
           No snapshots saved in this session
         </div>
 
-        <ScrollArea v-else>
+        <ScrollArea v-else h-full>
           <ul flex flex-col>
             <li
               v-for="(snap) in fm.snapshotsList" :key="snap.id"
