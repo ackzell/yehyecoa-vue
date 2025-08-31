@@ -44,26 +44,49 @@ function sendSSE(res, event, data) {
   res.write(`data: ${JSON.stringify(data)}\n\n`);
 }
 
-function broadcastFileChange(filename, content) {
+function broadcasFilesChanged(lessonName, files) {
   clients.forEach((client) => {
-    sendSSE(client, 'fileUpdate', { filename, content });
+    sendSSE(client, 'filesChanged', { lessonName, files });
   });
 }
 
-// Watch the root for changes to lessonFile.vue
-fs.watch(baseDir, { recursive: false }, (eventType, filename) => {
-  if (filename === 'lessonFile.vue') {
-    const filePath = path.join(baseDir, filename);
-    fs.readFile(filePath, 'utf-8', (err, content) => {
-      if (err) {
-        console.error(`[watch] Failed to read ${filename}:`, err);
-        return;
-      }
-      console.log(`[watch] ${filename} changed (${eventType})`);
-      broadcastFileChange(filename, content);
-    });
-  }
+// Watch the JSON file for changes
+fs.watch(path.join(baseDir, 'yv-lesson.json'), () => {
+  sendFileContents();
 });
+
+const excludeFiles = [
+  'yv-lesson.json',
+  'index.html',
+  'server.js',
+  'favicon.ico',
+  'lessonFile.vue',
+];
+
+const excludeFolders = [
+  'assets',
+];
+// Function to send file contents to clients
+function sendFileContents() {
+  const lessonFilePath = path.join(baseDir, 'yv-lesson.json');
+  const lessonFileContent = fs.readFileSync(lessonFilePath, 'utf-8');
+  const yvLesson = JSON.parse(lessonFileContent);
+  const lessonName = yvLesson.lessonName;
+
+  const files = {};
+  const fileNames = fs.readdirSync(baseDir);
+  fileNames.forEach((fileName) => {
+    const filePath = path.join(baseDir, fileName);
+    if (excludeFiles.includes(fileName) || excludeFolders.includes(path.basename(filePath))) {
+      return;
+    }
+
+    const content = fs.readFileSync(filePath, 'utf-8');
+    files[fileName] = content;
+  });
+
+  broadcasFilesChanged(lessonName, files);
+}
 
 // HTTP server
 const server = http.createServer((req, res) => {
@@ -78,6 +101,7 @@ const server = http.createServer((req, res) => {
     clients.push(res);
 
     console.log('[SSE] Client connected');
+    sendFileContents();
 
     req.on('close', () => {
       console.log('[SSE] Client disconnected');

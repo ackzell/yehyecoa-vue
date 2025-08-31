@@ -34,11 +34,11 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
     // Live updates via SSE
     const es = new EventSource('/events');
-    es.addEventListener('fileUpdate', (event) => {
-      const { filename, content } = JSON.parse(event.data);
-      if (filename === 'lessonFile.vue') {
-        replStore.setFiles({ 'src/App.vue': content });
-      }
+    es.addEventListener('filesChanged', (event) => {
+      const { lessonName, files } = JSON.parse(event.data);
+      console.log(`[SSE] Lesson  ${lessonName} changed contents`);
+
+      replStore.setFiles(files);
     });
   }
 
