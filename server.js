@@ -44,16 +44,38 @@ function sendSSE(res, event, data) {
   res.write(`data: ${JSON.stringify(data)}\n\n`);
 }
 
-function broadcasFilesChanged(lessonName, files) {
+function broadcastFilesChanged(lessonName, files, error = null) {
   clients.forEach((client) => {
-    sendSSE(client, 'filesChanged', { lessonName, files });
+    sendSSE(client, 'filesChanged', { lessonName, files, error });
   });
 }
 
-// Watch the JSON file for changes
-fs.watch(path.join(baseDir, 'yv-lesson.json'), () => {
-  sendFileContents();
-});
+// Watch for yv-lesson.json changes (including creation/deletion)
+let watcher = null;
+
+function setupWatcher() {
+  // Clean up existing watcher
+  if (watcher) {
+    watcher.close();
+  }
+
+  try {
+    // Watch the directory for the specific file
+    watcher = fs.watch(baseDir, (eventType, filename) => {
+      if (filename === 'yv-lesson.json') {
+        console.log(`[watcher] yv-lesson.json ${eventType}`);
+        sendFileContents();
+      }
+    });
+    console.log('[watcher] File watcher established');
+  }
+  catch (err) {
+    console.error('[watcher] Failed to setup file watcher:', err);
+  }
+}
+
+// Initialize watcher
+setupWatcher();
 
 const excludeFiles = [
   'yv-lesson.json',
@@ -66,26 +88,65 @@ const excludeFiles = [
 const excludeFolders = [
   'assets',
 ];
+
 // Function to send file contents to clients
 function sendFileContents() {
-  const lessonFilePath = path.join(baseDir, 'yv-lesson.json');
-  const lessonFileContent = fs.readFileSync(lessonFilePath, 'utf-8');
-  const yvLesson = JSON.parse(lessonFileContent);
-  const lessonName = yvLesson.lessonName;
+  let lessonName = null;
+  let error = null;
 
-  const files = {};
-  const fileNames = fs.readdirSync(baseDir);
-  fileNames.forEach((fileName) => {
-    const filePath = path.join(baseDir, fileName);
-    if (excludeFiles.includes(fileName) || excludeFolders.includes(path.basename(filePath))) {
-      return;
+  // Try to read and parse the lesson file
+  try {
+    const lessonFilePath = path.join(baseDir, 'yv-lesson.json');
+    if (fs.existsSync(lessonFilePath)) {
+      const lessonFileContent = fs.readFileSync(lessonFilePath, 'utf-8');
+      const yvLesson = JSON.parse(lessonFileContent);
+      lessonName = yvLesson.lessonName;
+      console.log(`[files] Lesson file found: ${lessonName}`);
     }
+    else {
+      error = 'yv-lesson.json not found';
+      console.log('[files] yv-lesson.json not found, continuing with other files');
+    }
+  }
+  catch (err) {
+    error = `Failed to read or parse yv-lesson.json: ${err.message}`;
+    console.error('[files]', error);
+  }
 
-    const content = fs.readFileSync(filePath, 'utf-8');
-    files[fileName] = content;
-  });
+  // Always gather other files regardless of lesson file status
+  const files = {};
+  try {
+    const fileNames = fs.readdirSync(baseDir);
+    fileNames.forEach((fileName) => {
+      const filePath = path.join(baseDir, fileName);
 
-  broadcasFilesChanged(lessonName, files);
+      // Skip excluded files and folders
+      if (excludeFiles.includes(fileName) || excludeFolders.includes(path.basename(filePath))) {
+        return;
+      }
+
+      // Check if it's a file (not a directory)
+      try {
+        const stats = fs.statSync(filePath);
+        if (stats.isFile()) {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          files[fileName] = content;
+        }
+      }
+      catch (fileErr) {
+        console.warn(`[files] Could not read file ${fileName}:`, fileErr.message);
+      }
+    });
+
+    console.log(`[files] Sending ${Object.keys(files).length} files to clients`);
+  }
+  catch (dirErr) {
+    console.error('[files] Could not read directory:', dirErr.message);
+    error = error ? `${error}; Directory read failed: ${dirErr.message}` : `Directory read failed: ${dirErr.message}`;
+  }
+
+  // Broadcast to all clients with current state
+  broadcastFilesChanged(lessonName, files, error);
 }
 
 // HTTP server
@@ -96,6 +157,7 @@ const server = http.createServer((req, res) => {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
     });
     res.write('\n');
     clients.push(res);
@@ -143,6 +205,18 @@ const server = http.createServer((req, res) => {
     const contentType = mimeTypes[ext] || 'application/octet-stream';
     res.writeHead(200, { 'Content-Type': contentType });
     fs.createReadStream(filePath).pipe(res);
+  });
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\n[shutdown] Closing server...');
+  if (watcher) {
+    watcher.close();
+  }
+  server.close(() => {
+    console.log('[shutdown] Server closed');
+    process.exit(0);
   });
 });
 

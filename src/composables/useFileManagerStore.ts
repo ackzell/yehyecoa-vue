@@ -22,22 +22,29 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
     currentSession.value = await sessions.create(name);
 
-    // Initial load
-    try {
-      const fileContents = await fetch('/lessonFile.vue').then(r => r.text());
-      replStore.setFiles({ 'src/App.vue': fileContents });
-    }
-    catch {
-      errorMessage.value = 'Failed to load lessonFile.vue';
-      console.error('Failed to load `lessonFile.vue`, makes sure you created one in the root directory.');
-    }
-
     // Live updates via SSE
-    const es = new EventSource('/events');
-    es.addEventListener('filesChanged', (event) => {
-      const { lessonName, files } = JSON.parse(event.data);
-      console.log(`[SSE] Lesson  ${lessonName} changed contents`);
+    const eventSource = new EventSource('/events');
 
+    eventSource.addEventListener('filesChanged', (event) => {
+      const { lessonName, files, error } = JSON.parse(event.data);
+      errorMessage.value = '';
+
+      if (error) {
+        console.warn('[yehyecoa-vue]: Server reported an issue:', error);
+        // Handle the error (show warning, use fallback lesson name, etc.)
+        errorMessage.value = error;
+      }
+
+      console.log('[yehyecoa-vue]: Active lesson:', lessonName);
+
+      if (lessonName) {
+        // Normal operation
+      }
+      else {
+        // Use fallback or show "No lesson loaded" state
+      }
+
+      // Process files as usual
       replStore.setFiles(files);
     });
   }

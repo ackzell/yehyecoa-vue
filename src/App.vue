@@ -19,7 +19,9 @@ setVH();
   <div class="repl-container" font-sans text-primary vaul-drawer-wrapper>
     <div
       v-if="fileManager.errorMessage"
-      class="error"
+      text="sm red-300 center"
+      font-mono
+      bg-red-900
     >
       {{ fileManager.errorMessage }}
     </div>
