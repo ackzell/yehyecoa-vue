@@ -1,6 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { glob } from 'glob';
-// scripts/minify-workers-post-build.js
 import { minify } from 'terser';
 
 async function minifyWorkers() {
@@ -13,10 +12,10 @@ async function minifyWorkers() {
 
     const result = await minify(originalCode, {
       compress: {
-        drop_console: true,
+        drop_console: false,
         drop_debugger: true,
         passes: 3,
-        unsafe: true,
+        unsafe: false,
       },
       mangle: true,
       format: {

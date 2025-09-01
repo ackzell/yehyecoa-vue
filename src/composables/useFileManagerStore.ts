@@ -36,34 +36,27 @@ export const useFileManagerStore = defineStore('file-manager', () => {
     eventSource.addEventListener('filesChanged', async (event) => {
       const { lessonName, files, error } = JSON.parse(event.data);
 
+      // most likely the yv-lesson.json file is not available
       if (error) {
         console.warn('[yehyecoa-vue]: Server reported an issue:', error);
-        // Handle the error (show warning, use fallback lesson name, etc.)
-        toast.error(error, {
-          duration: Infinity,
-        });
+        errorMessage.value = error;
       }
 
       console.log('[yehyecoa-vue]: Active lesson:', lessonName);
+      console.log('[yehyecoa-vue]: Files changed, updating repl', files);
+      replStore.setFiles(files);
 
       if (lessonName) {
+        errorMessage.value = '';
         // only create if there is no session with the same name
         const session = await sessions.getByName(lessonName);
         if (session) {
           currentSession.value = session;
-          return;
         }
         else {
           currentSession.value = await sessions.create(lessonName);
         }
       }
-      else {
-        // Use fallback or show "No lesson loaded" state
-      }
-
-      console.log('[yehyecoa-vue]: Files changed, updating repl');
-      // Process files as usual
-      replStore.setFiles(files);
     });
   }
 

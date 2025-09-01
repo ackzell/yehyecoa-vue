@@ -24,18 +24,18 @@ export default defineConfig({
         inlineDynamicImports: false,
       },
     },
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        passes: 2,
-        pure_funcs: ['console.log'],
-      },
-      mangle: true,
-      format: {
-        comments: false,
-      },
-    },
+    // terserOptions: {
+    //   compress: {
+    //     drop_console: false,
+    //     drop_debugger: true,
+    //     passes: 2,
+    //     pure_funcs: ['console.log'],
+    //   },
+    //   mangle: true,
+    //   format: {
+    //     comments: false,
+    //   },
+    // },
   },
   // This is key - force dependency optimization
   optimizeDeps: {

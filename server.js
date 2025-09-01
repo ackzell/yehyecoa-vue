@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import zlib from 'node:zlib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,14 +25,35 @@ const mimeTypes = {
   '.wasm': 'application/wasm',
 };
 
+// Helper to check if client accepts gzip
+function acceptsGzip(req) {
+  return req.headers['accept-encoding']?.includes('gzip') || false;
+}
+
+// Helper to serve gzipped file if it exists
+function tryServeGzipped(req, res, filePath, contentType) {
+  const gzipPath = `${filePath}.gz`;
+  if (acceptsGzip(req) && fs.existsSync(gzipPath)) {
+    res.writeHead(200, {
+      'Content-Type': contentType,
+      'Content-Encoding': 'gzip',
+    });
+    fs.createReadStream(gzipPath).pipe(res);
+    return true;
+  }
+  return false;
+}
+
 // SSE clients
 const clients = [];
 
 // Load index.html once at startup for instant serving
 const indexPath = path.join(baseDir, 'index.html');
 let indexHTML = '';
+let indexHTMLGzipped = null;
 try {
   indexHTML = fs.readFileSync(indexPath, 'utf-8');
+  indexHTMLGzipped = zlib.gzipSync(indexHTML);
   console.log('[startup] Loaded index.html into memory.');
 }
 catch (err) {
@@ -83,6 +105,7 @@ const excludeFiles = [
   'server.js',
   'favicon.ico',
   'lessonFile.vue',
+  'server.js.gz',
 ];
 
 const excludeFolders = [
@@ -180,8 +203,17 @@ const server = http.createServer((req, res) => {
 
   // Serve preloaded index.html instantly for root
   if (cleanUrl === '/' || cleanUrl === '') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(indexHTML);
+    if (acceptsGzip(req) && indexHTMLGzipped) {
+      res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Encoding': 'gzip',
+      });
+      res.end(indexHTMLGzipped);
+    }
+    else {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(indexHTML);
+    }
     return;
   }
 
@@ -196,13 +228,29 @@ const server = http.createServer((req, res) => {
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {
       // SPA fallback: serve cached index.html
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(indexHTML);
+      if (acceptsGzip(req) && indexHTMLGzipped) {
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Encoding': 'gzip',
+        });
+        res.end(indexHTMLGzipped);
+      }
+      else {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(indexHTML);
+      }
       return;
     }
 
     const ext = path.extname(filePath).toLowerCase();
     const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+    // Try to serve pre-compressed version first
+    if (tryServeGzipped(req, res, filePath, contentType)) {
+      return;
+    }
+
+    // Fall back to original file
     res.writeHead(200, { 'Content-Type': contentType });
     fs.createReadStream(filePath).pipe(res);
   });

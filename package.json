@@ -9,14 +9,14 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" -- && node scripts/minify-workers-post-build.js && npm run build-server ",
+    "build": "run-p type-check \"build-only {@}\" -- && node scripts/minify-workers-post-build.js && npm run build-server && node scripts/compress-assets.js",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "format": "prettier --write src/",
-    "install-in-amoxtli-vue": "cp -r dist/ ../amoxtli-vue/src/templates/yehyecoa",
+    "install-in-amoxtli-vue": "rm -rf ../amoxtli-vue/src/templates/yehyecoa && cp -r dist/ ../amoxtli-vue/src/templates/yehyecoa",
     "bi": "npm run build && npm run install-in-amoxtli-vue",
     "build-server": "cp server.js dist/server.js",
     "serve": "node dist/server.js"
