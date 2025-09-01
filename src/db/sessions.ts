@@ -9,8 +9,10 @@ import { db } from '@/db';
 export const sessions = {
   create,
   getById,
-  changeUpdatedAt,
+  getByName,
+  getCount,
   liveQuerySessions,
+  changeUpdatedAt,
 };
 
 async function create(name: string): Promise<Session> {
@@ -34,4 +36,12 @@ function liveQuerySessions(): Observable<Session[]> {
 
 async function getById(id: number): Promise<Session | undefined> {
   return db.sessions.get(id);
+}
+
+async function getByName(name: string): Promise<Session | undefined> {
+  return db.sessions.where('name').equals(name).first();
+}
+
+async function getCount(): Promise<number> {
+  return db.sessions.count();
 }

@@ -2,6 +2,7 @@ import type { Session, Snapshot } from '@/db';
 import { useStore } from '@vue/repl';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ref, watch } from 'vue';
+import { toast } from 'vue-sonner';
 
 import { sessions } from '@/db/sessions';
 import { snapshots } from '@/db/snapshots';
@@ -18,32 +19,49 @@ export const useFileManagerStore = defineStore('file-manager', () => {
   initSession();
 
   async function initSession(): Promise<void> {
-    const name = `Session ${crypto.randomUUID().slice(0, 8)}`;
-
-    currentSession.value = await sessions.create(name);
-
-    // Live updates via SSE
     const eventSource = new EventSource('/events');
 
-    eventSource.addEventListener('filesChanged', (event) => {
+    eventSource.onerror = async () => {
+      console.warn('[yehyecoa-vue]: events endpoint not available. App is running standalone.');
+      toast.warning('No events endpoint available', {
+        description: 'App is running standalone.',
+      });
+
+      if (await sessions.getCount() === 0) {
+        currentSession.value = await sessions.create(`Session ${crypto.randomUUID().slice(0, 8)}`);
+      }
+    };
+
+    // Live updates via SSE
+    eventSource.addEventListener('filesChanged', async (event) => {
       const { lessonName, files, error } = JSON.parse(event.data);
-      errorMessage.value = '';
 
       if (error) {
         console.warn('[yehyecoa-vue]: Server reported an issue:', error);
         // Handle the error (show warning, use fallback lesson name, etc.)
-        errorMessage.value = error;
+        toast.error(error, {
+          duration: Infinity,
+        });
       }
 
       console.log('[yehyecoa-vue]: Active lesson:', lessonName);
 
       if (lessonName) {
-        // Normal operation
+        // only create if there is no session with the same name
+        const session = await sessions.getByName(lessonName);
+        if (session) {
+          currentSession.value = session;
+          return;
+        }
+        else {
+          currentSession.value = await sessions.create(lessonName);
+        }
       }
       else {
         // Use fallback or show "No lesson loaded" state
       }
 
+      console.log('[yehyecoa-vue]: Files changed, updating repl');
       // Process files as usual
       replStore.setFiles(files);
     });

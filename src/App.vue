@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { Toaster } from '@/components/ui/sonner';
 import YVHeader from '@/components/YvHeader.vue';
+import { useSettingsStore } from '@/composables/useSettingsStore';
 
 import YvRepl from './components/YvRepl.vue';
 import { useFileManagerStore } from './composables/useFileManagerStore';
+import 'vue-sonner/style.css'; // vue-sonner v2 requires this import
 import '@vue/repl/style.css';
 
 const fileManager = useFileManagerStore();
+const { settings } = useSettingsStore();
 
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
@@ -16,6 +20,8 @@ setVH();
 </script>
 
 <template>
+  <Toaster rich-colors :theme="settings.theme" />
+
   <div class="repl-container" font-sans text-primary vaul-drawer-wrapper>
     <div
       v-if="fileManager.errorMessage"
