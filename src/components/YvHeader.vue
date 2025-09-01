@@ -17,7 +17,8 @@ const fm = useFileManagerStore();
     <Drawer v-model:open="fm.isDrawerOpen" :default-open="true" direction="right">
       <nav
         flex="~ justify-between"
-        relative p-4 z-999 shadow-md
+        relative p-4 pr-6 z-999
+        shadow-md
         bg="light dark:dark-900"
         border="b neutral-300/10"
         text="#333 dark:neutral-300"
@@ -35,28 +36,28 @@ const fm = useFileManagerStore();
         <div flex gap-4 text-neutral-500>
           <button
             v-tooltip.bottom="'Save snapshot'"
-            class="toolbar-btn"
+            class="sc-toolbar-btn"
             @click="fm.saveSnapshot()"
           >
-            <div class="i-mynaui:save" />
+            <div class="i-mynaui:save hover:i-mynaui:save-solid" />
           </button>
 
           <DrawerTrigger>
-            <button v-tooltip.bottom="'Open history'" class="toolbar-btn">
-              <div class="i-carbon:data-backup" />
+            <button v-tooltip.bottom="'Open history'" class="sc-toolbar-btn">
+              <div class="i-mynaui:clock-hexagon hover:i-mynaui:clock-hexagon-solid" />
             </button>
           </DrawerTrigger>
 
-          <button v-tooltip.bottom="`Switch to ${settings.layout === 'vertical' ? 'horizontal' : 'vertical'} layout`" toolbar-btn @click="toggleLayout">
-            <div :class="settings.layout === 'vertical' ? 'i-mynaui:rectangle' : 'i-mynaui:rectangle-vertical'" />
+          <button v-tooltip.bottom-end="`Switch to ${settings.layout === 'vertical' ? 'horizontal' : 'vertical'} layout`" sc-toolbar-btn @click="toggleLayout">
+            <div :class="settings.layout === 'vertical' ? 'i-mynaui:rectangle hover:i-mynaui:rectangle-solid' : 'i-mynaui:rectangle-vertical hover:i-mynaui:rectangle-vertical-solid'" />
           </button>
 
           <button
-            v-tooltip.bottom="`Switch to ${settings.theme === 'dark' ? 'light' : 'dark'} theme`"
-            toolbar-btn
+            v-tooltip.bottom-end="`Switch to ${settings.theme === 'dark' ? 'light' : 'dark'} theme`"
+            sc-toolbar-btn
             @click="toggleTheme"
           >
-            <div class="i-carbon:sun dark:i-carbon:moon" />
+            <div class="i-mynaui:sun hover:i-mynaui:sun-solid dark:i-mynaui:moon dark:hover:i-mynaui:moon-solid" />
           </button>
         </div>
       </nav>

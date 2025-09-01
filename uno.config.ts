@@ -6,6 +6,7 @@ import {
   presetTypography,
   presetWebFonts,
   presetWind4,
+  transformerDirectives,
 } from 'unocss';
 // import presetAnimations from 'unocss-preset-animations';
 import { presetShadcn } from 'unocss-preset-shadcn';
@@ -69,10 +70,14 @@ export default defineConfig({
 
     },
   },
+  transformers: [
+    transformerDirectives(),
+  ],
   shortcuts: {
-    'toolbar-btn': 'hover:text-black dark:hover:text-neutral-100 transition-colors duration-200',
-    'btn-base': 'p-2 rounded-lg bg-transparent',
-    'btn': 'btn-base bg-neutral-800 text-neutral-200 dark:bg-neutral-200 dark:text-dark-900',
-    'btn-outline': 'btn-base outline-solid outline-neutral text-neutral',
+    'sc-toolbar-btn': 'hover:text-foreground/80 hover:scale-120 transition duration-200',
+    'sc-btn-base': 'p-2 rounded-lg bg-transparent',
+    'btn': 'sc-btn-base bg-neutral-800 text-neutral-200 dark:bg-neutral-200 dark:text-dark-900',
+    'sc-btn-outline': 'sc-btn-base outline-solid outline-neutral text-neutral hover',
+    'sc-toast-base': ' bg-background py-2 px-4 rounded-md flex items-center gap-4 border shadow-md',
   },
 });

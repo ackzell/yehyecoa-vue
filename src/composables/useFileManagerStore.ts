@@ -23,8 +23,10 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
     eventSource.onerror = async () => {
       console.warn('[yehyecoa-vue]: events endpoint not available. App is running standalone.');
+
       toast.warning('No events endpoint available', {
         description: 'App is running standalone.',
+        duration: Infinity,
       });
 
       if (await sessions.getCount() === 0) {
@@ -40,6 +42,10 @@ export const useFileManagerStore = defineStore('file-manager', () => {
       if (error) {
         console.warn('[yehyecoa-vue]: Server reported an issue:', error);
         errorMessage.value = error;
+        toast.error('Error', {
+          description: error,
+          duration: Infinity,
+        });
       }
 
       console.log('[yehyecoa-vue]: Active lesson:', lessonName);
@@ -63,6 +69,7 @@ export const useFileManagerStore = defineStore('file-manager', () => {
   async function saveSnapshot(): Promise<void> {
     if (!currentSession.value) {
       console.error('No active session. Cannot save snapshot.');
+      toast.error('No active session. Cannot save snapshot.');
       return;
     }
 
@@ -74,6 +81,7 @@ export const useFileManagerStore = defineStore('file-manager', () => {
     });
 
     sessions.changeUpdatedAt(currentSession.value.id, newSnapshot?.createdAt);
+    toast.success('Snapshot saved');
   }
 
   async function deleteSnapshot(snapshotId: number): Promise<void> {

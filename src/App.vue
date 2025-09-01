@@ -20,7 +20,7 @@ setVH();
 </script>
 
 <template>
-  <Toaster rich-colors :theme="settings.theme" />
+  <Toaster :theme="settings.theme" />
 
   <div class="repl-container" font-sans text-primary vaul-drawer-wrapper>
     <div

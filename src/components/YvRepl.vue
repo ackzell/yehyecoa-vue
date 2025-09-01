@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Repl } from '@vue/repl';
 import Monaco from '@vue/repl/monaco-editor';
+// import CodeMirror from '@vue/repl/codemirror-editor';
+
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
