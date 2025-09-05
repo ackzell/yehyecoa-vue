@@ -7,6 +7,8 @@ import { toast } from 'vue-sonner';
 import { sessions } from '@/db/sessions';
 import { snapshots } from '@/db/snapshots';
 
+// const IGNORE_FILES = ['tsconfig.json', 'import-map.json'];
+
 export const useFileManagerStore = defineStore('file-manager', () => {
   const currentSession = ref<Session>();
   const replStore = useStore();
@@ -66,22 +68,46 @@ export const useFileManagerStore = defineStore('file-manager', () => {
     });
   }
 
-  async function saveSnapshot(): Promise<void> {
+  async function saveSnapshot(snapshot: Pick<Snapshot, 'type' | 'message'>): Promise<void> {
     if (!currentSession.value) {
       console.error('No active session. Cannot save snapshot.');
       toast.error('No active session. Cannot save snapshot.');
       return;
     }
 
-    const newSnapshot = await snapshots.create({
-      sessionId: currentSession.value.id,
-      files: replStore.getFiles(),
-      type: 'manual',
-      message: 'Manual',
-    });
+    const latestManualSnapshot = await snapshots.getLatestManualSnapshot();
 
-    sessions.changeUpdatedAt(currentSession.value.id, newSnapshot?.createdAt);
-    toast.success('Snapshot saved');
+    if (snapshot.type !== 'manual' || !latestManualSnapshot) {
+      snapshots.create({
+        sessionId: currentSession.value.id,
+        files: replStore.getFiles(),
+        type: snapshot.type,
+        message: snapshot.message,
+      });
+
+      sessions.changeUpdatedAt(currentSession.value.id, new Date());
+      toast.success('Snapshot saved');
+    }
+    else {
+      const didFilesChange = replStore.getFiles()['App.vue'] !== latestManualSnapshot.files['App.vue'];
+
+      console.log('current editor', replStore.getFiles()['App.vue']);
+      console.log('latest manual snapshot', latestManualSnapshot.files['App.vue']);
+
+      console.log('didFilesChange', didFilesChange);
+
+      if (didFilesChange) {
+        snapshots.create({
+          sessionId: currentSession.value.id,
+          files: replStore.getFiles(),
+          type: snapshot.type,
+          message: snapshot.message,
+        });
+      }
+
+      sessions.changeUpdatedAt(currentSession.value.id, new Date());
+      toast.success('Snapshot saved');
+    }
   }
 
   async function deleteSnapshot(snapshotId: number): Promise<void> {

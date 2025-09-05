@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import type { Snapshot, SnapshotType } from '@/db';
 import { useTimeAgoIntl } from '@vueuse/core';
-
 import { motion } from 'motion-v';
+import { CodeDiff } from 'v-code-diff';
 import { computed } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
+import { useSettingsStore } from '@/composables/useSettingsStore';
+import HoverCard from '../ui/hover-card/HoverCard.vue';
+import HoverCardContent from '../ui/hover-card/HoverCardContent.vue';
+import HoverCardTrigger from '../ui/hover-card/HoverCardTrigger.vue';
 import Popover from '../ui/popover/Popover.vue';
 import PopoverContent from '../ui/popover/PopoverContent.vue';
 import PopoverTrigger from '../ui/popover/PopoverTrigger.vue';
@@ -23,6 +27,7 @@ type TypeColorConfig = {
 const props = defineProps<YVTimelineEntryProps>();
 
 const fm = useFileManagerStore();
+const { settings } = useSettingsStore();
 
 const typeColors = computed((): TypeColorConfig => {
   const colorMap: Record<SnapshotType, TypeColorConfig> = {
@@ -49,6 +54,10 @@ const typeColors = computed((): TypeColorConfig => {
 function calculateFileCount(): number {
   return Object.keys(props.snapshot.files).filter(file => !['import-map.json', 'tsconfig.json'].includes(file)).length;
 }
+
+const didFilesChange = computed(() => {
+  return fm.replStore.getFiles()['App.vue'] !== props.snapshot.files['App.vue'];
+});
 </script>
 
 <template>
@@ -74,11 +83,31 @@ function calculateFileCount(): number {
         <p text="sm" font-bold mr-2 :class="typeColors.text">
           {{ props.snapshot.type }}
         </p>
-        <p text="sm neutral-400 dark:neutral-500">
-          {{
-            calculateFileCount() === 1 ? '1 file' : `${calculateFileCount()} files`
-          }}
-        </p>
+        <HoverCard :open-delay="200">
+          <HoverCardTrigger>
+            <p text="sm neutral-400 dark:neutral-500" cursor-pointer>
+              {{
+                calculateFileCount() === 1 ? '1 file' : `${calculateFileCount()} files`
+              }}
+            </p>
+          </HoverCardTrigger>
+          <HoverCardContent class="max-w-4xl py-0">
+            <CodeDiff
+              v-if="didFilesChange"
+              :key="`${props.snapshot.id}-${Date.now()}`"
+              max-height="20rem"
+              :theme="settings.theme"
+              :old-string="fm.replStore.getFiles()['App.vue']"
+              :new-string="props.snapshot.files['App.vue']"
+              output-format="side-by-side"
+              filename="Current"
+              new-filename="Snapshot"
+            />
+            <div v-else p-4>
+              <pre>The contents are exactly the same as currently in the editor</pre>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
       </div>
 
       <span

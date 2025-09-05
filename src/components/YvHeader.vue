@@ -37,7 +37,7 @@ const fm = useFileManagerStore();
           <button
             v-tooltip.bottom="'Save snapshot'"
             class="sc-toolbar-btn"
-            @click="fm.saveSnapshot()"
+            @click="fm.saveSnapshot({ type: 'manual', message: 'Manually saved' })"
           >
             <div class="i-mynaui:save hover:i-mynaui:save-solid" />
           </button>
