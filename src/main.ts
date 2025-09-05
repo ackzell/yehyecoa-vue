@@ -8,15 +8,7 @@ import 'virtual:uno.css';
 
 const pinia = createPinia();
 
-const floatingVueConfig = {
-  themes: {
-    'yv-dropdown': {
-      $extend: 'dropdown',
-    },
-  },
-};
-
 createApp(App)
   .use(pinia)
-  .use(FloatingVue, floatingVueConfig)
+  .use(FloatingVue)
   .mount('#app');

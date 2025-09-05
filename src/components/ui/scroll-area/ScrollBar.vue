@@ -26,7 +26,7 @@ const delegatedProps = reactiveOmit(props, 'class');
   >
     <ScrollAreaThumb
       data-slot="scroll-area-thumb"
-      class="relative flex-1 rounded-full bg-border/50"
+      class="relative flex-1 rounded-full bg-border/60 dark:bg-border"
     />
   </ScrollAreaScrollbar>
 </template>
