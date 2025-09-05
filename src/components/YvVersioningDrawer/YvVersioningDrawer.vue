@@ -43,7 +43,7 @@ const fm = useFileManagerStore();
       </div>
 
       <ScrollArea v-else flex="~ grow-1" h-full>
-        <ul mb-32 p-2>
+        <ul mb-32>
           <LayoutGroup>
             <AnimatePresence>
               <motion.li
@@ -62,29 +62,28 @@ const fm = useFileManagerStore();
                   opacity: 0,
                   x: 250,
                 }"
+                px-4
+                class="group/snapshot hover-bg-accent/60 dark:hover-bg-accent/10"
               >
-                <div flex="~ items-center justify-between">
-                  <div flex gap-2>
-                    <span
-                      inline-block
-                      text="sm amber-700"
-                      font="bold"
-                    >
-                      <span
-                        mr-2
-                        size-2 rounded-full
-                        inline-block
-                        bg-amber-700
-                      />
+                <div flex="~ items-center justify-between" mb-1>
+                  <div flex gap-0 items-center>
+                    <div
+                      mt-0.5
+                      transition="all duration-150 ease-in-out"
+                      outline="0 offset-0 amber-600"
+                      class="group-hover/snapshot:outline-1 group-hover/snapshot:outline-offset-2"
+                      mr-2 size-2.5 rounded-full inline-block
+                      bg-amber-600
+                    />
+                    <p text="sm amber-600" font-bold mr-2>
                       {{ snapshot.type }}
-                    </span>
-                    <span inline-block text="sm neutral-400 dark:neutral-500">
+                    </p>
+                    <p text="sm neutral-400 dark:neutral-500">
                       {{ Object.keys(snapshot.files).length }} files
-                    </span>
+                    </p>
                   </div>
 
                   <span
-                    p-1
                     inline-block
                     text="xs neutral-400 dark:neutral-500"
                   >
@@ -92,14 +91,26 @@ const fm = useFileManagerStore();
                   </span>
                 </div>
                 <div
-                  border-l border-l-neutral-300 dark:border-l-neutral-600 pl-5
-                  pb-3
-                  ml-0.9
-                  flex="~ col gap-6"
+                  relative flex="~ col gap-6"
+                  border-l border-l-neutral-300 dark:border-l-neutral-600
+                  class="`
+                    before:content-['']
+                    before:absolute
+                    before:inset-y-0
+                    before:-left-px
+                    before:w-px
+                    before:bg-amber-600
+                    before:scale-y-0
+                    before:origin-top
+                    before:transition-transform
+                    before:duration-300
+                    group-hover/snapshot:before:scale-y-100
+                  `"
+                  pl-5 pb-3 ml-1
                 >
-                  <div font-bold>
+                  <p font-bold class="text-foreground/70">
                     {{ snapshot.message }}
-                  </div>
+                  </p>
 
                   <div h-full>
                     <div flex gap-4 h-full>
@@ -129,7 +140,7 @@ const fm = useFileManagerStore();
                             dark="bg-input/30 hover:bg-red-700/20 hover:text-red-400 active:bg-red-400/20 active:text-red-500"
                             @click="fm.deleteSnapshot(snapshot.id)"
                           >
-                            Delete
+                            Confirm
                           </YvButton>
                         </PopoverContent>
                       </Popover>
