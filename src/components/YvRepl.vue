@@ -21,6 +21,7 @@ const fm = useFileManagerStore();
     :editor-options="{
       autoSaveText: false,
     }"
+    :preview-theme="true"
     :store="fm.replStore"
     @keydown.ctrl.s.prevent="fm.saveSnapshot()"
     @keydown.meta.s.capture.prevent="fm.saveSnapshot()"
