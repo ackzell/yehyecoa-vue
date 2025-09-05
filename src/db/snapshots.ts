@@ -32,7 +32,7 @@ function liveQuerySnapshots(sessionId: number): Observable<Snapshot[]> {
 }
 
 async function getLatestManualSnapshot(): Promise<Snapshot | undefined> {
-  return (await db.snapshots.where({ type: 'manual' }).reverse().sortBy('createdAt')).pop();
+  return (await db.snapshots.where({ type: 'manual' }).sortBy('createdAt')).pop();
 }
 
 function deleteSnapshot(snapshotId: number): Promise<void> {

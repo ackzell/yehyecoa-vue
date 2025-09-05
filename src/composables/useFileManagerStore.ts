@@ -103,10 +103,13 @@ export const useFileManagerStore = defineStore('file-manager', () => {
           type: snapshot.type,
           message: snapshot.message,
         });
-      }
 
-      sessions.changeUpdatedAt(currentSession.value.id, new Date());
-      toast.success('Snapshot saved');
+        sessions.changeUpdatedAt(currentSession.value.id, new Date());
+        toast.success('Snapshot saved');
+      }
+      else {
+        toast.info('Nothing new to save');
+      }
     }
   }
 
