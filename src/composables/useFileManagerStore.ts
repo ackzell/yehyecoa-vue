@@ -50,8 +50,8 @@ export const useFileManagerStore = defineStore('file-manager', () => {
         });
       }
 
-      console.log('[yehyecoa-vue]: Active lesson:', lessonName);
-      console.log('[yehyecoa-vue]: Files changed, updating repl', files);
+      console.warn('[yehyecoa-vue]: Active lesson:', lessonName);
+      console.warn('[yehyecoa-vue]: Files changed, updating repl', files);
       replStore.setFiles(files);
 
       if (lessonName) {
@@ -86,15 +86,9 @@ export const useFileManagerStore = defineStore('file-manager', () => {
       });
 
       sessions.changeUpdatedAt(currentSession.value.id, new Date());
-      toast.success('Snapshot saved');
     }
     else {
       const didFilesChange = replStore.getFiles()['App.vue'] !== latestManualSnapshot.files['App.vue'];
-
-      console.log('current editor', replStore.getFiles()['App.vue']);
-      console.log('latest manual snapshot', latestManualSnapshot.files['App.vue']);
-
-      console.log('didFilesChange', didFilesChange);
 
       if (didFilesChange) {
         snapshots.create({

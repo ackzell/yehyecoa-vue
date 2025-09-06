@@ -62,9 +62,9 @@ const didFilesChange = computed(() => {
 
 <template>
   <motion.li
-    :initial="{ opacity: 0, x: 100 }"
-    :animate="{ opacity: 1, x: 0 }"
-    :exit="{ opacity: 0, x: 250 }"
+    :initial="{ opacity: 0, scale: 0 }"
+    :animate="{ opacity: 1, scale: 1 }"
+    :exit="{ opacity: 0, scale: 0 }"
     px-4 layout
     class="group/snapshot hover-bg-accent/60 dark:hover-bg-accent/10"
   >

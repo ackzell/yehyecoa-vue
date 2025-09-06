@@ -39,7 +39,7 @@ export default defineConfig({
   },
   // This is key - force dependency optimization
   optimizeDeps: {
-    include: ['@vue/repl', '@vue/repl/monaco-editor', '@vue/repl/codemirror-editor'],
+    include: ['@vue/repl', '@vue/repl/monaco-editor'],
     force: true,
   },
 });

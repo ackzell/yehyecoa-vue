@@ -39,7 +39,7 @@ const fm = useFileManagerStore();
       <ScrollArea v-else flex="~ grow-1" h-full>
         <ul mb-32>
           <LayoutGroup>
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               <YvSnapshot
                 v-for="(snapshot) in fm.snapshotsList"
                 :key="snapshot.id"
