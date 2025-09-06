@@ -8,16 +8,14 @@ import {
   presetWind4,
   transformerDirectives,
 } from 'unocss';
-// import presetAnimations from 'unocss-preset-animations';
+import presetAnimations from 'unocss-preset-animations';
 import { presetShadcn } from 'unocss-preset-shadcn';
 
 export default defineConfig({
   presets: [
-    presetAttributify({
-      prefix: 'uno-',
-    }),
+    presetAttributify(),
     // todo: install and uncomment if shadcn acts weirdly
-    // presetAnimations(),
+    presetAnimations(),
     presetWind4(),
     presetTypography(),
     presetWebFonts(),
@@ -42,10 +40,6 @@ export default defineConfig({
         color: 'neutral',
         // With default setting for SolidUI, you need to set the darkSelector option.
         darkSelector: '.dark',
-      },
-      {
-        // If you are using reka ui.
-        componentLibrary: 'reka',
       },
     ),
   ],
@@ -74,7 +68,7 @@ export default defineConfig({
     transformerDirectives(),
   ],
   shortcuts: {
-    'sc-toolbar-btn': 'hover:text-foreground/80 hover:scale-120 transition duration-200',
+    'sc-toolbar-btn': 'cursor-pointer hover:text-foreground/80 hover:scale-120 transition duration-200',
     'sc-btn-base': 'p-2 rounded-lg bg-transparent',
     'btn': 'sc-btn-base bg-neutral-800 text-neutral-200 dark:bg-neutral-200 dark:text-dark-900',
     'sc-btn-outline': 'sc-btn-base outline-solid outline-neutral text-neutral hover',

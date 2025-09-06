@@ -12,6 +12,7 @@ export const sessions = {
   getByName,
   getCount,
   liveQuerySessions,
+  getLatestSession,
   changeUpdatedAt,
 };
 
@@ -44,4 +45,8 @@ async function getByName(name: string): Promise<Session | undefined> {
 
 async function getCount(): Promise<number> {
   return db.sessions.count();
+}
+
+async function getLatestSession(): Promise<Session | undefined> {
+  return (await db.sessions.reverse().limit(1).toArray())[0];
 }

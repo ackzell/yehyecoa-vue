@@ -34,6 +34,10 @@ export const useFileManagerStore = defineStore('file-manager', () => {
       if (await sessions.getCount() === 0) {
         currentSession.value = await sessions.create(`Session ${crypto.randomUUID().slice(0, 8)}`);
       }
+
+      if (!currentSession.value) {
+        currentSession.value = await sessions.getLatestSession();
+      }
     };
 
     // Live updates via SSE

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import type { Snapshot, SnapshotType } from '@/db';
 import { useTimeAgoIntl } from '@vueuse/core';
+import { Menu } from 'floating-vue';
 import { motion } from 'motion-v';
 import { CodeDiff } from 'v-code-diff';
 import { computed } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
-import HoverCard from '../ui/hover-card/HoverCard.vue';
-import HoverCardContent from '../ui/hover-card/HoverCardContent.vue';
-import HoverCardTrigger from '../ui/hover-card/HoverCardTrigger.vue';
 import Popover from '../ui/popover/Popover.vue';
 import PopoverContent from '../ui/popover/PopoverContent.vue';
 import PopoverTrigger from '../ui/popover/PopoverTrigger.vue';
+import ScrollArea from '../ui/scroll-area/ScrollArea.vue';
+import ScrollBar from '../ui/scroll-area/ScrollBar.vue';
 import YvButton from './YvButton.vue';
 
 type YVTimelineEntryProps = {
@@ -83,31 +83,39 @@ const didFilesChange = computed(() => {
         <p text="sm" font-bold mr-2 :class="typeColors.text">
           {{ props.snapshot.type }}
         </p>
-        <HoverCard :open-delay="200">
-          <HoverCardTrigger>
-            <p text="sm neutral-400 dark:neutral-500" cursor-pointer>
-              {{
-                calculateFileCount() === 1 ? '1 file' : `${calculateFileCount()} files`
-              }}
-            </p>
-          </HoverCardTrigger>
-          <HoverCardContent class="max-w-4xl py-0">
-            <CodeDiff
-              v-if="didFilesChange"
-              :key="`${props.snapshot.id}-${Date.now()}`"
-              max-height="20rem"
-              :theme="settings.theme"
-              :old-string="fm.replStore.getFiles()['App.vue']"
-              :new-string="props.snapshot.files['App.vue']"
-              output-format="side-by-side"
-              filename="Current"
-              new-filename="Snapshot"
-            />
-            <div v-else p-4>
-              <pre>The contents are exactly the same as currently in the editor</pre>
-            </div>
-          </HoverCardContent>
-        </HoverCard>
+        <Menu v-if="didFilesChange" theme="diff-card" :arrow-overflow="true" arrow-padding="1rem">
+          <p text="sm neutral-400 dark:neutral-500" cursor-pointer>
+            {{
+              calculateFileCount() === 1 ? '1 file' : `${calculateFileCount()} files`
+            }}
+          </p>
+
+          <template #popper>
+            <ScrollArea class="w-full whitespace-nowrap">
+              <div
+                p-2
+                dark:bg-neutral-600
+                bg-neutral-400
+                max-w-screen-lg
+              >
+                <CodeDiff
+                  :key="`${props.snapshot.id}-${Date.now()}`"
+                  max-height="20rem"
+                  :theme="settings.theme"
+                  :old-string="fm.replStore.getFiles()['App.vue']"
+                  :new-string="props.snapshot.files['App.vue']"
+                  output-format="side-by-side"
+                  filename="Current"
+                  new-filename="Snapshot"
+                />
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </template>
+        </Menu>
+        <p v-else text="xs neutral-400 dark:neutral-500">
+          (no changes)
+        </p>
       </div>
 
       <span
@@ -117,6 +125,7 @@ const didFilesChange = computed(() => {
         {{ useTimeAgoIntl(props.snapshot.createdAt) }}
       </span>
     </div>
+
     <div
       relative flex="~ col gap-6"
       border-l border-l-neutral-300 dark:border-l-neutral-600
@@ -176,3 +185,49 @@ const didFilesChange = computed(() => {
     </div>
   </motion.li>
 </template>
+
+<style>
+.code-diff-view {
+  margin: 0 !important;
+}
+
+.code-diff-view .diff-stat {
+  flex-wrap: wrap;
+  justify-content: flex-end !important;
+}
+
+.code-diff-view .info-right > span,
+.code-diff-view .info-right > span.diff-command-bar {
+  padding: 0.25rem !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.v-popper--theme-diff-card .v-popper__inner {
+  border-color: var(--colors-neutral-800);
+}
+
+.v-popper--theme-diff-card .v-popper__arrow-outer {
+  border-color: var(--colors-neutral-400) !important;
+
+}
+
+.v-popper--theme-diff-card .v-popper__arrow-inner {
+  border-color: var(--colors-neutral-400) !important;
+
+}
+
+.dark .v-popper--theme-diff-card .v-popper__inner {
+  border: var(--colors-neutral-600);
+}
+
+.dark .v-popper--theme-diff-card .v-popper__arrow-outer {
+  border-color: var(--colors-neutral-600);
+
+}
+
+.dark .v-popper--theme-diff-card .v-popper__arrow-inner {
+  border-color: var(--colors-neutral-600);
+
+}
+</style>

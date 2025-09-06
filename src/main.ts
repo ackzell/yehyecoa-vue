@@ -8,7 +8,17 @@ import 'virtual:uno.css';
 
 const pinia = createPinia();
 
+const floatingVueConfig = {
+  themes: {
+    'diff-card': {
+      $extend: 'menu',
+      triggers: ['hover', 'focus', 'click'],
+      autoHide: false,
+    },
+  },
+};
+
 createApp(App)
   .use(pinia)
-  .use(FloatingVue)
+  .use(FloatingVue, floatingVueConfig)
   .mount('#app');
