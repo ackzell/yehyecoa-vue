@@ -44,7 +44,7 @@ function getToastClasses(type: string) {
 function handleToastClick(toastId: string | number) {
   const timer = toastTimers.value.get(toastId);
   if (timer) {
-    clearTimeout(timer.timeoutId);
+    timer.stop();
     toastTimers.value.delete(toastId);
   }
   toast.dismiss(toastId);
@@ -73,6 +73,7 @@ function createAutoDissmiss(toastId: string | number, type: string, duration?: n
     remainingTime: autoDismissDelay,
     startTime,
     originalDuration: autoDismissDelay,
+    stop: () => clearTimeout(timeoutId),
   };
 
   toastTimers.value.set(toastId, timer);
@@ -104,6 +105,9 @@ function resumeAutoDissmiss(toastId: string | number) {
       toast.dismiss(toastId);
       toastTimers.value.delete(toastId);
     }, timer.remainingTime);
+
+    // Update the stop function to reference the new timeoutId
+    timer.stop = () => clearTimeout(timer.timeoutId);
 
     toastTimers.value.set(toastId, timer);
   }
@@ -148,11 +152,11 @@ watchEffect(() => {
         <div
           v-for="activeToast in activeToasts"
           :key="activeToast.id"
-          sc-toast-base bg="opacity-90"
+          sc-toast-base bg="opacity-90 background"
           flex="~ items-center gap-3"
           p-2
           transition="transition-all duration-200 ease-in-out"
-          class="border rounded-lg cursor-pointer pointer-events-auto select-none hover:opacity-100 hover:scale-103 active:scale-98 bg-background"
+          class="border rounded-lg cursor-pointer pointer-events-auto select-none hover:opacity-100 hover:scale-103 active:scale-98"
           :class="getToastClasses(activeToast.type || 'info')"
           @click="handleToastClick(activeToast.id)"
           @mouseenter="pauseAutoDissmiss(activeToast.id)"
