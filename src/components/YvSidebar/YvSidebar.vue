@@ -43,6 +43,7 @@ function handleScroll() {
       bg="light-100 dark:dark-900"
       border="l  neutral-200 dark:neutral-800"
       flex flex-col
+      class="sidebar-drawer"
     >
       <motion.div
         v-if="fm.isDrawerOpen"
@@ -74,6 +75,7 @@ function handleScroll() {
             flex="~ grow-1"
             overflow-auto
             h-full pt-4
+            class="sidebar-scroll-container"
             @scroll="handleScroll"
           >
             <ul v-bind="wrapperProps" mb-8>
@@ -100,14 +102,30 @@ function handleScroll() {
   display: grid;
   grid-template-columns: 1fr auto;
   height: calc(var(--vh) - var(--nav-height) - var(--footer-height)) !important;
+  /* Ensure consistent layout regardless of scrollbar visibility */
+  overflow: hidden;
 }
 
 .main-content {
   overflow: hidden;
   min-width: 0;
+  /* Force scrollbar space to always be reserved */
+  scrollbar-gutter: stable;
+}
+
+.sidebar-drawer {
+  /* Ensure the sidebar doesn't affect main content layout */
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .sidebar-content {
   height: calc(var(--vh) - var(--nav-height) - 70px - var(--footer-height)) !important;
+  overflow: hidden;
+}
+
+.sidebar-scroll-container {
+  /* Force consistent scrollbar behavior */
+  scrollbar-gutter: stable;
 }
 </style>
