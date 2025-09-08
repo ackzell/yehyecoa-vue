@@ -7,7 +7,7 @@ import { useIntervalFn } from '@vueuse/core';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
-const AUTO_SAVE_INTERVAL_MINUTES = 3 * 60 * 1000;
+const AUTO_SAVE_INTERVAL_MINUTES = 10 * 60 * 1000;
 
 const { settings } = useSettingsStore();
 const fm = useFileManagerStore();

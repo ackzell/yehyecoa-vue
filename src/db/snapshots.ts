@@ -1,6 +1,6 @@
 import type { Observable } from 'dexie';
 
-import type { Snapshot } from '@/db';
+import type { Snapshot, SnapshotType } from '@/db';
 import { liveQuery } from 'dexie';
 
 import { db } from '@/db';
@@ -8,7 +8,7 @@ import { db } from '@/db';
 export const snapshots = {
   create,
   liveQuerySnapshots,
-  getLatestManualSnapshot,
+  getLatestByType,
   deleteSnapshot,
 };
 
@@ -31,8 +31,8 @@ function liveQuerySnapshots(sessionId: number): Observable<Snapshot[]> {
   return liveQuery(async () => await db.snapshots.where({ sessionId }).reverse().sortBy('createdAt'));
 }
 
-async function getLatestManualSnapshot(): Promise<Snapshot | undefined> {
-  return (await db.snapshots.where({ type: 'manual' }).sortBy('createdAt')).pop();
+async function getLatestByType(type: SnapshotType): Promise<Snapshot | undefined> {
+  return (await db.snapshots.where({ type }).sortBy('createdAt')).pop();
 }
 
 function deleteSnapshot(snapshotId: number): Promise<void> {

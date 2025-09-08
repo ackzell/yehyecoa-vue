@@ -68,7 +68,7 @@ const didFilesChange = computed(() => {
     :exit="{ opacity: 0, scale: 0 }"
     :transition="props.disableAnimation ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }"
     px-4 layout h-28
-    class="group/snapshot hover-bg-accent/60 dark:hover-bg-accent/10"
+    class="group/snapshot hover-bg-accent/60 dark:hover-bg-accent/20"
   >
     <div flex="~ items-center justify-between" mb-1>
       <div flex gap-0 items-center>

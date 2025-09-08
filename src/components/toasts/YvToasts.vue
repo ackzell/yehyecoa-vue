@@ -135,18 +135,19 @@ watchEffect(() => {
 });
 
 // --- STACKING LOGIC ---
-const stackLimit = props.stackLimit || 4; // Number of toasts visible by default
+const stackLimit = computed(() => props.stackLimit ?? 4);
 const isStackHovered = ref(false);
 
 const visibleToasts = computed(() => {
   if (isStackHovered.value)
     return activeToasts;
-  return activeToasts.slice(0, stackLimit);
+
+  // Always show the newest ones
+  return activeToasts.slice(-stackLimit.value);
 });
 
 const hiddenCount = computed(() => {
-  const count = activeToasts.length - stackLimit;
-  return count > 0 ? count : 0;
+  return Math.max(0, activeToasts.length - visibleToasts.value.length);
 });
 </script>
 

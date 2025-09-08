@@ -89,9 +89,9 @@ export const useFileManagerStore = defineStore('file-manager', () => {
       return;
     }
 
-    const latestManualSnapshot = await snapshots.getLatestManualSnapshot();
+    const latestSnapshotByType = await snapshots.getLatestByType(snapshot.type);
 
-    if (snapshot.type !== 'manual' || !latestManualSnapshot) {
+    if (!latestSnapshotByType) {
       snapshots.create({
         sessionId: currentSession.value.id,
         files: replStore.getFiles(),
@@ -102,7 +102,7 @@ export const useFileManagerStore = defineStore('file-manager', () => {
       sessions.changeUpdatedAt(currentSession.value.id, new Date());
     }
     else {
-      const didFilesChange = replStore.getFiles()['App.vue'] !== latestManualSnapshot.files['App.vue'];
+      const didFilesChange = replStore.getFiles()['App.vue'] !== latestSnapshotByType.files['App.vue'];
 
       if (didFilesChange) {
         snapshots.create({
@@ -113,11 +113,14 @@ export const useFileManagerStore = defineStore('file-manager', () => {
         });
 
         sessions.changeUpdatedAt(currentSession.value.id, new Date());
-        toast.success('Snapshot saved');
+        if (snapshot.type === 'manual') {
+          toast.success('Snapshot saved');
+        }
       }
       else {
-        // toast.info('Nothing new to save', { duration: Infinity });
-        toast.info('Nothing new to save');
+        if (snapshot.type === 'manual') {
+          toast.info('Nothing new to save');
+        }
       }
     }
   }

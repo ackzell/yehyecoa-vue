@@ -9,6 +9,7 @@ type Toast = {
   title: string;
   description: string;
   duration?: number;
+  createdTimestamp: number;
 };
 
 const defaultToast: Omit<Toast, 'id'> = {
@@ -16,6 +17,7 @@ const defaultToast: Omit<Toast, 'id'> = {
   title: '',
   description: '',
   duration: 4000,
+  createdTimestamp: 0,
 };
 
 export const useToastsStore = defineStore('toastStore', () => {
@@ -23,7 +25,12 @@ export const useToastsStore = defineStore('toastStore', () => {
 
   function addToast(toast: Omit<Partial<Toast>, 'id'>): string {
     const id = crypto.randomUUID().slice(0, 8);
-    activeToasts.push({ id, ...defaultToast, ...toast });
+    activeToasts.push({
+      id,
+      ...defaultToast,
+      ...toast,
+      createdTimestamp: Date.now(),
+    });
     return id;
   };
 

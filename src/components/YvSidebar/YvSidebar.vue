@@ -71,8 +71,9 @@ function handleScroll() {
           <div
             v-else
             v-bind="containerProps"
-            class="p-2 overflow-auto" flex="~ grow-1"
-            h-full
+            flex="~ grow-1"
+            overflow-auto
+            h-full pt-4
             @scroll="handleScroll"
           >
             <ul v-bind="wrapperProps" mb-8>
