@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url';
 import vue from '@vitejs/plugin-vue';
 import UnoCSS from 'unocss/vite';
 import { defineConfig } from 'vite';
+import version from 'vite-plugin-package-version';
 import vueDevTools from 'vite-plugin-vue-devtools';
 
 export default defineConfig({
@@ -10,6 +11,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     UnoCSS(),
+    version(),
   ],
   resolve: {
     alias: {

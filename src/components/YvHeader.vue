@@ -22,7 +22,7 @@ const fm = useFileManagerStore();
       <h1 text-lg font-500 inline-flex items-center>
         <!-- TODO: maybe a logo would be cool -->
         <!-- <img alt="logo" src="/logo.svg" /> -->
-        <span>yehyecoa-vue</span>
+        <!-- <span>yehyecoa-vue</span> -->
       </h1>
       <!-- <div>
             submenus here
