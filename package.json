@@ -1,7 +1,7 @@
 {
   "name": "yehyecoa-vue",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0-beta",
   "private": true,
   "packageManager": "pnpm@10.14.0",
   "engines": {
@@ -65,6 +65,7 @@
     "unocss-preset-animations": "^1.2.1",
     "unocss-preset-shadcn": "^1.0.1",
     "vite": "^7.0.6",
+    "vite-plugin-package-version": "^1.1.0",
     "vite-plugin-vue-devtools": "^8.0.0",
     "vue-tsc": "^3.0.4"
   },
