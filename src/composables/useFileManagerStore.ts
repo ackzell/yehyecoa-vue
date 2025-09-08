@@ -49,12 +49,10 @@ export const useFileManagerStore = defineStore('file-manager', () => {
     eventSource.addEventListener('filesChanged', async (event) => {
       const { lessonName, files, error } = JSON.parse(event.data);
 
+      toast.dismissAll();
+
       // most likely the yv-lesson.json file is not available
       if (error) {
-        // we switched lessons in amoxtli-vue
-        // clear last lesson's toasts
-        // toast.dismissAll();
-
         console.error('[yehyecoa-vue]: Server reported an issue:', error);
         toast.error('Error', {
           description: error,
@@ -136,9 +134,6 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
   watch(currentSession, (newSession, _, onCleanup) => {
     if (newSession) {
-      // console.log('[yehyecoa-vue]: New active session:', newSession);
-      // toast.dismissAll();
-
       const subscription = snapshots.liveQuerySnapshots(newSession.id).subscribe((snaps) => {
         snapshotsList.value = snaps;
       });
