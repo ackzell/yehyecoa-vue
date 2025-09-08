@@ -1,11 +1,24 @@
+import FloatingVue from 'floating-vue';
+import { createPinia } from 'pinia';
+import { createApp } from 'vue';
+import App from './App.vue';
+
 import 'floating-vue/dist/style.css';
 import 'virtual:uno.css';
 
-import FloatingVue from 'floating-vue';
-import { createApp } from 'vue';
+const pinia = createPinia();
 
-import App from './App.vue';
+const floatingVueConfig = {
+  themes: {
+    'diff-card': {
+      $extend: 'menu',
+      triggers: ['hover', 'focus', 'click'],
+      autoHide: false,
+    },
+  },
+};
 
 createApp(App)
-  .use(FloatingVue)
+  .use(pinia)
+  .use(FloatingVue, floatingVueConfig)
   .mount('#app');

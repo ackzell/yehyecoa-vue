@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { DrawerTitleProps } from 'vaul-vue';
-import { reactiveOmit } from '@vueuse/core';
 import type { HTMLAttributes } from 'vue';
+import { reactiveOmit } from '@vueuse/core';
 import { DrawerTitle } from 'vaul-vue';
 
 import { cn } from '@/lib/utils';

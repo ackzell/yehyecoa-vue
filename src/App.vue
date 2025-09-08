@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import '@vue/repl/style.css';
-
-import Monaco from '@vue/repl/monaco-editor';
-import { Repl, useStore } from '@vue/repl';
-import { onMounted, ref } from 'vue';
-
-import { useSettingsStore } from '@/composables/useSettingsStore';
 import YVHeader from '@/components/YvHeader.vue';
-
-const { settings } = useSettingsStore();
+import YvToasts from './components/toasts/YvToasts.vue';
+// import Drawer from './components/ui/drawer/Drawer.vue';
+import YvFooter from './components/YvFooter.vue';
+import YvRepl from './components/YvRepl.vue';
+import YvSidebar from './components/YvSidebar/YvSidebar.vue';
+import '@vue/repl/style.css';
 
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
@@ -16,60 +13,19 @@ function setVH() {
 window.addEventListener('resize', setVH);
 
 setVH();
-
-const store = useStore();
-
-const errormessage = ref('');
-
-onMounted(async () => {
-  // Initial load
-  try {
-    const fileContents = await fetch('/lessonFile.vue').then(r => r.text());
-    store.setFiles({ 'src/App.vue': fileContents });
-  }
-  catch {
-    errormessage.value = 'Failed to load lessonFile.vue';
-    console.error(
-
-      'Failed to load `lessonFile.vue`, makes sure you created one in the root directory.',
-    );
-  }
-
-  // Live updates via SSE
-  const es = new EventSource('/events');
-  es.addEventListener('fileUpdate', (event) => {
-    const { filename, content } = JSON.parse(event.data);
-    if (filename === 'lessonFile.vue') {
-      store.setFiles({ 'src/App.vue': content });
-    }
-  });
-});
 </script>
 
 <template>
-  <div class="repl-container" font-sans text-primary vaul-drawer-wrapper>
-    <div
-      v-if="errormessage"
-      class="error"
-    >
-      {{ errormessage }}
-    </div>
+  <!-- <Drawer v-model:open="isDo" :default-open="true" direction="right"> -->
+  <main class="repl-container" font-sans text-primary vaul-drawer-wrapper>
+    <YvToasts :stack-limit="4" />
     <YVHeader />
-    <Repl
-      :editor="Monaco"
-      :show-compile-output="false"
-      :show-import-map="false"
-      :show-ts-config="false"
-      :theme="settings.theme"
-      :layout="settings.layout"
-      :editor-options="{
-        autoSaveText: false,
-      }"
-      :store
-      @keydown.ctrl.s.prevent
-      @keydown.meta.s.prevent
-    />
-  </div>
+    <YvSidebar>
+      <YvRepl />
+    </YvSidebar>
+    <YvFooter />
+  </main>
+  <!-- </Drawer> -->
 </template>
 
 <style>
@@ -81,22 +37,10 @@ body {
   margin: 0;
   --base: #444;
   --nav-height: 50px;
-}
-
-.repl-container {
-  height: calc(var(--vh) - var(--nav-height)) !important;
-  color-scheme: dark;
+  --footer-height: 40px;
 }
 
 .dark {
   color-scheme: dark;
-}
-
-button {
-  border: none;
-  outline: none;
-  cursor: pointer;
-  margin: 0;
-  background-color: transparent;
 }
 </style>
