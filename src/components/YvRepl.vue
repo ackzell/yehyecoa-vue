@@ -21,21 +21,27 @@ useIntervalFn(() => {
 </script>
 
 <template>
-  <Repl
-    :editor="Monaco"
-    :show-compile-output="false"
-    :show-import-map="false"
-    :show-ts-config="false"
-    :theme="settings.theme"
-    :layout="settings.layout"
-    :editor-options="{
-      autoSaveText: false,
-    }"
-    :preview-theme="true"
-    :store="fm.replStore"
+  <div
+    class="yv-repl"
+    w-full h-full
     @keydown.ctrl.s.prevent="fm.saveSnapshot({ type: 'manual', message: 'Manually saved' })"
     @keydown.meta.s.capture.prevent="fm.saveSnapshot({ type: 'manual', message: 'Manually saved' })"
-    @keydown.ctrl.shift.h.prevent="fm.isDrawerOpen = true"
-    @keydown.meta.shift.h.prevent="fm.isDrawerOpen = true"
-  />
+    @keydown.meta.b="fm.isDrawerOpen = !fm.isDrawerOpen"
+    @keydown.ctrl.b.capture.prevent.stop="fm.isDrawerOpen = !fm.isDrawerOpen"
+  >
+    <Repl
+      :editor="Monaco"
+      :show-compile-output="false"
+      :show-import-map="false"
+      :show-ts-config="false"
+      :theme="settings.theme"
+      :layout="settings.layout"
+      :editor-options="{
+        autoSaveText: false,
+      }"
+      :preview-theme="true"
+      :store="fm.replStore"
+      @update:model-value="() => { console.log('updated the contents of the editor in the repl') }"
+    />
+  </div>
 </template>

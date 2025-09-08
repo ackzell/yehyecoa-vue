@@ -15,7 +15,6 @@ import { snapshots } from '@/db/snapshots';
 export const useFileManagerStore = defineStore('file-manager', () => {
   const currentSession = ref<Session>();
   const replStore = useStore();
-  const errorMessage = ref('');
   const isDrawerOpen = ref(false);
 
   const sessionList = ref<Session[]>([]);
@@ -57,7 +56,6 @@ export const useFileManagerStore = defineStore('file-manager', () => {
         // toast.dismissAll();
 
         console.error('[yehyecoa-vue]: Server reported an issue:', error);
-        errorMessage.value = error;
         toast.error('Error', {
           description: error,
           duration: Infinity,
@@ -69,7 +67,6 @@ export const useFileManagerStore = defineStore('file-manager', () => {
       replStore.setFiles(files);
 
       if (lessonName) {
-        errorMessage.value = '';
         // only create if there is no session with the same name
         const session = await sessions.getByName(lessonName);
         if (session) {
@@ -166,7 +163,6 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
     sessionList,
 
-    errorMessage,
   };
 });
 
