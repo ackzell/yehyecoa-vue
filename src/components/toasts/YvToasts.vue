@@ -168,7 +168,7 @@ const hiddenCount = computed(() => {
           :key="activeToast.id"
           sc-toast-base bg="opacity-90 background"
           flex="~ items-center gap-3"
-          p-2 cursor-pointer select-none
+          py-2 px-4 cursor-pointer select-none
           hover="opacity-100 scale-105"
           transition="transition-all duration-200 ease-in-out"
           class="border rounded-lg pointer-events-auto active:scale-98"

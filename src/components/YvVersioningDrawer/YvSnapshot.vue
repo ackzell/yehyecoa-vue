@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Snapshot, SnapshotType } from '@/db';
 import { useTimeAgoIntl } from '@vueuse/core';
-import { Menu } from 'floating-vue';
+import { Menu, Tooltip } from 'floating-vue';
 import { motion } from 'motion-v';
 import { CodeDiff } from 'v-code-diff';
 import { computed } from 'vue';
@@ -120,12 +120,21 @@ const didFilesChange = computed(() => {
         </p>
       </div>
 
-      <span
-        inline-block
-        text="xs neutral-400 dark:neutral-500"
-      >
-        {{ useTimeAgoIntl(props.snapshot.createdAt) }}
-      </span>
+      <Tooltip placement="bottom">
+        <span
+          cursor-pointer
+          inline-block
+          text="xs neutral-400 dark:neutral-500"
+        >
+          {{ useTimeAgoIntl(props.snapshot.createdAt) }}
+        </span>
+
+        <template #popper>
+          <p text="xs">
+            {{ new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(props.snapshot.createdAt) }}
+          </p>
+        </template>
+      </Tooltip>
     </div>
 
     <div
@@ -146,7 +155,7 @@ const didFilesChange = computed(() => {
       :class="typeColors.line"
       pl-5 pb-3 ml-1
     >
-      <p font-bold class="text-foreground/70">
+      <p font-bold text-xs class="text-foreground/70">
         {{ props.snapshot.message }}
       </p>
 

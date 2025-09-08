@@ -125,6 +125,12 @@ export const useFileManagerStore = defineStore('file-manager', () => {
   }
 
   async function restoreSnapshot(snapshot: Snapshot): Promise<void> {
+    // save the current contents of the repl in a snapshot before updating the repl
+    await saveSnapshot({
+      type: 'auto',
+      message: 'Before a snapshot was restored',
+    });
+
     replStore.setFiles(snapshot.files);
   }
 
