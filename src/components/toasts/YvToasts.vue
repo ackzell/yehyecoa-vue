@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from 'vue';
-import { toast, useVueSonner } from 'vue-sonner';
+import { useToastsStore } from './useToastsStore';
 
-const { activeToasts } = useVueSonner();
+const { activeToasts, toast } = useToastsStore();
 
 // Store timeout data for each toast
-const toastTimers = ref(new Map<string | number, {
+const toastTimers = ref(new Map<string, {
   timeoutId: number;
   remainingTime: number;
   startTime: number;
@@ -41,7 +41,7 @@ function getToastClasses(type: string) {
   return classes[type as keyof typeof classes] || classes.info;
 }
 
-function handleToastClick(toastId: string | number) {
+function handleToastClick(toastId: string) {
   const timer = toastTimers.value.get(toastId);
   if (timer) {
     timer.stop();
@@ -50,7 +50,7 @@ function handleToastClick(toastId: string | number) {
   toast.dismiss(toastId);
 }
 
-function createAutoDissmiss(toastId: string | number, type: string, duration?: number) {
+function createAutoDissmiss(toastId: string, type: string, duration?: number) {
   // Check if toast should auto-dismiss
   const shouldAutoDismiss = duration !== Infinity && duration !== 0;
   if (!shouldAutoDismiss)
@@ -80,7 +80,7 @@ function createAutoDissmiss(toastId: string | number, type: string, duration?: n
   return timer;
 }
 
-function pauseAutoDissmiss(toastId: string | number) {
+function pauseAutoDissmiss(toastId: string) {
   const timer = toastTimers.value.get(toastId);
   if (timer) {
     // Clear the current timeout
@@ -94,7 +94,7 @@ function pauseAutoDissmiss(toastId: string | number) {
   }
 }
 
-function resumeAutoDissmiss(toastId: string | number) {
+function resumeAutoDissmiss(toastId: string) {
   const timer = toastTimers.value.get(toastId);
   if (timer && timer.remainingTime > 0) {
     // Create new timeout with remaining time
@@ -115,10 +115,10 @@ function resumeAutoDissmiss(toastId: string | number) {
 
 // Watch for changes in active toasts and manage timers
 watchEffect(() => {
-  const activeToastIds = new Set(activeToasts.value.map(t => t.id));
+  const activeToastIds = new Set(activeToasts.map(t => t.id));
 
   // Set up timers for new toasts
-  activeToasts.value.forEach((activeToast) => {
+  activeToasts.forEach((activeToast) => {
     if (!toastTimers.value.has(activeToast.id)) {
       createAutoDissmiss(
         activeToast.id,

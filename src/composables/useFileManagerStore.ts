@@ -1,8 +1,11 @@
 import type { Session, Snapshot } from '@/db';
+
 import { useStore } from '@vue/repl';
 import { acceptHMRUpdate, defineStore } from 'pinia';
+
 import { ref, watch } from 'vue';
-import { toast } from 'vue-sonner';
+
+import { useToastsStore } from '@/components/toasts/useToastsStore';
 
 import { sessions } from '@/db/sessions';
 import { snapshots } from '@/db/snapshots';
@@ -17,6 +20,8 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
   const sessionList = ref<Session[]>([]);
   const snapshotsList = ref<Snapshot[]>([]);
+
+  const { toast } = useToastsStore();
 
   initSession();
 
@@ -106,6 +111,7 @@ export const useFileManagerStore = defineStore('file-manager', () => {
         toast.success('Snapshot saved');
       }
       else {
+        // toast.info('Nothing new to save', { duration: Infinity });
         toast.info('Nothing new to save');
       }
     }
