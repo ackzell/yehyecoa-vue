@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const version = import.meta.env.PACKAGE_VERSION;
 </script>
 
 <template>
@@ -13,13 +14,21 @@
       h="var(--footer-height)"
       transition="background-color 0.2s ease"
     >
-      <slot name="begin">
-        <p text="xs ">
+      <div>
+        <slot name="begin">
+        <!-- <p text="xs ">
           {{ new Date().toLocaleString() }}
-        </p>
-      </slot>
-      <slot name="middle" />
-      <slot name="end" />
+        </p> -->
+        </slot>
+      </div>
+      <div>
+        <slot name="middle" />
+      </div>
+      <div>
+        <slot name="end">
+          <pre text="xs neutral/30" bg-transparent>yehyecoa-vue v{{ version }}</pre>
+        </slot>
+      </div>
     </div>
   </div>
 </template>
