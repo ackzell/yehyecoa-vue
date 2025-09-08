@@ -1,8 +1,17 @@
 <script lang="ts" setup>
-import { ref, watchEffect } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useToastsStore } from './useToastsStore';
 
+const props = defineProps<YvToastsProps>();
+
 const { activeToasts, toast } = useToastsStore();
+
+type YvToastsProps = {
+  /**
+   * Number of toasts visible by default
+   */
+  stackLimit?: number;
+};
 
 // Store timeout data for each toast
 const toastTimers = ref(new Map<string, {
@@ -13,7 +22,6 @@ const toastTimers = ref(new Map<string, {
   stop: () => void;
 }>());
 
-// Default durations for different toast types (in milliseconds)
 const defaultDurations = {
   success: 4000,
   error: 6000,
@@ -51,17 +59,14 @@ function handleToastClick(toastId: string) {
 }
 
 function createAutoDissmiss(toastId: string, type: string, duration?: number) {
-  // Check if toast should auto-dismiss
   const shouldAutoDismiss = duration !== Infinity && duration !== 0;
   if (!shouldAutoDismiss)
     return null;
 
-  // Get duration
   const autoDismissDelay = duration
     || defaultDurations[type as keyof typeof defaultDurations]
     || defaultDurations.info;
 
-  // Create timeout
   const startTime = Date.now();
   const timeoutId = window.setTimeout(() => {
     toast.dismiss(toastId);
@@ -83,13 +88,9 @@ function createAutoDissmiss(toastId: string, type: string, duration?: number) {
 function pauseAutoDissmiss(toastId: string) {
   const timer = toastTimers.value.get(toastId);
   if (timer) {
-    // Clear the current timeout
     clearTimeout(timer.timeoutId);
-
-    // Calculate remaining time
     const elapsed = Date.now() - timer.startTime;
     timer.remainingTime = Math.max(0, timer.originalDuration - elapsed);
-
     toastTimers.value.set(toastId, timer);
   }
 }
@@ -97,18 +98,13 @@ function pauseAutoDissmiss(toastId: string) {
 function resumeAutoDissmiss(toastId: string) {
   const timer = toastTimers.value.get(toastId);
   if (timer && timer.remainingTime > 0) {
-    // Create new timeout with remaining time
     timer.startTime = Date.now();
     timer.originalDuration = timer.remainingTime;
-
     timer.timeoutId = window.setTimeout(() => {
       toast.dismiss(toastId);
       toastTimers.value.delete(toastId);
     }, timer.remainingTime);
-
-    // Update the stop function to reference the new timeoutId
     timer.stop = () => clearTimeout(timer.timeoutId);
-
     toastTimers.value.set(toastId, timer);
   }
 }
@@ -117,7 +113,6 @@ function resumeAutoDissmiss(toastId: string) {
 watchEffect(() => {
   const activeToastIds = new Set(activeToasts.map(t => t.id));
 
-  // Set up timers for new toasts
   activeToasts.forEach((activeToast) => {
     if (!toastTimers.value.has(activeToast.id)) {
       createAutoDissmiss(
@@ -128,7 +123,6 @@ watchEffect(() => {
     }
   });
 
-  // Clean up timers for removed toasts
   Array.from(toastTimers.value.keys()).forEach((toastId) => {
     if (!activeToastIds.has(toastId)) {
       const timer = toastTimers.value.get(toastId);
@@ -139,18 +133,37 @@ watchEffect(() => {
     }
   });
 });
+
+// --- STACKING LOGIC ---
+const stackLimit = props.stackLimit || 4; // Number of toasts visible by default
+const isStackHovered = ref(false);
+
+const visibleToasts = computed(() => {
+  if (isStackHovered.value)
+    return activeToasts;
+  return activeToasts.slice(0, stackLimit);
+});
+
+const hiddenCount = computed(() => {
+  const count = activeToasts.length - stackLimit;
+  return count > 0 ? count : 0;
+});
 </script>
 
 <template>
   <div class="fixed top-0 left-0 right-0 z-[13] pointer-events-none">
-    <div class="flex flex-col items-center gap-2 p-4 pt-[55px]">
+    <div
+      class="flex flex-col items-center gap-2 p-4 pt-[55px]"
+      @mouseenter="isStackHovered = true"
+      @mouseleave="isStackHovered = false"
+    >
       <TransitionGroup
         name="toast"
         tag="div"
         class="flex flex-col items-center gap-2"
       >
         <div
-          v-for="activeToast in activeToasts"
+          v-for="activeToast in visibleToasts"
           :key="activeToast.id"
           sc-toast-base bg="opacity-90 background"
           flex="~ items-center gap-3"
@@ -162,13 +175,10 @@ watchEffect(() => {
           @mouseenter="pauseAutoDissmiss(activeToast.id)"
           @mouseleave="resumeAutoDissmiss(activeToast.id)"
         >
-          <!-- Icon -->
           <span
             class="inline-block text-sm align-middle"
             :class="getToastIcon(activeToast.type || 'info')"
           />
-
-          <!-- Content -->
           <div class="flex-1">
             <div v-if="activeToast.title" class="font-medium">
               {{ activeToast.title }}
@@ -183,6 +193,13 @@ watchEffect(() => {
           </div>
         </div>
       </TransitionGroup>
+
+      <div
+        v-if="hiddenCount > 0 && !isStackHovered"
+        class="text-xs cursor-pointer text-neutral dark:text-neutral-400/90"
+      >
+        +{{ hiddenCount }} more
+      </div>
     </div>
   </div>
 </template>

@@ -1,11 +1,29 @@
 <script setup lang="ts">
+import { useVirtualList } from '@vueuse/core';
 import { AnimatePresence, LayoutGroup, motion } from 'motion-v';
+import { computed, ref } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
-import ScrollArea from '../ui/scroll-area/ScrollArea.vue';
 import YvSessionSelector from '../YvVersioningDrawer/YvSessionSelector.vue';
 import YvSnapshot from '../YvVersioningDrawer/YvSnapshot.vue';
 
 const fm = useFileManagerStore();
+
+const computedList = computed(() => fm.snapshotsList);
+
+const { list, containerProps, wrapperProps } = useVirtualList(computedList, {
+  itemHeight: 112, // h-28 added to the snapshot component
+});
+
+const isScrolling = ref(false);
+let scrollTimeout: number;
+
+function handleScroll() {
+  isScrolling.value = true;
+  clearTimeout(scrollTimeout);
+  scrollTimeout = window.setTimeout(() => {
+    isScrolling.value = false;
+  }, 100);
+}
 </script>
 
 <template>
@@ -50,19 +68,26 @@ const fm = useFileManagerStore();
             No snapshots saved in this session
           </div>
 
-          <ScrollArea v-else flex="~ grow-1" h-full>
-            <ul mb-8>
+          <div
+            v-else
+            v-bind="containerProps"
+            class="p-2 overflow-auto" flex="~ grow-1"
+            h-full
+            @scroll="handleScroll"
+          >
+            <ul v-bind="wrapperProps" mb-8>
               <LayoutGroup>
                 <AnimatePresence mode="popLayout">
                   <YvSnapshot
-                    v-for="(snapshot) in fm.snapshotsList"
+                    v-for="({ data: snapshot }) in list"
                     :key="snapshot.id"
                     :snapshot="snapshot"
+                    :disable-animation="isScrolling"
                   />
                 </AnimatePresence>
               </LayoutGroup>
             </ul>
-          </ScrollArea>
+          </div>
         </div>
       </motion.div>
     </motion.div>

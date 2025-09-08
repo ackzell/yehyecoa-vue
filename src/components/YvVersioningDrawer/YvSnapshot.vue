@@ -16,6 +16,7 @@ import YvButton from './YvButton.vue';
 
 type YVTimelineEntryProps = {
   snapshot: Snapshot;
+  disableAnimation?: boolean;
 };
 
 type TypeColorConfig = {
@@ -65,7 +66,8 @@ const didFilesChange = computed(() => {
     :initial="{ opacity: 0, scale: 0 }"
     :animate="{ opacity: 1, scale: 1 }"
     :exit="{ opacity: 0, scale: 0 }"
-    px-4 layout
+    :transition="props.disableAnimation ? { duration: 0 } : { duration: 0.25, ease: 'easeOut' }"
+    px-4 layout h-28
     class="group/snapshot hover-bg-accent/60 dark:hover-bg-accent/10"
   >
     <div flex="~ items-center justify-between" mb-1>
@@ -218,16 +220,16 @@ const didFilesChange = computed(() => {
 }
 
 .dark .v-popper--theme-diff-card .v-popper__inner {
-  border: var(--colors-neutral-600);
+  border: var(--colors-neutral-600) !important;;
 }
 
 .dark .v-popper--theme-diff-card .v-popper__arrow-outer {
-  border-color: var(--colors-neutral-600);
+  border-color: var(--colors-neutral-600) !important;;
 
 }
 
 .dark .v-popper--theme-diff-card .v-popper__arrow-inner {
-  border-color: var(--colors-neutral-600);
+  border-color: var(--colors-neutral-600) !important;;
 
 }
 </style>

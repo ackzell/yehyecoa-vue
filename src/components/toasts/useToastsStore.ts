@@ -1,22 +1,7 @@
-import type { Ref } from 'vue';
-
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { reactive } from 'vue';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
-
-type ToastsStore = {
-  activeToasts: Ref<Toast[]>;
-
-  toast: {
-    success: (title: string, toast?: Omit<Partial<Toast>, 'id'>) => string;
-    error: (title: string, toast?: Omit<Partial<Toast>, 'id'>) => string;
-    warning: (title: string, toast?: Omit<Partial<Toast>, 'id'>) => string;
-    info: (title: string, toast?: Omit<Partial<Toast>, 'id'>) => string;
-
-    dismiss: (id: string) => void;
-  };
-};
 
 type Toast = {
   id: string;
@@ -33,19 +18,23 @@ const defaultToast: Omit<Toast, 'id'> = {
   duration: 4000,
 };
 
-export const useToastsStore = defineStore<'toastStore', ToastsStore>('toastStore', (): ToastsStore => {
-  const activeToasts = ref<Toast[]>([]);
+export const useToastsStore = defineStore('toastStore', () => {
+  const activeToasts = reactive<Toast[]>([]);
 
   function addToast(toast: Omit<Partial<Toast>, 'id'>): string {
     const id = crypto.randomUUID().slice(0, 8);
-    activeToasts.value.push({ id, ...defaultToast, ...toast });
+    activeToasts.push({ id, ...defaultToast, ...toast });
     return id;
   };
 
   function dismiss(id: string): void {
-    const index = activeToasts.value.findIndex(t => t.id === id);
+    const index = activeToasts.findIndex(t => t.id === id);
     if (index > -1)
-      activeToasts.value.splice(index, 1);
+      activeToasts.splice(index, 1);
+  };
+
+  function dismissAll(): void {
+    activeToasts.splice(0);
   };
 
   function success(title: string, toast?: Omit<Partial<Toast>, 'id'>): string {
@@ -73,6 +62,8 @@ export const useToastsStore = defineStore<'toastStore', ToastsStore>('toastStore
       info,
       warning,
       dismiss,
+      dismissAll,
     },
+
   };
 });

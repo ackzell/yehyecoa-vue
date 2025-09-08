@@ -5,7 +5,6 @@ import YvToasts from './components/toasts/YvToasts.vue';
 import YvFooter from './components/YvFooter.vue';
 import YvRepl from './components/YvRepl.vue';
 import YvSidebar from './components/YvSidebar/YvSidebar.vue';
-import 'vue-sonner/style.css'; // vue-sonner v2 requires this import
 import '@vue/repl/style.css';
 
 function setVH() {
@@ -19,7 +18,7 @@ setVH();
 <template>
   <!-- <Drawer v-model:open="isDo" :default-open="true" direction="right"> -->
   <main class="repl-container" font-sans text-primary vaul-drawer-wrapper>
-    <YvToasts />
+    <YvToasts :stack-limit="4" />
     <YVHeader />
     <YvSidebar>
       <YvRepl />
