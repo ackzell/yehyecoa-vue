@@ -4,13 +4,16 @@ import Monaco from '@vue/repl/monaco-editor';
 import { useIntervalFn } from '@vueuse/core';
 // import CodeMirror from '@vue/repl/codemirror-editor';
 
+import { watch } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
+import { usePartyKitBroadcast } from '@/composables/usePartyKit';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
 const AUTO_SAVE_INTERVAL_MINUTES = 10 * 60 * 1000;
 
 const { settings } = useSettingsStore();
 const fm = useFileManagerStore();
+const pkb = usePartyKitBroadcast();
 
 useIntervalFn(() => {
   fm.saveSnapshot({
@@ -18,6 +21,24 @@ useIntervalFn(() => {
     message: 'Auto saved',
   });
 }, AUTO_SAVE_INTERVAL_MINUTES);
+
+const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
+
+console.log('isInstructor', isInstructor);
+if (isInstructor) {
+  console.warn('INSTRUCTOR, THIS SHOULD BE SENDING MESSAGES');
+
+  watch(() => fm.replStore.files, () => {
+    console.log('Files changed', fm.replStore.activeFile.code);
+
+    pkb.send({
+      code: fm.replStore.activeFile.code,
+    });
+  }, {
+    deep: true,
+    immediate: true,
+  });
+}
 </script>
 
 <template>
@@ -38,10 +59,10 @@ useIntervalFn(() => {
       :layout="settings.layout"
       :editor-options="{
         autoSaveText: false,
+        showErrorText: false,
       }"
       :preview-theme="true"
       :store="fm.replStore"
-      @update:model-value="() => { console.log('updated the contents of the editor in the repl') }"
     />
   </div>
 </template>
