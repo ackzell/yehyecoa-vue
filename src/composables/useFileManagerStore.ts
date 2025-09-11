@@ -31,12 +31,13 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
   if (!isInstructor) {
     console.warn('ATTENDEEE, SHOULD BE RECEIVING MESSAGES');
-    watch(pkb.lastMessage, (newVal) => {
-      if (newVal) {
-        replStore.setFiles({
-          'App.vue': newVal.code,
-        });
+    watch(pkb.lastMessage, (msg) => {
+      if (msg?.from === 'instructor' && msg.files) {
+        // console.log('should be setting files', msg.files);
+        replStore.setFiles(msg.files);
       }
+    }, {
+      deep: true,
     });
   }
 

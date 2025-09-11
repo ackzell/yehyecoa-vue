@@ -1,7 +1,7 @@
 import type { Ref } from 'vue';
 
 import PartySocket from 'partysocket';
-import { onBeforeMount, onUnmounted, ref } from 'vue';
+import { onBeforeMount, onUnmounted, readonly, ref } from 'vue';
 
 type PartyBroadcast = {
   isConnected: Ref<boolean>;
@@ -14,11 +14,15 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
 
   const isConnected = ref(false);
   const lastMessage = ref<any | null>(null);
+  const id = sessionStorage.getItem('isInstructor') === 'yes'
+    ? 'instructor'
+    : `attendee-${crypto.randomUUID().slice(0, 8)}`;
 
   onBeforeMount(() => {
     connection = new PartySocket({
       host: 'https://party-kit.ackzell.partykit.dev',
       room,
+      id,
     });
 
     connection.addEventListener('open', () => {
@@ -26,6 +30,7 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
     });
 
     connection.addEventListener('message', (event) => {
+      console.log('message', event.data);
       lastMessage.value = JSON.parse(event.data);
     });
 
@@ -42,5 +47,9 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
     connection?.send(JSON.stringify(data));
   }
 
-  return { isConnected, lastMessage, send };
+  return {
+    isConnected: readonly(isConnected),
+    lastMessage,
+    send,
+  };
 }

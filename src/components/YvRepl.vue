@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Repl } from '@vue/repl';
 import Monaco from '@vue/repl/monaco-editor';
-import { useIntervalFn } from '@vueuse/core';
+import { useIntervalFn, watchDebounced } from '@vueuse/core';
 // import CodeMirror from '@vue/repl/codemirror-editor';
 
-import { watch } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { usePartyKitBroadcast } from '@/composables/usePartyKit';
 import { useSettingsStore } from '@/composables/useSettingsStore';
@@ -28,16 +27,20 @@ console.log('isInstructor', isInstructor);
 if (isInstructor) {
   console.warn('INSTRUCTOR, THIS SHOULD BE SENDING MESSAGES');
 
-  watch(() => fm.replStore.files, () => {
-    console.log('Files changed', fm.replStore.activeFile.code);
-
-    pkb.send({
-      code: fm.replStore.activeFile.code,
-    });
-  }, {
-    deep: true,
-    immediate: true,
-  });
+  // 0ms debounce for now
+  // the REPL already debounces its own changes
+  // but if it becomes an issue, we can bump up the time here
+  watchDebounced(
+    () => fm.replStore.getFiles(),
+    () => {
+      pkb.send({
+        id: 'instructor',
+        type: 'repl-update',
+        files: fm.replStore.getFiles(),
+      });
+    },
+    { debounce: 0, deep: true },
+  );
 }
 </script>
 
