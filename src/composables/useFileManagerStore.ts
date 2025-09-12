@@ -1,15 +1,11 @@
 import type { Session, Snapshot } from '@/db';
-
-import { useStore } from '@vue/repl';
+import { useStore } from '@calmecac-vue/repl';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-
 import { ref, watch } from 'vue';
 
 import { useToastsStore } from '@/components/toasts/useToastsStore';
-
 import { sessions } from '@/db/sessions';
 import { snapshots } from '@/db/snapshots';
-import { usePartyKitBroadcast } from './usePartyKit';
 
 // const IGNORE_FILES = ['tsconfig.json', 'import-map.json'];
 
@@ -23,23 +19,7 @@ export const useFileManagerStore = defineStore('file-manager', () => {
 
   const { toast } = useToastsStore();
 
-  const pkb = usePartyKitBroadcast();
-
   initSession();
-
-  const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
-
-  if (!isInstructor) {
-    console.warn('ATTENDEEE, SHOULD BE RECEIVING MESSAGES');
-    watch(pkb.lastMessage, (msg) => {
-      if (msg?.from === 'instructor' && msg.files) {
-        // console.log('should be setting files', msg.files);
-        replStore.setFiles(msg.files);
-      }
-    }, {
-      deep: true,
-    });
-  }
 
   async function initSession(): Promise<void> {
     const eventSource = new EventSource('/events');

@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.1.0-beta",
   "private": true,
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.15.1",
   "engines": {
     "node": ">=24.5.0"
   },
@@ -22,10 +22,10 @@
     "serve": "node dist/server.js"
   },
   "dependencies": {
+    "@calmecac-vue/repl": "file:~/projects/calmecac-vue/vue-repl",
     "@iconify-json/carbon": "^1.2.13",
     "@iconify-json/mynaui": "^1.2.16",
     "@unocss/reset": "^66.4.2",
-    "@vue/repl": "^4.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dexie": "^4.2.0",
@@ -55,6 +55,8 @@
     "floating-vue": "^5.2.2",
     "glob": "^11.0.3",
     "jiti": "^2.4.2",
+    "monaco-editor": "^0.53.0",
+    "monaco-editor-core": "^0.53.0",
     "motion-v": "^1.7.1",
     "npm-run-all2": "^8.0.4",
     "prettier": "3.6.2",
