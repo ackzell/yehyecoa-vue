@@ -22,7 +22,7 @@
     "serve": "node dist/server.js"
   },
   "dependencies": {
-    "@calmecac-vue/repl": "file:~/projects/calmecac-vue/vue-repl",
+    "@calmecac-vue/repl": "workspace:*",
     "@iconify-json/carbon": "^1.2.13",
     "@iconify-json/mynaui": "^1.2.16",
     "@unocss/reset": "^66.4.2",
