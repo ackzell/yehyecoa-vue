@@ -28,3 +28,6 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+packages/vue-repl/
+packages/party-kit/
