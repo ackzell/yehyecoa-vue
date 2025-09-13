@@ -56,7 +56,10 @@ function handleScroll() {
           ease: 'easeOut',
         }"
       >
-        <div p-4 shadow-md bg="background dark:dark-900">
+        <div
+          p-4 shadow-md bg-background
+          dark="shadow-black bg-dark-900"
+        >
           <YvSessionSelector />
         </div>
 

@@ -75,6 +75,9 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "v-code-diff"
-    ]
+    ],
+    "overrides": {
+      "monaco-editor-core": "0.53.0"
+    }
   }
 }

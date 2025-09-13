@@ -1,3 +1,5 @@
+import type { editor } from 'monaco-editor-core';
+
 import type { Session, Snapshot } from '@/db';
 import { useStore } from '@calmecac-vue/repl';
 import { acceptHMRUpdate, defineStore } from 'pinia';
@@ -11,7 +13,7 @@ import { snapshots } from '@/db/snapshots';
 
 export const useFileManagerStore = defineStore('file-manager', () => {
   const currentSession = ref<Session>();
-  const replStore = useStore();
+  const replStore = useStore<editor.IStandaloneCodeEditor>();
   const isDrawerOpen = ref(false);
 
   const sessionList = ref<Session[]>([]);

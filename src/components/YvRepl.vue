@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Repl } from '@calmecac-vue/repl';
 import Monaco from '@calmecac-vue/repl/monaco-editor';
-import { useIntervalFn, watchDebounced } from '@vueuse/core';
+import { useDebounceFn, useIntervalFn, watchDebounced } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, watch } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { usePartyKitBroadcast } from '@/composables/usePartyKit';
 import { useSettingsStore } from '@/composables/useSettingsStore';
@@ -14,6 +14,17 @@ const { settings } = useSettingsStore();
 const fm = useFileManagerStore();
 const pkb = usePartyKitBroadcast();
 
+type PartyKitMessage = {
+  type: 'repl-update' | 'system';
+  id: string;
+  payload: {
+    selections?: MonacoCore.Selection[];
+    scrollTop?: number;
+    scrollLeft?: number;
+    files?: Record<string, string>;
+  };
+};
+
 useIntervalFn(() => {
   fm.saveSnapshot({
     type: 'auto',
@@ -23,7 +34,12 @@ useIntervalFn(() => {
 
 onMounted(() => {
   const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
-  const editor = fm.replStore.editor as MonacoCore.editor.IStandaloneCodeEditor;
+  const editor = fm.replStore.editor;
+
+  if (!editor) {
+    console.error('REPL editor instance not found.');
+    return;
+  }
 
   editor.addCommand(MonacoCore.KeyMod.CtrlCmd | MonacoCore.KeyCode.KeyS, () => {
     fm.saveSnapshot({
@@ -35,33 +51,37 @@ onMounted(() => {
   console.log('isInstructor', isInstructor);
   if (isInstructor) {
     console.warn('INSTRUCTOR, THIS SHOULD BE SENDING MESSAGES');
+    // Send selection changes immediately
+    editor.onDidChangeCursorSelection(() => {
+      pkb.send({
+        id: 'instructor',
+        type: 'repl-update',
+        payload: { selections: editor.getSelections() },
+      });
+    });
 
-    const editor = fm.replStore.editor as MonacoCore.editor.IStandaloneCodeEditor;
+    // Send scroll changes, debounced to avoid flooding
+    const sendScrollUpdate = useDebounceFn(() => {
+      pkb.send({
+        id: 'instructor',
+        type: 'repl-update',
+        payload: {
+          scrollTop: editor.getScrollTop(),
+          scrollLeft: editor.getScrollLeft(),
+        },
+      });
+    }, 100);
+    editor.onDidScrollChange(sendScrollUpdate);
 
-    // editor.onDidChangeCursorSelection(() => {
-    //   const state = {
-    //     files: fm.replStore.getFiles(),
-    //     activeFile: fm.replStore.activeFile,
-    //     selections: editor.getSelections(),
-    //     viewState: editor.saveViewState(), // includes scroll & cursor
-    //   };
-
-    //   pkb.send({
-    //     id: 'instructor',
-    //     type: 'repl-update',
-    //     payload: state,
-    //   });
-    // });
-
-    // // 0ms debounce for now
-    // // the REPL already debounces its own changes
-    // // but if it becomes an issue, we can bump up the time here
+    // Send file content changes
     watchDebounced(
       () => fm.replStore.getFiles(),
-      () => {
+      (files) => {
         const payload = {
-          files: fm.replStore.getFiles(),
+          files,
           selections: editor.getSelections(),
+          scrollTop: editor.getScrollTop(),
+          scrollLeft: editor.getScrollLeft(),
         };
 
         console.warn('INSTRUCTOR, sending repl-update', payload);
@@ -76,54 +96,59 @@ onMounted(() => {
   }
   else {
     console.warn('ATTENDEE, receiving instructor updates...');
-
-    const newPosition = ref<MonacoCore.IPosition | null>(null);
-
-    pkb.onMessage((message) => {
-      console.warn('Received message', message);
-
-      if (message.type === 'repl-update') {
-        const firstSelection = message.payload.selections?.[0];
-        newPosition.value = firstSelection
-          ? { lineNumber: firstSelection.positionLineNumber, column: firstSelection.positionColumn }
-          : { lineNumber: 1, column: 1 }; // Fallback to top of file
-
-        // This is the declarative update. It will trigger the watcher below.
-        fm.replStore.setFiles(message.payload.files);
-      }
-    });
-
-    // This watcher waits for the active file's code to be updated in the store.
-    // This is a more reliable signal that the declarative part of the update is in progress.
-    watch(() => fm.replStore.activeFile.code, () => {
-      if (!newPosition.value)
+    pkb.onMessage((message: PartyKitMessage) => {
+      if (message.type !== 'repl-update')
         return;
 
-      const positionToApply = newPosition.value;
-      newPosition.value = null; // Reset to avoid re-applying
+      console.warn('Received message', message);
+      const { files, selections, scrollTop, scrollLeft } = message.payload;
 
-      // We still need to wait for the editor component to react to the code change
-      // and update its internal state. `nextTick` waits for the DOM update queue
-      // to flush, which is a good point to run imperative commands.
-      nextTick(() => {
-        const editor = fm.replStore.editor as MonacoCore.editor.IStandaloneCodeEditor;
-        if (!editor || !editor.getModel())
+      const applyImperativeUpdates = () => {
+        if (!editor?.getModel())
           return;
 
-        editor.setPosition(positionToApply);
-        editor.focus();
-      });
+        if (selections) {
+          // Re-hydrate the selections into Monaco Selection objects, as they lose their methods during serialization
+          const monacoSelections = selections.map(
+            s =>
+              new MonacoCore.Selection(
+                s.selectionStartLineNumber,
+                s.selectionStartColumn,
+                s.positionLineNumber,
+                s.positionColumn,
+              ),
+          );
+          editor.setSelections(monacoSelections);
+          // Reveal the primary cursor if it's off-screen
+          if (monacoSelections.length > 0)
+            editor.revealPositionInCenterIfOutsideViewport(monacoSelections[0].getStartPosition());
+          editor.focus();
+        }
+        if (typeof scrollTop === 'number')
+          editor.setScrollTop(scrollTop);
+
+        if (typeof scrollLeft === 'number')
+          editor.setScrollLeft(scrollLeft);
+      };
+
+      if (files) {
+        // Files changed, this is a declarative update.
+        // We must wait for the editor to process the new file content
+        // before applying imperative updates like selections and scroll.
+        const unwatch = watch(() => fm.replStore.activeFile.code, () => {
+          nextTick(() => {
+            applyImperativeUpdates();
+            unwatch(); // This was a one-time watcher
+          });
+        });
+        fm.replStore.setFiles(files);
+      }
+      else {
+        // No file changes, just apply imperative updates.
+        applyImperativeUpdates();
+      }
     });
   }
-
-  // editor.onDidChangeCursorSelection(() => {
-  //   pkb.send({
-  //     id: 'instructor',
-  //     type: 'repl-update',
-  //     files: fm.replStore.getFiles(),
-  //     selections: editor.getSelections(),
-  //   });
-  // });
 });
 </script>
 
