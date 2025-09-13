@@ -3,7 +3,7 @@ import { Repl } from '@calmecac-vue/repl';
 import Monaco from '@calmecac-vue/repl/monaco-editor';
 import { useDebounceFn, useIntervalFn, watchDebounced } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
-import { nextTick, onMounted, watch } from 'vue';
+import { nextTick, onMounted } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { usePartyKitBroadcast } from '@/composables/usePartyKit';
 import { useSettingsStore } from '@/composables/useSettingsStore';
@@ -18,10 +18,12 @@ type PartyKitMessage = {
   type: 'repl-update' | 'system';
   id: string;
   payload: {
+    activeFile?: string;
     selections?: MonacoCore.Selection[];
     scrollTop?: number;
     scrollLeft?: number;
     files?: Record<string, string>;
+    fileOrder?: string[];
   };
 };
 
@@ -51,12 +53,16 @@ onMounted(() => {
   console.log('isInstructor', isInstructor);
   if (isInstructor) {
     console.warn('INSTRUCTOR, THIS SHOULD BE SENDING MESSAGES');
+
     // Send selection changes immediately
     editor.onDidChangeCursorSelection(() => {
       pkb.send({
         id: 'instructor',
         type: 'repl-update',
-        payload: { selections: editor.getSelections() },
+        payload: {
+          selections: editor.getSelections(),
+          activeFile: fm.replStore.activeFile?.filename,
+        },
       });
     });
 
@@ -68,6 +74,7 @@ onMounted(() => {
         payload: {
           scrollTop: editor.getScrollTop(),
           scrollLeft: editor.getScrollLeft(),
+          activeFile: fm.replStore.activeFile?.filename,
         },
       });
     }, 100);
@@ -79,6 +86,8 @@ onMounted(() => {
       (files) => {
         const payload = {
           files,
+          fileOrder: Object.keys(files),
+          activeFile: fm.replStore.activeFile?.filename,
           selections: editor.getSelections(),
           scrollTop: editor.getScrollTop(),
           scrollLeft: editor.getScrollLeft(),
@@ -91,17 +100,24 @@ onMounted(() => {
           payload,
         });
       },
-      { debounce: 0, deep: true },
+      { debounce: 50, deep: true },
     );
   }
   else {
     console.warn('ATTENDEE, receiving instructor updates...');
-    pkb.onMessage((message: PartyKitMessage) => {
+    pkb.onMessage(async (message: PartyKitMessage) => {
       if (message.type !== 'repl-update')
         return;
 
       console.warn('Received message', message);
-      const { files, selections, scrollTop, scrollLeft } = message.payload;
+      const {
+        files,
+        selections,
+        scrollTop,
+        scrollLeft,
+        activeFile,
+        fileOrder,
+      } = message.payload;
 
       const applyImperativeUpdates = () => {
         if (!editor?.getModel())
@@ -131,20 +147,48 @@ onMounted(() => {
           editor.setScrollLeft(scrollLeft);
       };
 
+      // If file content is changing, it's a major update that might reset the active file.
       if (files) {
-        // Files changed, this is a declarative update.
-        // We must wait for the editor to process the new file content
-        // before applying imperative updates like selections and scroll.
-        const unwatch = watch(() => fm.replStore.activeFile.code, () => {
-          nextTick(() => {
-            applyImperativeUpdates();
-            unwatch(); // This was a one-time watcher
-          });
-        });
-        fm.replStore.setFiles(files);
+        let filesToSet = files;
+        // If an explicit file order is provided, reconstruct the files object
+        // to ensure the REPL store processes them in that order. Modern JS engines
+        // preserve property insertion order, which the REPL's `for...in` loop will respect.
+        if (fileOrder) {
+          const orderedFiles: Record<string, string> = {};
+          for (const filename of fileOrder) {
+            // Make sure the file exists in the payload
+            if (files[filename] !== undefined) {
+              orderedFiles[filename] = files[filename];
+            }
+          }
+          // Add any files from the payload that weren't in the order array, just in case.
+          for (const filename in files) {
+            if (orderedFiles[filename] === undefined) {
+              orderedFiles[filename] = files[filename];
+            }
+          }
+          filesToSet = orderedFiles;
+        }
+
+        // 1. Set the files. This is an async operation. Awaiting it ensures the
+        //    REPL store is ready before we proceed. We do NOT pass activeFile here,
+        //    as that would force it to be the first tab.
+        await fm.replStore.setFiles(filesToSet);
+        // 2. Now that the files are set in the correct order, set the active tab.
+        if (activeFile)
+          fm.replStore.setActive(activeFile);
+        // Use nextTick as a final safeguard to run after any Vue-related DOM updates.
+        nextTick(applyImperativeUpdates);
       }
+      // If no file content change, but the active file is out of sync (e.g., from a cursor-only message).
+      else if (activeFile && fm.replStore.activeFile?.filename !== activeFile) {
+        fm.replStore.setActive(activeFile);
+
+        // Wait for the tab switch to render before applying updates.
+        nextTick(applyImperativeUpdates);
+      }
+      // Otherwise, it's just a simple cursor/scroll update for the current file.
       else {
-        // No file changes, just apply imperative updates.
         applyImperativeUpdates();
       }
     });
