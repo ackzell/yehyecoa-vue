@@ -86,7 +86,11 @@ export function useReplSync(): void {
             payload,
           });
         },
-        { debounce: 50, deep: true },
+        {
+          debounce: 50,
+          deep: true,
+          immediate: true,
+        },
       );
     }
     else {
