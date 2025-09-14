@@ -2,7 +2,7 @@ import FloatingVue from 'floating-vue';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 import App from './App.vue';
-import './monaco-workers';
+
 
 import 'floating-vue/dist/style.css';
 import 'virtual:uno.css';

@@ -143,7 +143,7 @@ export function useReplSync(): void {
         // confirm the switch before applying selections/scroll. `nextTick` is not
         // sufficient because Monaco's model change is asynchronous.
         if (willTabChange) {
-          const disposable = editor.onDidChangeModel((e) => {
+          const disposable = editor.onDidChangeModel((e: any) => {
             if (e.newModelUrl?.path === `/${activeFile}`) {
               console.log(`[yv-sync] Editor model switched to ${activeFile}. Applying imperative updates.`);
               nextTick(applyImperativeUpdates);
