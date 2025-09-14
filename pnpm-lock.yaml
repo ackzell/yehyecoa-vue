@@ -35,6 +35,12 @@ importers:
       lucide-vue-next:
         specifier: ^0.541.0
         version: 0.541.0(vue@3.5.18(typescript@5.8.3))
+      monaco-editor:
+        specifier: ^0.53.0
+        version: 0.53.0
+      monaco-editor-core:
+        specifier: 0.53.0
+        version: 0.53.0
       partysocket:
         specifier: ^1.1.5
         version: 1.1.5
@@ -105,12 +111,6 @@ importers:
       jiti:
         specifier: ^2.4.2
         version: 2.5.1
-      monaco-editor:
-        specifier: ^0.53.0
-        version: 0.53.0
-      monaco-editor-core:
-        specifier: 0.53.0
-        version: 0.53.0
       motion-v:
         specifier: ^1.7.1
         version: 1.7.1(@vueuse/core@13.7.0(vue@3.5.18(typescript@5.8.3)))(vue@3.5.18(typescript@5.8.3))

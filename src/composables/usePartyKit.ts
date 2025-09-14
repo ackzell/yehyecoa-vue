@@ -25,8 +25,8 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
 
   onBeforeMount(() => {
     connection = new PartySocket({
-      host: 'https://party-kit.ackzell.partykit.dev',
-      // host: 'http://127.0.0.1:1999',
+      // host: 'https://party-kit.ackzell.partykit.dev',
+      host: 'http://127.0.0.1:1999',
       room,
       id,
     });
