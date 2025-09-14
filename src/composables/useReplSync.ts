@@ -133,6 +133,21 @@ export function useReplSync(): void {
             editor.setScrollLeft(scrollLeft);
         };
 
+        const willTabChange = activeFile && fm.replStore.activeFile?.filename !== activeFile;
+
+        // If the active tab is going to change, we must listen for the editor to
+        // confirm the switch before applying selections/scroll. `nextTick` is not
+        // sufficient because Monaco's model change is asynchronous.
+        if (willTabChange) {
+          const disposable = editor.onDidChangeModel((e) => {
+            if (e.newModelUrl?.path === `/${activeFile}`) {
+              console.log(`[yv-sync] Editor model switched to ${activeFile}. Applying imperative updates.`);
+              nextTick(applyImperativeUpdates);
+              disposable.dispose();
+            }
+          });
+        }
+
         // If file content is changing, it's a major update that might reset the active file.
         if (files) {
           let filesToSet = files;
@@ -156,25 +171,35 @@ export function useReplSync(): void {
             filesToSet = orderedFiles;
           }
 
-          // 1. Set the files. This is an async operation. Awaiting it ensures the
-          //    REPL store is ready before we proceed. We do NOT pass activeFile here,
-          //    as that would force it to be the first tab.
-          await fm.replStore.setFiles(filesToSet);
-          // 2. Now that the files are set in the correct order, set the active tab.
+          // 1. Atomically update files and active file to prevent a race condition.
+          // First, set active file to a non-existent name. This makes the `activeFile`
+          // computed property become `undefined`, preventing Monaco from trying to
+          // switch to a stale model when `setFiles` is called.
+          fm.replStore.setActive(`__temp_file_for_sync__.vue`);
+
+          // 2. Set the new file content without auto-activating.
+          await fm.replStore.setFiles(filesToSet, undefined, false);
+
+          // 3. Now, make the single, definitive call to set the correct active file.
+          // This will trigger the watcher in the Editor once, causing a clean model switch.
           if (activeFile)
             fm.replStore.setActive(activeFile);
-          // Use nextTick as a final safeguard to run after any Vue-related DOM updates.
-          nextTick(applyImperativeUpdates);
+
+          // The onDidChangeModel listener will handle applying imperative updates.
+          if (!willTabChange)
+            nextTick(applyImperativeUpdates);
         }
         // If no file content change, but the active file is out of sync (e.g., from a cursor-only message).
         else if (activeFile && fm.replStore.activeFile?.filename !== activeFile) {
           fm.replStore.setActive(activeFile);
 
           // Wait for the tab switch to render before applying updates.
-          nextTick(applyImperativeUpdates);
+          // The onDidChangeModel listener will handle applying imperative updates.
+          if (!willTabChange)
+            nextTick(applyImperativeUpdates);
         }
-        // Otherwise, it's just a simple cursor/scroll update for the current file.
         else {
+          // No file or tab change, just a cursor/scroll update on the current file.
           applyImperativeUpdates();
         }
       });
