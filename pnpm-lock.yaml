@@ -102,6 +102,9 @@ importers:
       eslint-plugin-vue:
         specifier: ~10.3.0
         version: 10.3.0(@typescript-eslint/parser@8.40.0(eslint@9.33.0(jiti@2.5.1))(typescript@5.8.3))(eslint@9.33.0(jiti@2.5.1))(vue-eslint-parser@10.2.0(eslint@9.33.0(jiti@2.5.1)))
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       floating-vue:
         specifier: ^5.2.2
         version: 5.2.2(@nuxt/kit@3.18.1(magicast@0.3.5))(vue@3.5.18(typescript@5.8.3))
@@ -160,6 +163,9 @@ importers:
         specifier: ^1.0.2
         version: 1.1.5
     devDependencies:
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       partykit:
         specifier: ^0.0.110
         version: 0.0.110

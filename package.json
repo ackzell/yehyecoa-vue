@@ -54,6 +54,7 @@
     "@vueuse/rxjs": "^13.7.0",
     "eslint": "^9.31.0",
     "eslint-plugin-vue": "~10.3.0",
+    "fflate": "^0.8.2",
     "floating-vue": "^5.2.2",
     "glob": "^11.0.3",
     "jiti": "^2.4.2",

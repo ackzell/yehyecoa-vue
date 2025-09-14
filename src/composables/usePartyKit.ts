@@ -1,5 +1,6 @@
 import type { Ref } from 'vue';
 
+import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate';
 import PartySocket from 'partysocket';
 import { onBeforeMount, onUnmounted, readonly, ref } from 'vue';
 
@@ -35,8 +36,36 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
       isConnected.value = true;
     });
 
-    connection.addEventListener('message', (event) => {
-      const message = JSON.parse(event.data);
+    connection.addEventListener('message', async (event) => {
+      let message: any;
+
+      try {
+        if (event.data instanceof ArrayBuffer) {
+          const decompressed = decompressSync(new Uint8Array(event.data));
+          const jsonString = strFromU8(decompressed);
+          message = JSON.parse(jsonString);
+        }
+        else if (event.data instanceof Blob) {
+          // The server broadcasts binary data, which can be received as a Blob
+          const buffer = await event.data.arrayBuffer();
+          const decompressed = decompressSync(new Uint8Array(buffer));
+          const jsonString = strFromU8(decompressed);
+          message = JSON.parse(jsonString);
+        }
+        else if (typeof event.data === 'string') {
+          // Fallback for non-compressed string messages
+          message = JSON.parse(event.data);
+        }
+        else {
+          console.warn('Received message of unknown type:', event.data);
+          return;
+        }
+      }
+      catch (error) {
+        console.error('Failed to process incoming message:', error, 'Raw data:', event.data);
+        return;
+      }
+
       console.log('message', message);
 
       // Update lastMessage for backward compatibility
@@ -64,7 +93,17 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
   });
 
   function send(data: any): void {
-    connection?.send(JSON.stringify(data));
+    try {
+      const jsonString = JSON.stringify(data);
+      const payload = strToU8(jsonString);
+      // Using fflate to compress the payload.
+      // This returns a Uint8Array, which PartySocket can send as binary.
+      const compressed = compressSync(payload);
+      connection?.send(compressed);
+    }
+    catch (error) {
+      console.error('Failed to serialize and compress message for sending:', error);
+    }
   }
 
   function onMessage(handler: MessageHandler): () => void {
