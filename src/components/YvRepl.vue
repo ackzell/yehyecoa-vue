@@ -65,22 +65,41 @@ onMounted(() => {
 </template>
 
 <style>
+.dark .yv-repl {
+  --ghost-cursor-color: hsl(49, 71%, 50%);;
+
+}
+
+/* Ghost instructor cursor */
+.dark .monaco-editor .instructor-cursor {
+  border-left: 5px solid var(--ghost-cursor-color);
+  margin-left: -1px;
+  pointer-events: none;
+}
+
+/* Instructor selection highlight */
+.dark .monaco-editor .instructor-selection {
+  background-color: hsl(49, 71%, 30%);
+
+  pointer-events: none;
+  /* border: 1px solid var(--ghost-cursor-color); */
+}
+
 .yv-repl {
   --ghost-cursor-color: hsl(328, 71%, 50%);;
 }
 
 /* Ghost instructor cursor */
 .monaco-editor .instructor-cursor {
-  border-left: 2px solid var(--ghost-cursor-color);
+  border-left: 5px solid var(--ghost-cursor-color);
   margin-left: -1px;
   pointer-events: none;
 }
 
 /* Instructor selection highlight */
 .monaco-editor .instructor-selection {
-  background-color: hsl(328, 71%, 12%);
+  background-color: hsl(328, 71%, 85%);
   pointer-events: none;
   /* border: 1px solid var(--ghost-cursor-color); */
-
 }
 </style>

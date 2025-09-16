@@ -74,6 +74,23 @@ export function useReplSync(): void {
     });
   }
 
+  // NEW FUNCTION: Send the full REPL state
+  function sendFullSync(): void {
+    const files: ReplMessagePayloads['full_sync']['files'] = {};
+    for (const filename in fm.replStore.files) {
+      const file = fm.replStore.files[filename];
+      files[filename] = {
+        code: file.code,
+        editorViewState: file.editorViewState,
+      };
+    }
+    sendReplMessage(AvailableMessageTypes.FULL_SYNC, {
+      files,
+      activeFile: fm.replStore.activeFilename,
+      fileOrder: Object.keys(files),
+    });
+  }
+
   onMounted(() => {
     const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
     const editor = fm.replStore.editor;
@@ -109,6 +126,8 @@ export function useReplSync(): void {
 
     if (isInstructor) {
       setupInstructorHandlers(fm.replStore, editor, sendReplMessage);
+      // NEW: Send full sync on instructor init
+      sendFullSync();
     }
     else {
       console.warn('ATTENDEE, receiving instructor updates...');
@@ -137,7 +156,12 @@ export function useReplSync(): void {
         if (activeViewState && editor) {
           editor.restoreViewState(activeViewState);
         }
-        toast.info('REPL synced with instructor.');
+        // toast.info('REPL synced with instructor.');
+
+        // repaint cursor if we already have one (so late-joiners see the instructor)
+        if (lastInstructorSelections.length > 0 && editor) {
+          paintInstructorSelections(editor, lastInstructorSelections);
+        }
       });
     }
 
@@ -173,47 +197,6 @@ export function useReplSync(): void {
             }
           });
           (editor as any)._instructorRepaintHooked = true;
-        }
-
-        function paintInstructorSelections(
-          editor: MonacoCore.editor.IStandaloneCodeEditor,
-          selections: MonacoCore.ISelection[],
-        ): void {
-          const newDecorations = selections.flatMap((sel) => {
-            const decorations: MonacoCore.editor.IModelDeltaDecoration[] = [];
-
-            if (
-              sel.selectionStartLineNumber !== sel.positionLineNumber
-              || sel.selectionStartColumn !== sel.positionColumn
-            ) {
-              decorations.push({
-                range: new MonacoCore.Range(
-                  sel.selectionStartLineNumber,
-                  sel.selectionStartColumn,
-                  sel.positionLineNumber,
-                  sel.positionColumn,
-                ),
-                options: { className: 'instructor-selection' },
-              });
-            }
-
-            decorations.push({
-              range: new MonacoCore.Range(
-                sel.positionLineNumber,
-                sel.positionColumn,
-                sel.positionLineNumber,
-                sel.positionColumn,
-              ),
-              options: {
-                className: 'instructor-cursor',
-                stickiness: MonacoCore.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-              },
-            });
-
-            return decorations;
-          });
-
-          instructorDecorations = editor.getModel()?.deltaDecorations(instructorDecorations, newDecorations) ?? [];
         }
       }
       if (message.type === 'scroll') {
@@ -269,6 +252,8 @@ export function useReplSync(): void {
 
       if (updates.length > 0) {
         sendReplMessage(AvailableMessageTypes.BATCH_UPDATE, { updates });
+        // NEW: Send full sync after batch updates
+        sendFullSync();
         // After sending updates, sync the local copy
         initializeFileContents();
       }
@@ -278,6 +263,8 @@ export function useReplSync(): void {
     watch(() => store.activeFilename, (newFilename) => {
       if (newFilename) {
         sendReplMessage(AvailableMessageTypes.BATCH_UPDATE, { updates: [{ type: 'setActive', filename: newFilename }] });
+        // NEW: Send full sync after active file change
+        sendFullSync();
       }
     });
 
@@ -306,5 +293,46 @@ export function useReplSync(): void {
       });
     }, 100);
     editor.onDidScrollChange(sendScrollUpdate);
+  }
+
+  function paintInstructorSelections(
+    editor: MonacoCore.editor.IStandaloneCodeEditor,
+    selections: MonacoCore.ISelection[],
+  ): void {
+    const newDecorations = selections.flatMap((sel) => {
+      const decorations: MonacoCore.editor.IModelDeltaDecoration[] = [];
+
+      if (
+        sel.selectionStartLineNumber !== sel.positionLineNumber
+        || sel.selectionStartColumn !== sel.positionColumn
+      ) {
+        decorations.push({
+          range: new MonacoCore.Range(
+            sel.selectionStartLineNumber,
+            sel.selectionStartColumn,
+            sel.positionLineNumber,
+            sel.positionColumn,
+          ),
+          options: { className: 'instructor-selection' },
+        });
+      }
+
+      decorations.push({
+        range: new MonacoCore.Range(
+          sel.positionLineNumber,
+          sel.positionColumn,
+          sel.positionLineNumber,
+          sel.positionColumn,
+        ),
+        options: {
+          className: 'instructor-cursor',
+          stickiness: MonacoCore.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+        },
+      });
+
+      return decorations;
+    });
+
+    instructorDecorations = editor.getModel()?.deltaDecorations(instructorDecorations, newDecorations) ?? [];
   }
 }
