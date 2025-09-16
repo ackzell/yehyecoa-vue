@@ -4,20 +4,52 @@ import { useDebounceFn, watchDebounced } from '@vueuse/core';
 import { Selection } from 'monaco-editor-core';
 import { nextTick, onMounted } from 'vue';
 
+import { useToastsStore } from '@/components/toasts/useToastsStore';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { usePartyKitBroadcast } from '@/composables/usePartyKit';
 
-type PartyKitMessage = {
-  type: 'repl-update' | 'system';
-  id: string;
-  payload: {
+const AvailableMessageTypes = {
+  content: 'content',
+  selection: 'selection',
+  scroll: 'scroll',
+} as const;
+
+type ReplMessageType = typeof AvailableMessageTypes[keyof typeof AvailableMessageTypes];
+
+// Map message types to payloads
+type ReplMessagePayloads = {
+  content: {
+    files: Record<string, string>;
+    fileOrder?: string[];
     activeFile?: string;
-    selections?: MonacoCore.Selection[];
+  };
+  selection: {
+    selections: MonacoCore.ISelection[] | null;
+    activeFile?: string;
+  };
+  scroll: {
     scrollTop?: number;
     scrollLeft?: number;
-    files?: Record<string, string>;
-    fileOrder?: string[];
+    activeFile?: string;
   };
+};
+
+// Generic message type
+type ReplMessage<T extends ReplMessageType = ReplMessageType> = {
+  type: T;
+  id: string;
+  payload: ReplMessagePayloads[T];
+};
+
+// Concrete union
+type AnyReplUpdateMessage
+  = | ReplMessage<'content'>
+    | ReplMessage<'selection'>
+    | ReplMessage<'scroll'>;
+
+type SystemMessage = {
+  type: 'system';
+  message: string;
 };
 
 /**
@@ -27,6 +59,18 @@ type PartyKitMessage = {
 export function useReplSync(): void {
   const fm = useFileManagerStore();
   const pkb = usePartyKitBroadcast();
+  const { toast } = useToastsStore();
+
+  function sendReplMessage<T extends ReplMessageType>(
+    type: T,
+    payload: ReplMessagePayloads[T],
+  ): void {
+    pkb.send<ReplMessage<T>>({
+      id: 'instructor',
+      type,
+      payload,
+    });
+  }
 
   onMounted(() => {
     const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
@@ -37,32 +81,33 @@ export function useReplSync(): void {
       return;
     }
 
+    pkb.onMessage(async (message: SystemMessage) => {
+      if (message.type === 'system') {
+        toast.info(message.message);
+      }
+    },
+    );
+
     if (isInstructor) {
       console.warn('INSTRUCTOR, setting up REPL sync...');
 
       // Send selection changes immediately
       editor.onDidChangeCursorSelection(() => {
-        pkb.send({
-          id: 'instructor',
-          type: 'repl-update',
-          payload: {
-            selections: editor.getSelections(),
-            activeFile: fm.replStore.activeFile?.filename,
-          },
-        });
+        const payload = {
+          selections: editor.getSelections(),
+          activeFile: fm.replStore.activeFile?.filename,
+        };
+        sendReplMessage('selection', payload);
       });
 
       // Send scroll changes, debounced to avoid flooding
       const sendScrollUpdate = useDebounceFn(() => {
-        pkb.send({
-          id: 'instructor',
-          type: 'repl-update',
-          payload: {
-            scrollTop: editor.getScrollTop(),
-            scrollLeft: editor.getScrollLeft(),
-            activeFile: fm.replStore.activeFile?.filename,
-          },
-        });
+        const payload = {
+          scrollTop: editor.getScrollTop(),
+          scrollLeft: editor.getScrollLeft(),
+          activeFile: fm.replStore.activeFile?.filename,
+        };
+        sendReplMessage('scroll', payload);
       }, 100);
       editor.onDidScrollChange(sendScrollUpdate);
 
@@ -74,17 +119,10 @@ export function useReplSync(): void {
             files,
             fileOrder: Object.keys(files),
             activeFile: fm.replStore.activeFile?.filename,
-            selections: editor.getSelections(),
-            scrollTop: editor.getScrollTop(),
-            scrollLeft: editor.getScrollLeft(),
           };
 
-          console.warn('INSTRUCTOR, sending repl-update', payload);
-          pkb.send({
-            id: 'instructor',
-            type: 'repl-update',
-            payload,
-          });
+          console.warn('INSTRUCTOR, sending repl-update');
+          sendReplMessage('content', payload);
         },
         {
           debounce: 50,
@@ -95,27 +133,19 @@ export function useReplSync(): void {
     }
     else {
       console.warn('ATTENDEE, receiving instructor updates...');
-      pkb.onMessage(async (message: PartyKitMessage) => {
-        if (message.type !== 'repl-update')
+      pkb.onMessage(async (message: AnyReplUpdateMessage) => {
+        if (AvailableMessageTypes[message.type] !== message.type)
           return;
 
         console.warn('Received message', message);
-        const {
-          files,
-          selections,
-          scrollTop,
-          scrollLeft,
-          activeFile,
-          fileOrder,
-        } = message.payload;
 
         function applyImperativeUpdates(): void {
           if (!editor?.getModel())
             return;
 
-          if (selections) {
+          if (message.type === 'selection' && message.payload.selections) {
             // Re-hydrate the selections into Monaco Selection objects, as they lose their methods during serialization
-            const monacoSelections = selections.map(
+            const monacoSelections = message.payload.selections.map(
               s =>
                 new Selection(
                   s.selectionStartLineNumber,
@@ -130,22 +160,27 @@ export function useReplSync(): void {
               editor.revealPositionInCenterIfOutsideViewport(monacoSelections[0].getStartPosition());
             editor.focus();
           }
-          if (typeof scrollTop === 'number')
-            editor.setScrollTop(scrollTop);
 
-          if (typeof scrollLeft === 'number')
-            editor.setScrollLeft(scrollLeft);
+          if (message.type === 'scroll' && message.payload.scrollTop && message.payload.scrollLeft) {
+            if (typeof message.payload.scrollTop === 'number') {
+              editor.setScrollTop(message.payload.scrollTop);
+            }
+
+            if (typeof message.payload.scrollLeft === 'number') {
+              editor.setScrollLeft(message.payload.scrollLeft);
+            }
+          }
         };
 
-        const willTabChange = activeFile && fm.replStore.activeFile?.filename !== activeFile;
+        const willTabChange = message.payload.activeFile && fm.replStore.activeFile?.filename !== message.payload.activeFile;
 
         // If the active tab is going to change, we must listen for the editor to
         // confirm the switch before applying selections/scroll. `nextTick` is not
         // sufficient because Monaco's model change is asynchronous.
         if (willTabChange) {
           const disposable = editor.onDidChangeModel((e: any) => {
-            if (e.newModelUrl?.path === `/${activeFile}`) {
-              console.log(`[yv-sync] Editor model switched to ${activeFile}. Applying imperative updates.`);
+            if (e.newModelUrl?.path === `/${message.payload.activeFile}`) {
+              console.log(`[yv-sync] Editor model switched to ${message.payload.activeFile}. Applying imperative updates.`);
               nextTick(applyImperativeUpdates);
               disposable.dispose();
             }
@@ -153,23 +188,23 @@ export function useReplSync(): void {
         }
 
         // If file content is changing, it's a major update that might reset the active file.
-        if (files) {
-          let filesToSet = files;
+        if (message.type === 'content' && message.payload.files) {
+          let filesToSet = message.payload.files;
           // If an explicit file order is provided, reconstruct the files object
           // to ensure the REPL store processes them in that order. Modern JS engines
           // preserve property insertion order, which the REPL's `for...in` loop will respect.
-          if (fileOrder) {
+          if (message.payload.fileOrder) {
             const orderedFiles: Record<string, string> = {};
-            for (const filename of fileOrder) {
+            for (const filename of message.payload.fileOrder) {
               // Make sure the file exists in the payload
-              if (files[filename] !== undefined) {
-                orderedFiles[filename] = files[filename];
+              if (message.payload.files[filename] !== undefined) {
+                orderedFiles[filename] = message.payload.files[filename];
               }
             }
             // Add any files from the payload that weren't in the order array, just in case.
-            for (const filename in files) {
+            for (const filename in message.payload.files) {
               if (orderedFiles[filename] === undefined) {
-                orderedFiles[filename] = files[filename];
+                orderedFiles[filename] = message.payload.files[filename];
               }
             }
             filesToSet = orderedFiles;
@@ -186,16 +221,16 @@ export function useReplSync(): void {
 
           // 3. Now, make the single, definitive call to set the correct active file.
           // This will trigger the watcher in the Editor once, causing a clean model switch.
-          if (activeFile)
-            fm.replStore.setActive(activeFile);
+          if (message.payload.activeFile)
+            fm.replStore.setActive(message.payload.activeFile);
 
           // The onDidChangeModel listener will handle applying imperative updates.
           if (!willTabChange)
             nextTick(applyImperativeUpdates);
         }
         // If no file content change, but the active file is out of sync (e.g., from a cursor-only message).
-        else if (activeFile && fm.replStore.activeFile?.filename !== activeFile) {
-          fm.replStore.setActive(activeFile);
+        else if (message.payload.activeFile && fm.replStore.activeFile?.filename !== message.payload.activeFile) {
+          fm.replStore.setActive(message.payload.activeFile);
 
           // Wait for the tab switch to render before applying updates.
           // The onDidChangeModel listener will handle applying imperative updates.

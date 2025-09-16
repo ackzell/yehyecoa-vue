@@ -9,7 +9,7 @@ type MessageHandler = (message: any) => void;
 type PartyBroadcast = {
   isConnected: Ref<boolean>;
   lastMessage: any;
-  send: (data: any) => void;
+  send: <T>(data: T) => void;
   onMessage: (handler: MessageHandler) => () => void; // Returns unsubscribe function
 };
 
