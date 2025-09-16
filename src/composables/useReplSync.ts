@@ -1,4 +1,5 @@
 import type { BatchUpdateOperation, ReplStore } from '@calmecac-vue/repl';
+import { compileFile, File } from '@calmecac-vue/repl';
 
 import { useDebounceFn } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
@@ -133,36 +134,76 @@ export function useReplSync(): void {
       console.warn('ATTENDEE, receiving instructor updates...');
     }
 
-    function handleFullSync(payload: ReplMessagePayloads['full_sync']): void {
-      const { files, activeFile, fileOrder } = payload;
-      const newFiles: Record<string, string> = {};
-      const viewStates: Record<string, MonacoCore.editor.ICodeEditorViewState | null> = {};
+    async function handleFullSync(payload: ReplMessagePayloads['full_sync']): Promise<void> {
+      const { files: incomingFiles, activeFile, fileOrder } = payload;
 
+      const filesToCompile: File[] = [];
+
+      // Update existing files or create new ones
       for (const filename of fileOrder) {
-        if (files[filename]) {
-          newFiles[filename] = files[filename].code;
-          viewStates[filename] = files[filename].editorViewState;
+        const incoming = incomingFiles[filename];
+        if (!incoming)
+          continue;
+
+        if (fm.replStore.files[filename]) {
+          // update content without replacing ref
+          fm.replStore.files[filename].updateContent(incoming.code);
+          fm.replStore.files[filename].editorViewState = incoming.editorViewState;
+        }
+        else {
+          // add new file
+          fm.replStore.files[filename] = new File(filename, incoming.code);
+          fm.replStore.files[filename].editorViewState = incoming.editorViewState;
+        }
+
+        filesToCompile.push(fm.replStore.files[filename]);
+      }
+
+      // Remove deleted files
+      for (const filename of Object.keys(fm.replStore.files)) {
+        if (!incomingFiles[filename])
+          delete fm.replStore.files[filename];
+      }
+
+      // Set active file
+      fm.replStore.activeFilename = activeFile;
+      const activeFileRef = fm.replStore.files[activeFile];
+
+      // Compile active file first (JS + CSS) for preview
+      if (activeFileRef) {
+        const errs = await compileFile(fm.replStore, activeFileRef);
+        fm.replStore.errors = errs;
+
+        // Inject compiled CSS into preview iframe
+        if (activeFileRef.compiled.css && fm.replStore.editor?.getDomNode()) {
+          const iframe = document.querySelector<HTMLIFrameElement>('#preview-iframe');
+          if (iframe?.contentDocument) {
+            let styleTag = iframe.contentDocument.getElementById(
+              `file-style-${activeFileRef.filename}`,
+            ) as HTMLStyleElement;
+            if (!styleTag) {
+              styleTag = iframe.contentDocument.createElement('style');
+              styleTag.id = `file-style-${activeFileRef.filename}`;
+              iframe.contentDocument.head.appendChild(styleTag);
+            }
+            styleTag.textContent = activeFileRef.compiled.css;
+          }
+        }
+
+        // Restore editor view state
+        if (activeFileRef.editorViewState && fm.replStore.editor) {
+          fm.replStore.editor.restoreViewState(activeFileRef.editorViewState);
         }
       }
 
-      fm.replStore.setFiles(newFiles, activeFile).then(() => {
-        Object.entries(viewStates).forEach(([filename, viewState]) => {
-          const file = fm.replStore.files[filename];
-          if (file) {
-            file.editorViewState = viewState;
-          }
-        });
-        const activeViewState = viewStates[activeFile];
-        if (activeViewState && editor) {
-          editor.restoreViewState(activeViewState);
-        }
-        // toast.info('REPL synced with instructor.');
+      // Compile the rest of the files in background
+      const otherFiles = filesToCompile.filter(f => f !== activeFileRef);
+      await Promise.all(otherFiles.map(f => compileFile(fm.replStore, f)));
 
-        // repaint cursor if we already have one (so late-joiners see the instructor)
-        if (lastInstructorSelections.length > 0 && editor) {
-          paintInstructorSelections(editor, lastInstructorSelections);
-        }
-      });
+      // Repaint instructor selections if needed
+      if (lastInstructorSelections.length > 0 && fm.replStore.editor) {
+        paintInstructorSelections(fm.replStore.editor, lastInstructorSelections);
+      }
     }
 
     function handleImperativeUpdates(message: ReplMessage<'selection'> | ReplMessage<'scroll'>): void {
