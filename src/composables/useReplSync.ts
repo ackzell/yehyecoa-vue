@@ -110,7 +110,7 @@ export function useReplSync(): void {
           break;
 
         case AvailableMessageTypes.FULL_SYNC:
-          handleFullSync(message.payload);
+          await handleFullSync(message.payload);
           break;
 
         case AvailableMessageTypes.BATCH_UPDATE:
@@ -268,8 +268,6 @@ export function useReplSync(): void {
 
       if (updates.length > 0) {
         sendReplMessage(AvailableMessageTypes.BATCH_UPDATE, { updates });
-        // NEW: Send full sync after batch updates
-        sendFullSync();
         // After sending updates, sync the local copy
         initializeFileContents();
       }
@@ -279,8 +277,6 @@ export function useReplSync(): void {
     watch(() => store.activeFilename, (newFilename) => {
       if (newFilename) {
         sendReplMessage(AvailableMessageTypes.BATCH_UPDATE, { updates: [{ type: 'setActive', filename: newFilename }] });
-        // NEW: Send full sync after active file change
-        sendFullSync();
       }
     });
 
