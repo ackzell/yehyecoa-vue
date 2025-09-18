@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
+
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
 const { settings, toggleLayout, toggleTheme } = useSettingsStore();
@@ -11,7 +12,7 @@ const fm = useFileManagerStore();
   <div>
     <nav
       flex="~ justify-between"
-      relative p-4 pr-6 z-999
+      relative pr-6 z-999
       shadow-md
       bg="light dark:dark-900"
       border="b neutral-300/10"
@@ -19,14 +20,13 @@ const fm = useFileManagerStore();
       h="var(--nav-height)"
       transition="background-color 0.2s ease"
     >
-      <h1 text-lg font-500 inline-flex items-center>
+      <h1 text-md font-500 inline-flex items-center>
         <!-- TODO: maybe a logo would be cool -->
         <!-- <img alt="logo" src="/logo.svg" /> -->
         <!-- <span>yehyecoa-vue</span> -->
+        <!-- yehyecoa-vue -->
       </h1>
-      <!-- <div>
-            submenus here
-          </div> -->
+
       <div flex gap-4 text-neutral-500>
         <button
           v-tooltip.bottom="'Save snapshot'"

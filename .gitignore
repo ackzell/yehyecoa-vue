@@ -29,5 +29,4 @@ coverage
 
 *.tsbuildinfo
 
-packages/vue-repl/
-packages/party-kit/
+

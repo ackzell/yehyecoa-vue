@@ -31,7 +31,7 @@ const defaultDurations = {
 
 function getToastIcon(type: string) {
   const icons = {
-    success: 'i-mynaui:check-hexagon-solid text-green-500',
+    success: 'i-mynaui:check-hexagon-solid text-teal-500',
     error: 'i-mynaui:x-hexagon-solid text-red-500',
     warning: 'i-mynaui:danger-hexagon-solid text-amber-500',
     info: 'i-mynaui:info-hexagon-solid text-blue-500',
@@ -41,7 +41,7 @@ function getToastIcon(type: string) {
 
 function getToastClasses(type: string) {
   const classes = {
-    success: 'text-green-500 border-green-500/10',
+    success: 'text-teal-500 border-teal-500/10',
     error: 'text-red-500 border-red-500/10',
     warning: 'text-amber-500 border-amber-500/10',
     info: 'text-blue-500 border-blue-500/10',

@@ -74,7 +74,6 @@ export function useReplSync(): void {
     });
   }
 
-  // NEW FUNCTION: Send the full REPL state
   function sendFullSync(): void {
     const files: ReplMessagePayloads['full_sync']['files'] = {};
     for (const filename in fm.replStore.files) {
@@ -105,10 +104,6 @@ export function useReplSync(): void {
         return;
 
       switch (message.type) {
-        case AvailableMessageTypes.SYSTEM:
-          toast.info(message.payload.message);
-          break;
-
         case AvailableMessageTypes.FULL_SYNC:
           await handleFullSync(message.payload);
           break;
