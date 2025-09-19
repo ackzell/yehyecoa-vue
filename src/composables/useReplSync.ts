@@ -1,4 +1,4 @@
-import type { BatchUpdateOperation, ReplStore } from '@calmecac-vue/repl';
+import type { ReplStore } from '@calmecac-vue/repl';
 
 import { useDebounceFn } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
@@ -8,51 +8,46 @@ import { useToastsStore } from '@/components/toasts/useToastsStore';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { usePartyKitStore } from '@/composables/usePartyKitStore';
 
-const AvailableMessageTypes = {
-  FULL_SYNC: 'full_sync',
-  BATCH_UPDATE: 'batch_update',
-  SELECTION: 'selection',
-  SCROLL: 'scroll',
-  SYSTEM: 'system',
-} as const;
-
-type ReplMessageType = typeof AvailableMessageTypes[keyof typeof AvailableMessageTypes];
-
-type ReplMessagePayloads = {
-  [AvailableMessageTypes.FULL_SYNC]: {
-    files: Record<string, { code: string; editorViewState: MonacoCore.editor.ICodeEditorViewState | null }>;
-    activeFile: string;
-    fileOrder: string[];
-  };
-  [AvailableMessageTypes.BATCH_UPDATE]: {
-    updates: BatchUpdateOperation[];
-  };
-  [AvailableMessageTypes.SELECTION]: {
-    selections: MonacoCore.ISelection[] | null;
-    activeFile: string;
-  };
-  [AvailableMessageTypes.SCROLL]: {
-    scrollTop: number;
-    scrollLeft: number;
-    activeFile: string;
-  };
-  [AvailableMessageTypes.SYSTEM]: {
-    message: string;
-  };
-};
-
-type ReplMessage<T extends ReplMessageType = ReplMessageType> = {
-  type: T;
+// Message types matching the refactored server
+type ReplMessage = {
+  type: 'repl';
+  code: 'FULL_SYNC' | 'CONTENT' | 'SELECTION' | 'SCROLL';
   id: string;
-  payload: ReplMessagePayloads[T];
+  payload: any;
+  timestamp: number;
 };
 
-type AnyReplUpdateMessage
-  = | ReplMessage<'full_sync'>
-    | ReplMessage<'batch_update'>
-    | ReplMessage<'selection'>
-    | ReplMessage<'scroll'>
-    | ReplMessage<'system'>;
+type SystemMessage = {
+  type: 'system';
+  code: 'WELCOME' | 'INSTRUCTOR_CONNECTED' | 'INSTRUCTOR_DISCONNECTED';
+  payload: any;
+  timestamp: number;
+};
+
+// Specific payload types for type safety
+type FullSyncPayload = {
+  files: Record<string, string>;
+  activeFile: string;
+  editorStates?: Record<string, MonacoCore.editor.ICodeEditorViewState | null>;
+};
+
+type ContentPayload = {
+  filename: string;
+  content: string;
+};
+
+type SelectionPayload = {
+  filename: string;
+  selections: MonacoCore.ISelection[] | null;
+};
+
+type ScrollPayload = {
+  filename: string;
+  scrollTop: number;
+  scrollLeft: number;
+};
+
+type AnyMessage = ReplMessage | SystemMessage;
 
 export function useReplSync(): void {
   const fm = useFileManagerStore();
@@ -62,31 +57,33 @@ export function useReplSync(): void {
   let instructorDecorations: string[] = [];
   let lastInstructorSelections: MonacoCore.ISelection[] = [];
 
-  function sendReplMessage<T extends ReplMessageType>(
-    type: T,
-    payload: ReplMessagePayloads[T],
-  ): void {
-    pks.send<ReplMessage<T>>({
+  function sendReplMessage(code: ReplMessage['code'], payload: any): void {
+    pks.send<ReplMessage>({
+      type: 'repl',
+      code,
       id: 'instructor',
-      type,
       payload,
+      timestamp: Date.now(),
     });
   }
 
   function sendFullSync(): void {
-    const files: ReplMessagePayloads['full_sync']['files'] = {};
+    const files: Record<string, string> = {};
+    const editorStates: Record<string, MonacoCore.editor.ICodeEditorViewState | null> = {};
+
     for (const filename in fm.replStore.files) {
       const file = fm.replStore.files[filename];
-      files[filename] = {
-        code: file.code,
-        editorViewState: file.editorViewState,
-      };
+      files[filename] = file.code;
+      editorStates[filename] = file.editorViewState;
     }
-    sendReplMessage(AvailableMessageTypes.FULL_SYNC, {
+
+    const payload: FullSyncPayload = {
       files,
       activeFile: fm.replStore.activeFilename,
-      fileOrder: Object.keys(files),
-    });
+      editorStates,
+    };
+
+    sendReplMessage('FULL_SYNC', payload);
   }
 
   onMounted(() => {
@@ -98,28 +95,38 @@ export function useReplSync(): void {
       return;
     }
 
-    pks.onMessage(async (message: AnyReplUpdateMessage) => {
-      if (message.id === 'instructor' && isInstructor)
+    pks.onMessage(async (message: AnyMessage) => {
+      // Ignore system messages for now
+      if (message.type === 'system') {
         return;
+      }
 
-      switch (message.type) {
-        case AvailableMessageTypes.FULL_SYNC:
+      // Ignore instructor's own messages
+      if (message.id === 'instructor' && isInstructor) {
+        return;
+      }
+
+      switch (message.code) {
+        case 'FULL_SYNC':
           await handleFullSync(message.payload);
           break;
 
-        case AvailableMessageTypes.BATCH_UPDATE:
-          await fm.replStore.batchUpdate(message.payload.updates);
+        case 'CONTENT':
+          await handleContentUpdate(message.payload);
           break;
 
-        case AvailableMessageTypes.SELECTION:
-        case AvailableMessageTypes.SCROLL:
-          handleImperativeUpdates(message);
+        case 'SELECTION':
+          handleSelectionUpdate(message.payload);
+          break;
+
+        case 'SCROLL':
+          handleScrollUpdate(message.payload);
           break;
       }
     });
 
     if (isInstructor) {
-      setupInstructorHandlers(fm.replStore, editor, sendReplMessage);
+      setupInstructorHandlers(fm.replStore, editor);
 
       // Watch for store readiness and connection state
       watch([
@@ -140,7 +147,7 @@ export function useReplSync(): void {
       console.warn('ATTENDEE, receiving instructor updates...');
     }
 
-    async function handleFullSync(payload: ReplMessagePayloads['full_sync']): Promise<void> {
+    async function handleFullSync(payload: FullSyncPayload): Promise<void> {
       try {
         console.warn('[DEBUG] Handling full sync from instructor...');
 
@@ -149,60 +156,21 @@ export function useReplSync(): void {
           return;
         }
 
-        console.warn('[DEBUG] Preparing file updates...');
-        // Prepare batch updates for files
-        const updates: BatchUpdateOperation[] = [];
+        // Use applyFullState for efficient state application
+        await fm.replStore.applyFullState(payload.files, payload.activeFile);
 
-        // First mark all current files for deletion
-        Object.keys(fm.replStore.files).forEach((filename) => {
-          updates.push({
-            type: 'delete',
-            filename,
-          });
-        });
-
-        console.warn('[DEBUG] Creating new files in order...');
-        // Create files in the specified order
-        for (const filename of payload.fileOrder) {
-          const fileData = payload.files[filename];
-          if (!fileData)
-            continue;
-
-          updates.push({
-            type: 'create',
-            filename,
-            content: fileData.code,
-          });
-        }
-
-        console.warn('[DEBUG] Applying batch updates...');
-        await fm.replStore.batchUpdate(updates);
-
-        // Set active file in editor while keeping App.vue as main file
-        if (payload.activeFile && fm.replStore.files[payload.activeFile]) {
-          fm.replStore.activeFilename = payload.activeFile;
-        }
-        // Always keep App.vue as the main (preview) file
-        if (fm.replStore.files['src/App.vue']) {
-          fm.replStore.mainFile = 'src/App.vue';
-        }
-
-        // Wait for the store to settle
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Restore editor view states
-        for (const [filename, fileData] of Object.entries(payload.files)) {
-          const file = fm.replStore.files[filename];
-          if (file && fileData.editorViewState) {
-            file.editorViewState = fileData.editorViewState;
+        // Restore editor view states if available
+        if (payload.editorStates) {
+          for (const [filename, viewState] of Object.entries(payload.editorStates)) {
+            const file = fm.replStore.files[filename];
+            if (file && viewState) {
+              file.editorViewState = viewState;
+            }
           }
-        }
 
-        // Restore active editor view state
-        const editor = fm.replStore.editor;
-        if (editor && payload.activeFile) {
+          // Restore active editor view state
           const activeFile = fm.replStore.files[payload.activeFile];
-          if (activeFile?.editorViewState) {
+          if (activeFile?.editorViewState && editor) {
             setTimeout(() => {
               try {
                 editor.restoreViewState(activeFile.editorViewState!);
@@ -222,26 +190,34 @@ export function useReplSync(): void {
       }
     }
 
-    function handleImperativeUpdates(message: ReplMessage<'selection'> | ReplMessage<'scroll'>): void {
-      if (!editor || !editor.getModel())
-        return;
-
-      if (message.payload.activeFile !== fm.replStore.activeFile?.filename) {
-        // The active file is not in sync, but we can still try to apply the update
-        // if the file exists in the store.
-        const file = fm.replStore.files[message.payload.activeFile];
-        if (!file) {
-          console.warn(`File ${message.payload.activeFile} not found in REPL store.`);
-          return;
+    async function handleContentUpdate(payload: ContentPayload): Promise<void> {
+      try {
+        const success = fm.replStore.updateFileContent(payload.filename, payload.content);
+        if (!success) {
+          console.warn(`Failed to update file: ${payload.filename}`);
         }
       }
+      catch (error) {
+        console.error('Error during content update:', error);
+        toast.error('Failed to update file content');
+      }
+    }
 
-      if (message.type === 'selection' && message.payload.selections) {
-        lastInstructorSelections = message.payload.selections;
+    function handleSelectionUpdate(payload: SelectionPayload): void {
+      if (!editor || !editor.getModel()) {
+        return;
+      }
 
+      // Only apply if we're viewing the same file
+      if (payload.filename !== fm.replStore.activeFile?.filename) {
+        return;
+      }
+
+      if (payload.selections) {
+        lastInstructorSelections = payload.selections;
         paintInstructorSelections(editor, lastInstructorSelections);
 
-        // add once so repaint always happens
+        // Hook for repainting on model changes
         if (!(editor as any)._instructorRepaintHooked) {
           editor.onDidChangeModel(() => {
             if (lastInstructorSelections.length > 0) {
@@ -256,68 +232,90 @@ export function useReplSync(): void {
           (editor as any)._instructorRepaintHooked = true;
         }
       }
-      if (message.type === 'scroll') {
-        editor.setScrollTop(message.payload.scrollTop);
-        editor.setScrollLeft(message.payload.scrollLeft);
+    }
+
+    function handleScrollUpdate(payload: ScrollPayload): void {
+      if (!editor || !editor.getModel()) {
+        return;
       }
+
+      // Only apply if we're viewing the same file
+      if (payload.filename !== fm.replStore.activeFile?.filename) {
+        return;
+      }
+
+      editor.setScrollTop(payload.scrollTop);
+      editor.setScrollLeft(payload.scrollLeft);
     }
   });
 
   function setupInstructorHandlers(
     store: ReplStore,
     editor: MonacoCore.editor.IStandaloneCodeEditor,
-    sendReplMessage: <T extends ReplMessageType>(type: T, payload: ReplMessagePayloads[T]) => void,
   ): void {
     console.warn('INSTRUCTOR, setting up REPL sync...');
 
-    // Maintain a local copy of file contents for comparison
+    // Track file changes for CONTENT messages
     const fileContents = new Map<string, string>();
-    const initializeFileContents = (): void => {
+
+    function initializeFileContents(): void {
       fileContents.clear();
       for (const filename in store.files) {
         fileContents.set(filename, store.files[filename].code);
       }
-    };
+    }
+
     initializeFileContents();
 
-    // Watch for all file changes
+    // Watch for file content changes
     watch(() => store.files, (newFilesRecord) => {
-      const newFilenames = new Set(Object.keys(newFilesRecord));
-      const updates: BatchUpdateOperation[] = [];
+      for (const [filename, file] of Object.entries(newFilesRecord)) {
+        const oldContent = fileContents.get(filename);
+        const newContent = file.code;
 
-      // Check for deletions
-      for (const filename of fileContents.keys()) {
-        if (!newFilenames.has(filename)) {
-          updates.push({ type: 'delete', filename });
+        if (oldContent !== newContent) {
+          // Send CONTENT update for changed files
+          const payload: ContentPayload = {
+            filename,
+            content: newContent,
+          };
+          sendReplMessage('CONTENT', payload);
+          fileContents.set(filename, newContent);
         }
       }
 
-      // Check for creations and updates
-      for (const filename of newFilenames) {
-        const newFile = newFilesRecord[filename];
-        const oldCode = fileContents.get(filename);
+      // Handle new files (simple approach for now)
+      const currentFilenames = new Set(Object.keys(newFilesRecord));
+      const trackedFilenames = new Set(fileContents.keys());
 
-        if (oldCode === undefined) {
-        // New file created
-          updates.push({ type: 'create', filename, content: newFile.code });
-        }
-        else if (oldCode !== newFile.code) {
-        // File content updated
-          updates.push({ type: 'update', filename, content: newFile.code });
+      // New files
+      for (const filename of currentFilenames) {
+        if (!trackedFilenames.has(filename)) {
+          const payload: ContentPayload = {
+            filename,
+            content: newFilesRecord[filename].code,
+          };
+          sendReplMessage('CONTENT', payload);
+          fileContents.set(filename, newFilesRecord[filename].code);
         }
       }
 
-      if (updates.length > 0) {
-        sendReplMessage(AvailableMessageTypes.BATCH_UPDATE, { updates });
-        // After sending updates, sync the local copy
-        initializeFileContents();
+      // Handle deleted files by sending full sync
+      for (const filename of trackedFilenames) {
+        if (!currentFilenames.has(filename)) {
+          console.warn('File deleted, sending full sync');
+          sendFullSync();
+          initializeFileContents();
+          break;
+        }
       }
     }, { deep: true });
 
     // Watch for active file changes
     watch(() => store.activeFilename, (newFilename) => {
       if (newFilename) {
-        sendReplMessage(AvailableMessageTypes.BATCH_UPDATE, { updates: [{ type: 'setActive', filename: newFilename }] });
+        console.warn('Active file changed, sending full sync');
+        sendFullSync();
       }
     });
 
@@ -326,25 +324,34 @@ export function useReplSync(): void {
       const activeFile = store.activeFile;
       if (!activeFile)
         return;
+
+      // Save view state
       activeFile.editorViewState = editor.saveViewState();
-      sendReplMessage(AvailableMessageTypes.SELECTION, {
+
+      const payload: SelectionPayload = {
+        filename: activeFile.filename,
         selections: editor.getSelections(),
-        activeFile: activeFile.filename,
-      });
+      };
+      sendReplMessage('SELECTION', payload);
     });
 
-    // Send scroll changes
+    // Send scroll changes (debounced)
     const sendScrollUpdate = useDebounceFn(() => {
       const activeFile = store.activeFile;
       if (!activeFile)
         return;
+
+      // Save view state
       activeFile.editorViewState = editor.saveViewState();
-      sendReplMessage(AvailableMessageTypes.SCROLL, {
+
+      const payload: ScrollPayload = {
+        filename: activeFile.filename,
         scrollTop: editor.getScrollTop(),
         scrollLeft: editor.getScrollLeft(),
-        activeFile: activeFile.filename,
-      });
+      };
+      sendReplMessage('SCROLL', payload);
     }, 100);
+
     editor.onDidScrollChange(sendScrollUpdate);
   }
 
