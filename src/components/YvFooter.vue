@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { usePartyKitBroadcast } from '@/composables/usePartyKit';
+import { usePartyKitStore } from '@/composables/usePartyKitStore';
+import YvButton from './YvVersioningDrawer/YvButton.vue';
 
 const version = import.meta.env.PACKAGE_VERSION;
 
-const pkb = usePartyKitBroadcast();
+const pks = usePartyKitStore();
 </script>
 
 <template>
@@ -20,70 +21,41 @@ const pkb = usePartyKitBroadcast();
     >
       <div>
         <slot name="begin">
-          <div flex="~ items-center gap-1">
-            <div
-              v-if="pkb.isInstructorConnected.value"
-              flex items-center gap-1
-              px-1 rounded cursor-default
-              text="xs blue-500/80"
-              bg="blue-600/7"
-            >
+          <div flex="~ items-center gap-2">
+            <div>
               <div
-                class="animate-pulse"
-                w-1.5 h-1.5 rounded-full
-                bg-blue-500
+                v-if="pks.isInstructorConnected"
+                v-tooltip="pks.isUserInstructor ? 'Instructor mode' : 'Instructor is online.'"
+                w-3.5 h-3.5
+                :bg="pks.isUserInstructor ? 'pink-500' : 'sky-400'"
+                i-carbon-user-filled
               />
-              <div>
-                <strong>Instructor online</strong>
-              </div>
+              <div
+                v-else
+                v-tooltip="'Instructor is offline.'"
+                w-3.5 h-3.5
+                class="bg-neutral/50"
+                i-carbon-user
+              />
             </div>
 
-            <div
-              v-else
-              flex items-center gap-1
-              px-1 rounded cursor-default
-              text="xs neutral/80"
-              bg="neutral/10"
-              dark="text-neutral-600 border-neutral/40"
+            <YvButton
+              v-if=" pks.isConnected"
+              class="hover:bg-teal-400/20 hover:text-teal-600 active:bg-teal-400/50 active:text-teal-900"
+              dark="hover:bg-teal-300/10 hover:text-teal-300 active:bg-teal-300/20 active:text-teal-500"
+              @click="pks.disconnect()"
             >
-              <!-- <div
-                v-tooltip="pkb.isWorkshopActive.value
-                  ? `Workshop will end in ${pkb.offlineInstructorTimeLeft.value / 60} minutes if they don\'t return`
-                  : 'No active workshop.'"
-              >
-                Instructor offline
-              </div> -->
-
-              <div>
-                Instructor offline
+              <div flex="~ items-center gap-1">
+                <div
+                  class="animate-pulse"
+                  w-1.5 h-1.5 rounded-full
+                  bg-emerald-500
+                />
+                <div v-tooltip="'Click to disconnect'">
+                  {{ pks.currentRoomId }}
+                </div>
               </div>
-            </div>
-
-            <!-- <button
-              v-if="pkb.isWorkshopActive.value && pkb.isConnected.value"
-              flex items-center gap-1
-              px-1 rounded cursor-pointer
-              text="xs teal-500/80"
-              bg="teal-600/7"
-              @click="pkb.disconnect()"
-            > -->
-            <button
-              v-if=" pkb.isConnected.value"
-              flex items-center gap-1
-              px-1 rounded cursor-pointer
-              text="xs teal-500/80"
-              bg="teal-600/7"
-              @click="pkb.disconnect()"
-            >
-              <div
-                class="animate-pulse"
-                w-1.5 h-1.5 rounded-full
-                bg-teal-500
-              />
-              <div v-tooltip="'Click to disconnect'">
-                <strong>{{ pkb.currentRoomId.value }}</strong>
-              </div>
-            </button>
+            </YvButton>
 
             <!-- <button
               v-else
@@ -94,23 +66,24 @@ const pkb = usePartyKitBroadcast();
               dark="text-neutral-600 border-neutral/40"
               @click="pkb.isWorkshopActive.value && pkb.reconnect()"
             > -->
-            <button
+            <YvButton
               v-else
+              class="hover:bg-teal-400/20 hover:text-teal-600 active:bg-teal-400/50 active:text-teal-900"
+              dark="hover:bg-teal-300/10 hover:text-teal-300 active:bg-teal-300/20 active:text-teal-500"
               flex items-center gap-1
               px-1 rounded cursor-pointer
               text="xs neutral/80"
               bg="neutral/10"
-              dark="text-neutral-600 border-neutral/40"
-              @click="pkb.reconnect()"
+              @click="pks.reconnect()"
             >
               <!-- <div v-tooltip="pkb.isWorkshopActive.value ? 'Click to try reconnecting' : 'No active workshop.'">
                 Disconnected
               </div> -- -->
 
-              <div v-tooltip="'Click to try reconnecting'">
-                Disconnected
+              <div v-tooltip="'Click to receive real time updates from the instructor'">
+                Reconnect
               </div>
-            </button>
+            </YvButton>
           </div>
         </slot>
       </div>

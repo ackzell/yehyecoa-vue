@@ -7,7 +7,7 @@ import { onMounted, watch } from 'vue';
 
 import { useToastsStore } from '@/components/toasts/useToastsStore';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
-import { usePartyKitBroadcast } from '@/composables/usePartyKit';
+import { usePartyKitStore } from '@/composables/usePartyKitStore';
 
 const AvailableMessageTypes = {
   FULL_SYNC: 'full_sync',
@@ -57,7 +57,7 @@ type AnyReplUpdateMessage
 
 export function useReplSync(): void {
   const fm = useFileManagerStore();
-  const pkb = usePartyKitBroadcast();
+  const pks = usePartyKitStore();
   const { toast } = useToastsStore();
 
   let instructorDecorations: string[] = [];
@@ -67,7 +67,7 @@ export function useReplSync(): void {
     type: T,
     payload: ReplMessagePayloads[T],
   ): void {
-    pkb.send<ReplMessage<T>>({
+    pks.send<ReplMessage<T>>({
       id: 'instructor',
       type,
       payload,
@@ -99,7 +99,7 @@ export function useReplSync(): void {
       return;
     }
 
-    pkb.onMessage(async (message: AnyReplUpdateMessage) => {
+    pks.onMessage(async (message: AnyReplUpdateMessage) => {
       if (message.id === 'instructor' && isInstructor)
         return;
 

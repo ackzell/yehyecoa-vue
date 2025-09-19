@@ -20,7 +20,7 @@ const defaultToast: Omit<Toast, 'id'> = {
   createdTimestamp: 0,
 };
 
-export const useToastsStore = defineStore('toastStore', () => {
+export const useToastsStore = defineStore('toastsStore', () => {
   const activeToasts = reactive<Toast[]>([]);
 
   function addToast(toast: Omit<Partial<Toast>, 'id'>): string {

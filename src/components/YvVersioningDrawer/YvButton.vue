@@ -13,6 +13,7 @@ const props = defineProps<YvButtonProps>();
 <template>
   <button
     :class="cn(`group rounded
+    cursor-pointer
     bg-neutral-200/50 dark:bg-input/30
     hover:scale-110
     text-xs text-muted-foreground

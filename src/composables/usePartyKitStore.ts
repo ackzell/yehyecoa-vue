@@ -1,47 +1,36 @@
-import type { Ref } from 'vue';
-
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate';
 import PartySocket from 'partysocket';
+import { defineStore } from 'pinia';
 import { onBeforeMount, onUnmounted, readonly, ref, shallowRef } from 'vue';
 
 import { useToastsStore } from '@/components/toasts/useToastsStore';
 
-let connection: PartySocket | null = null;
-const isConnected = ref(false);
-const isInstructorConnected = ref(false);
-// const isWorkshopActive = ref(false);
-const currentRoomId = ref('');
-const offlineInstructorTimeLeft = shallowRef(0);
-const messageHandlers = new Set<MessageHandler>();
-let initialized = false;
-const { toast } = useToastsStore();
-
 type MessageHandler = (message: any) => void;
 
-type PartyBroadcast = {
-  isConnected: Ref<boolean>;
-  currentRoomId: Ref<string>;
-  offlineInstructorTimeLeft: Ref<number>;
-  send: <T>(data: T) => void;
-  onMessage: (handler: MessageHandler) => () => void; // Returns unsubscribe function
-  disconnect: () => void;
-  reconnect: () => void;
-  isInstructorConnected: Ref<boolean>;
-  // isWorkshopActive: Ref<boolean>;
-};
+export const usePartyKitStore = defineStore('partyKitStore', () => {
+  let connection: PartySocket | null = null;
+  const isConnected = ref(false);
+  const isInstructorConnected = ref(false);
+  // const isWorkshopActive = ref(false);
+  const currentRoomId = ref('');
+  const offlineInstructorTimeLeft = shallowRef(0);
+  const messageHandlers = new Set<MessageHandler>();
+  let initialized = false;
 
-export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
+  const { toast } = useToastsStore();
+  const isUserInstructor = ref(sessionStorage.getItem('isInstructor') === 'yes');
+
   if (!initialized) {
     initialized = true;
 
-    const id = sessionStorage.getItem('isInstructor') === 'yes'
+    const id = isUserInstructor.value
       ? 'instructor'
       : `attendee-${crypto.randomUUID().slice(0, 8)}`;
 
     onBeforeMount(() => {
       connection = new PartySocket({
         host: 'http://127.0.0.1:1999',
-        room,
+        room: 'test-workshop',
         id,
       });
 
@@ -121,7 +110,7 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
     });
   }
 
-  function send(data: any): void {
+  function send<T>(data: T): void {
     try {
       const jsonString = JSON.stringify(data);
       const payload = strToU8(jsonString);
@@ -152,6 +141,7 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
 
   return {
     isConnected: readonly(isConnected),
+    isUserInstructor: readonly(isUserInstructor),
     isInstructorConnected: readonly(isInstructorConnected),
     // isWorkshopActive: readonly(isWorkshopActive),
     currentRoomId: readonly(currentRoomId),
@@ -161,4 +151,4 @@ export function usePartyKitBroadcast(room = 'test-workshop'): PartyBroadcast {
     disconnect,
     reconnect,
   };
-}
+});

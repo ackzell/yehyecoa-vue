@@ -12,7 +12,7 @@ const fm = useFileManagerStore();
   <div>
     <nav
       flex="~ justify-between"
-      relative pr-6 z-999
+      relative p-4 pr-6 z-999
       shadow-md
       bg="light dark:dark-900"
       border="b neutral-300/10"
