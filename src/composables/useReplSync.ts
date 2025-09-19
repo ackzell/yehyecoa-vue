@@ -2,7 +2,6 @@ import type { BatchUpdateOperation, ReplStore } from '@calmecac-vue/repl';
 
 import { useDebounceFn } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
-
 import { onMounted, watch } from 'vue';
 
 import { useToastsStore } from '@/components/toasts/useToastsStore';
@@ -121,8 +120,21 @@ export function useReplSync(): void {
 
     if (isInstructor) {
       setupInstructorHandlers(fm.replStore, editor, sendReplMessage);
-      // NEW: Send full sync on instructor init
-      sendFullSync();
+
+      // Watch for store readiness and connection state
+      watch([
+        () => pks.isConnected,
+        () => fm.replStore.files,
+        () => fm.replStore.activeFile,
+      ], ([isConnected, files, activeFile]) => {
+        if (isConnected && files && activeFile) {
+          console.warn('[DEBUG] Instructor state ready, sending sync...', {
+            filesCount: Object.keys(files).length,
+            activeFile: activeFile.filename,
+          });
+          sendFullSync();
+        }
+      }, { deep: true, immediate: true });
     }
     else {
       console.warn('ATTENDEE, receiving instructor updates...');
@@ -130,19 +142,53 @@ export function useReplSync(): void {
 
     async function handleFullSync(payload: ReplMessagePayloads['full_sync']): Promise<void> {
       try {
-        console.log('Applying full sync from instructor...');
+        console.warn('[DEBUG] Handling full sync from instructor...');
 
-        // Extract just the code from each file
-        const fileState: Record<string, string> = {};
-        for (const [filename, fileData] of Object.entries(payload.files)) {
-          fileState[filename] = fileData.code;
+        if (!payload.files || !payload.activeFile) {
+          console.error('Invalid sync payload received:', payload);
+          return;
         }
 
-        // Apply the fileState
-        await fm.replStore.applyFullState(fileState, typeof payload.activeFile === 'string' ? payload.activeFile : undefined);
+        console.warn('[DEBUG] Preparing file updates...');
+        // Prepare batch updates for files
+        const updates: BatchUpdateOperation[] = [];
+
+        // First mark all current files for deletion
+        Object.keys(fm.replStore.files).forEach((filename) => {
+          updates.push({
+            type: 'delete',
+            filename,
+          });
+        });
+
+        console.warn('[DEBUG] Creating new files in order...');
+        // Create files in the specified order
+        for (const filename of payload.fileOrder) {
+          const fileData = payload.files[filename];
+          if (!fileData)
+            continue;
+
+          updates.push({
+            type: 'create',
+            filename,
+            content: fileData.code,
+          });
+        }
+
+        console.warn('[DEBUG] Applying batch updates...');
+        await fm.replStore.batchUpdate(updates);
+
+        // Set active file in editor while keeping App.vue as main file
+        if (payload.activeFile && fm.replStore.files[payload.activeFile]) {
+          fm.replStore.activeFilename = payload.activeFile;
+        }
+        // Always keep App.vue as the main (preview) file
+        if (fm.replStore.files['src/App.vue']) {
+          fm.replStore.mainFile = 'src/App.vue';
+        }
 
         // Wait for the store to settle
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         // Restore editor view states
         for (const [filename, fileData] of Object.entries(payload.files)) {
@@ -168,7 +214,7 @@ export function useReplSync(): void {
           }
         }
 
-        console.log('Full sync completed successfully');
+        console.warn('[DEBUG] Full sync completed successfully');
       }
       catch (error) {
         console.error('Error during full sync:', error);
