@@ -40,7 +40,7 @@ const pks = usePartyKitStore();
             </div>
 
             <YvButton
-              v-if=" pks.isConnected"
+              v-if="pks.isConnected"
               class="hover:bg-teal-400/20 hover:text-teal-600 active:bg-teal-400/50 active:text-teal-900"
               dark="hover:bg-teal-300/10 hover:text-teal-300 active:bg-teal-300/20 active:text-teal-500"
               @click="pks.disconnect()"
