@@ -1,0 +1,21 @@
+{
+  "name": "@calmecac-vue/party-kit",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "partykit dev --live",
+    "deploy": "partykit deploy",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "partysocket": "^1.0.2"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^1.6.1",
+    "fflate": "^0.8.2",
+    "partykit": "^0.0.110",
+    "typescript": "^5.5.4",
+    "vitest": "^1.6.1"
+  }
+}
