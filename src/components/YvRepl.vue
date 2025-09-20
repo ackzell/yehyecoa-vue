@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Repl } from '@calmecac-vue/repl';
+import { Repl, useReplEditor } from '@calmecac-vue/repl';
 import Monaco from '@calmecac-vue/repl/monaco-editor';
 import { useIntervalFn } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
@@ -24,23 +24,22 @@ useIntervalFn(() => {
 }, AUTO_SAVE_INTERVAL_MINUTES);
 
 onMounted(() => {
-  // Editor access is now available through both:
-  // - Legacy: fm.replStore.editor
-  // - New composable: useReplEditor() for cleaner separation of concerns
+  // Set up manual save keybinding using the editor composable
+  const { getEditor } = useReplEditor();
+  const editor = getEditor();
 
-  const editor = fm.replStore.editor;
-
-  if (!editor) {
-    console.error('REPL editor instance not found.');
-    return;
-  }
-
-  editor.addCommand(MonacoCore.KeyMod.CtrlCmd | MonacoCore.KeyCode.KeyS, () => {
-    fm.saveSnapshot({
-      type: 'manual',
-      message: 'Manual save from editor',
+  if (editor) {
+    // Add manual save command to Monaco editor
+    editor.addCommand(MonacoCore.KeyMod.CtrlCmd | MonacoCore.KeyCode.KeyS, () => {
+      fm.saveSnapshot({
+        type: 'manual',
+        message: 'Manual save from editor',
+      });
     });
-  });
+  }
+  else {
+    console.warn('Editor not available for manual save keybinding');
+  }
 });
 </script>
 

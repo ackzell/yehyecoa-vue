@@ -29,12 +29,12 @@ While primarily designed for TutorialKit integration, it can also function as a 
 This is a pnpm workspace project containing multiple packages:
 
 1. **Root Project**: Main application integrating all components
-2. **`packages/party-kit/`**: 
+2. **`packages/party-kit/`**:
    - PartyKit server implementation
    - Handles real-time WebSocket communication
    - Manages room state and instructor/attendee connections
 
-3. **`packages/vue-repl/`**: 
+3. **`packages/vue-repl/`**:
    - Forked from official `@vue/repl`
    - Enhanced store management for better external control
    - Improved state exposure and management patterns
@@ -72,10 +72,10 @@ The project is designed to work as a standalone application or as an embedded co
   - Central to application state management
   - Key stores in `/src/composables/`:
     ```typescript
-    usePartyKitStore    // WebSocket and real-time state
-    useFileManagerStore // REPL file management
-    useSettingsStore    // Application configuration
-    useToastsStore     // UI notifications
+    usePartyKitStore; // WebSocket and real-time state
+    useFileManagerStore; // REPL file management
+    useSettingsStore; // Application configuration
+    useToastsStore; // UI notifications
     ```
   - Leverages Vue Composition API integration
   - Enables clean separation of concerns
@@ -87,18 +87,18 @@ The project is designed to work as a standalone application or as an embedded co
      ```typescript
      // uno.config.ts
      presets: [
-       presetWind4(),           // Tailwind v4 compatible utilities
-       presetAnimations(),      // Animation utilities
-       presetTypography(),      // Typography utilities
-       presetWebFonts(),        // Web fonts support
-       presetShadcn(),          // shadcn integration
+       presetWind4(), // Tailwind v4 compatible utilities
+       presetAnimations(), // Animation utilities
+       presetTypography(), // Typography utilities
+       presetWebFonts(), // Web fonts support
+       presetShadcn(), // shadcn integration
        presetIcons({
          collections: {
            carbon: () => import('@iconify-json/carbon/icons.json'),
            mynaui: () => import('@iconify-json/mynaui/icons.json'),
          }
        })
-     ]
+     ];
      ```
 
 2. **shadcn-vue Components**:
@@ -120,7 +120,7 @@ The project is designed to work as a standalone application or as an embedded co
   - `useFileManagerStore.ts`: File management and state
 
 ### Real-time Collaboration Model
-- **Instructor-Attendee Pattern**: 
+- **Instructor-Attendee Pattern**:
   ```typescript
   // src/composables/useReplSync.ts
   const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
@@ -128,12 +128,12 @@ The project is designed to work as a standalone application or as an embedded co
 - **Message Types**:
   ```typescript
   const AvailableMessageTypes = {
-    FULL_SYNC: 'full_sync',      // Complete REPL state sync
+    FULL_SYNC: 'full_sync', // Complete REPL state sync
     BATCH_UPDATE: 'batch_update', // Incremental file changes
-    SELECTION: 'selection',       // Cursor/selection sync
-    SCROLL: 'scroll',            // Viewport sync
-    SYSTEM: 'system'             // System messages
-  }
+    SELECTION: 'selection', // Cursor/selection sync
+    SCROLL: 'scroll', // Viewport sync
+    SYSTEM: 'system' // System messages
+  };
   ```
 
 ### State Management
@@ -163,7 +163,7 @@ The sync process follows a specific order:
     type: 'create' | 'update' | 'delete' | 'setActive';
     filename: string;
     content?: string;
-  }
+  };
   ```
 
 ### 3. Error Handling
@@ -196,7 +196,7 @@ catch (error) {
 ### 1. State Compression
 Always compress state before sending over WebSocket:
 ```typescript
-compressSync(strToU8(JSON.stringify(message)))
+compressSync(strToU8(JSON.stringify(message)));
 ```
 
 ### 2. File State Management
@@ -263,11 +263,11 @@ console.error('Error details:', error);
    function handleFileChange() {
      // Implementation
    }
-   
+
    // Use arrow functions for callbacks in higher-order methods
    files.forEach((file) => {
-     processFile(file)
-   })
+     processFile(file);
+   });
    ```
 
 2. **Variable Naming**:
@@ -275,15 +275,15 @@ console.error('Error details:', error);
    - Descriptive identifiers that convey purpose
    - Store instances can use abbreviated names for readability:
      ```typescript
-     const pks = usePartyKitStore()    // PartyKit store
-     const fm = useFileManagerStore()   // File manager store
+     const pks = usePartyKitStore(); // PartyKit store
+     const fm = useFileManagerStore(); // File manager store
      ```
 
 3. **Destructuring Guidelines**:
    ```typescript
    // Good: Clear source context
    const { toast } = useToastsStore()
-   
+
    // Prefer: Maintain context for complex objects
    const store = useStore()
    store.files.forEach(...)  // Clear that 'files' comes from store
@@ -294,27 +294,27 @@ console.error('Error details:', error);
    // Prefer composables with defineStore
    export const usePartyKitStore = defineStore('partyKitStore', () => {
      // State as refs
-     const isConnected = ref(false)
-     const currentRoomId = ref('')
-     
+     const isConnected = ref(false);
+     const currentRoomId = ref('');
+
      // Computed as readonly when exposed
      return {
        isConnected: readonly(isConnected),
        currentRoomId: readonly(currentRoomId)
-     }
-   })
+     };
+   });
    ```
 
 5. **Type Definitions**:
    - Use TypeScript `type` over `interface`
    - Explicit message type definitions
    ```typescript
-   type ReplMessageType = typeof AvailableMessageTypes[keyof typeof AvailableMessageTypes]
+   type ReplMessageType = typeof AvailableMessageTypes[keyof typeof AvailableMessageTypes];
    type ReplMessage<T extends ReplMessageType = ReplMessageType> = {
-     type: T
-     id: string
-     payload: ReplMessagePayloads[T]
-   }
+     type: T;
+     id: string;
+     payload: ReplMessagePayloads[T];
+   };
    ```
 
 3. **Vue Component Structure**:
@@ -330,8 +330,8 @@ console.error('Error details:', error);
      // Operation
    }
    catch (error) {
-     console.error('Descriptive error:', error)
-     toast.error('User-friendly message')
+     console.error('Descriptive error:', error);
+     toast.error('User-friendly message');
    }
    ```
 

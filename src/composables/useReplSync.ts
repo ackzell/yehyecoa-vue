@@ -1,8 +1,9 @@
 import type { ReplStore } from '@calmecac-vue/repl';
+import { useReplEditor } from '@calmecac-vue/repl';
 
 import { useDebounceFn } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
-import { onMounted, watch } from 'vue';
+import { watch } from 'vue';
 
 import { useToastsStore } from '@/components/toasts/useToastsStore';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
@@ -93,14 +94,15 @@ export function useReplSync(): void {
     sendReplMessage('FULL_SYNC', payload);
   }
 
-  onMounted(() => {
-    const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
-    const editor = fm.replStore.editor;
+  const { editor } = useReplEditor();
 
-    if (!editor) {
-      console.error('REPL editor instance not found for sync.');
+  // Watch for editor to become available reactively
+  watch(editor, (editorInstance) => {
+    if (!editorInstance)
       return;
-    }
+
+    console.warn('Editor is now available, initializing sync...');
+    const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
 
     pks.onMessage(async (message: AnyMessage) => {
       // Ignore system messages for now
@@ -133,7 +135,7 @@ export function useReplSync(): void {
     });
 
     if (isInstructor) {
-      setupInstructorHandlers(fm.replStore, editor);
+      setupInstructorHandlers(fm.replStore, editorInstance);
 
       // Watch for store readiness and connection state
       watch([
@@ -185,10 +187,10 @@ export function useReplSync(): void {
 
           // Restore active editor view state
           const activeFile = fm.replStore.files[payload.activeFile];
-          if (activeFile?.editorViewState && editor) {
+          if (activeFile?.editorViewState && editorInstance) {
             setTimeout(() => {
               try {
-                editor.restoreViewState(activeFile.editorViewState!);
+                editorInstance.restoreViewState(activeFile.editorViewState!);
               }
               catch (error) {
                 console.warn('Could not restore editor view state:', error);
@@ -226,7 +228,7 @@ export function useReplSync(): void {
     }
 
     function handleSelectionUpdate(payload: SelectionPayload): void {
-      if (!editor || !editor.getModel()) {
+      if (!editorInstance || !editorInstance.getModel()) {
         return;
       }
 
@@ -237,27 +239,28 @@ export function useReplSync(): void {
 
       if (payload.selections) {
         lastInstructorSelections = payload.selections;
-        paintInstructorSelections(editor, lastInstructorSelections);
+        paintInstructorSelections(editorInstance, lastInstructorSelections);
 
         // Hook for repainting on model changes
-        if (!(editor as any)._instructorRepaintHooked) {
-          editor.onDidChangeModel(() => {
+        if (!(editorInstance as any)._instructorRepaintHooked) {
+          editorInstance.onDidChangeModel(() => {
+            // Clear selections when switching files - don't carry over selections from previous file
+            instructorDecorations = editorInstance.getModel()?.deltaDecorations(instructorDecorations, []) ?? [];
+            lastInstructorSelections = []; // Also clear the stored selections
+          });
+          editorInstance.onDidChangeModelContent(() => {
+            // Only repaint selections if we're still on the same file where the selection was made
             if (lastInstructorSelections.length > 0) {
-              paintInstructorSelections(editor, lastInstructorSelections);
+              paintInstructorSelections(editorInstance, lastInstructorSelections);
             }
           });
-          editor.onDidChangeModelContent(() => {
-            if (lastInstructorSelections.length > 0) {
-              paintInstructorSelections(editor, lastInstructorSelections);
-            }
-          });
-          (editor as any)._instructorRepaintHooked = true;
+          (editorInstance as any)._instructorRepaintHooked = true;
         }
       }
     }
 
     function handleScrollUpdate(payload: ScrollPayload): void {
-      if (!editor || !editor.getModel()) {
+      if (!editorInstance || !editorInstance.getModel()) {
         return;
       }
 
@@ -266,10 +269,10 @@ export function useReplSync(): void {
         return;
       }
 
-      editor.setScrollTop(payload.scrollTop);
-      editor.setScrollLeft(payload.scrollLeft);
+      editorInstance.setScrollTop(payload.scrollTop);
+      editorInstance.setScrollLeft(payload.scrollLeft);
     }
-  });
+  }, { immediate: true });
 
   function setupInstructorHandlers(
     store: ReplStore,
