@@ -24,6 +24,10 @@ useIntervalFn(() => {
 }, AUTO_SAVE_INTERVAL_MINUTES);
 
 onMounted(() => {
+  // Editor access is now available through both:
+  // - Legacy: fm.replStore.editor
+  // - New composable: useReplEditor() for cleaner separation of concerns
+  
   const editor = fm.replStore.editor;
 
   if (!editor) {
