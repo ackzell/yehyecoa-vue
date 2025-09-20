@@ -17,6 +17,8 @@
     "lint:fix": "eslint . --fix",
     "lint:packages": "pnpm -r run lint",
     "lint:all": "pnpm run lint && pnpm run lint:packages",
+    "sync:vue-repl": "git subtree pull --prefix=packages/vue-repl git@github.com:ackzell/vue-repl.git main --squash",
+    "sync:party-kit": "git subtree pull --prefix=packages/party-kit https://github.com/ackzell/party-kit.git main --squash",
     "format": "prettier --write src/",
     "install-in-amoxtli-vue": "rm -rf ../amoxtli-vue/src/templates/yehyecoa && cp -r dist/ ../amoxtli-vue/src/templates/yehyecoa",
     "bi": "npm run build && npm run install-in-amoxtli-vue",
