@@ -1,22 +1,8 @@
 /* eslint-disable no-console */
+import type { ReplMessage, SystemMessage } from '@calmecac-vue/shared-types';
 import type * as Party from 'partykit/server';
 
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate';
-
-type ReplMessage = {
-  type: 'repl';
-  code: 'FULL_SYNC' | 'CONTENT' | 'SELECTION' | 'SCROLL';
-  id: string;
-  payload: any;
-  timestamp: number;
-};
-
-type SystemMessage = {
-  type: 'system';
-  code: 'WELCOME' | 'INSTRUCTOR_CONNECTED' | 'INSTRUCTOR_DISCONNECTED';
-  payload: any;
-  timestamp: number;
-};
 
 export default class WorkshopParty implements Party.Server {
   private latestRepl: ReplMessage | null = null;

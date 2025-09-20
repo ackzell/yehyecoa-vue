@@ -1,6 +1,7 @@
 import type { ReplStore } from '@calmecac-vue/repl';
-import { useReplEditor } from '@calmecac-vue/repl';
+import type { AnyMessage, ContentPayload, FullSyncPayload, ReplMessage, ScrollPayload, SelectionPayload } from '@calmecac-vue/shared-types';
 
+import { useReplEditor } from '@calmecac-vue/repl';
 import { useDebounceFn } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
 import { watch } from 'vue';
@@ -8,47 +9,6 @@ import { watch } from 'vue';
 import { useToastsStore } from '@/components/toasts/useToastsStore';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { usePartyKitStore } from '@/composables/usePartyKitStore';
-
-// Message types matching the refactored server
-type ReplMessage = {
-  type: 'repl';
-  code: 'FULL_SYNC' | 'CONTENT' | 'SELECTION' | 'SCROLL';
-  id: string;
-  payload: any;
-  timestamp: number;
-};
-
-type SystemMessage = {
-  type: 'system';
-  code: 'WELCOME' | 'INSTRUCTOR_CONNECTED' | 'INSTRUCTOR_DISCONNECTED';
-  payload: any;
-  timestamp: number;
-};
-
-// Specific payload types for type safety
-type FullSyncPayload = {
-  files: Record<string, string>;
-  activeFile: string;
-  editorStates?: Record<string, MonacoCore.editor.ICodeEditorViewState | null>;
-};
-
-type ContentPayload = {
-  filename: string;
-  content: string;
-};
-
-type SelectionPayload = {
-  filename: string;
-  selections: MonacoCore.ISelection[] | null;
-};
-
-type ScrollPayload = {
-  filename: string;
-  scrollTop: number;
-  scrollLeft: number;
-};
-
-type AnyMessage = ReplMessage | SystemMessage;
 
 export function useReplSync(): void {
   const fm = useFileManagerStore();
