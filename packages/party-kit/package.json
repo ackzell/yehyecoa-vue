@@ -1,10 +1,12 @@
 {
   "name": "@calmecac-vue/party-kit",
+  "type": "module",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "dev": "partykit dev --live",
     "deploy": "partykit deploy",
+    "lint": "eslint .",
     "test": "vitest",
     "test:coverage": "vitest run --coverage"
   },
@@ -12,9 +14,13 @@
     "partysocket": "^1.0.2"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^5.2.1",
+    "@types/node": "^24.5.2",
     "@vitest/coverage-v8": "^1.6.1",
+    "eslint": "^9.35.0",
     "fflate": "^0.8.2",
     "partykit": "^0.0.110",
+    "tsx": "^4.20.5",
     "typescript": "^5.5.4",
     "vitest": "^1.6.1"
   }

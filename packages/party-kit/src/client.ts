@@ -10,7 +10,7 @@ let pingInterval: ReturnType<typeof setInterval>;
 const output = document.getElementById('app') as HTMLDivElement;
 
 // Helper function to add a new line to the DOM
-function add(text: string) {
+function add(text: string): void {
   output.appendChild(document.createTextNode(text));
   output.appendChild(document.createElement('br'));
 }

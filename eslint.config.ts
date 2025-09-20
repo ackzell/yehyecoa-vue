@@ -13,6 +13,7 @@ export default antfu({
   yaml: true,
   ignores: [
     '**/fixtures',
+    'packages/vue-repl/**', // Let vue-repl use its own ESLint config
   ],
 }, {
   // Additional config for more specific rules
