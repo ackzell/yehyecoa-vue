@@ -96,14 +96,17 @@ export function useReplSync(): void {
 
   const { editor } = useReplEditor();
 
-  // Watch for editor to become available reactively
-  watch(editor, (editorInstance) => {
-    if (!editorInstance)
+  const stopWatching = watch(editor, (editorInstance) => {
+    if (!editorInstance) {
       return;
+    }
 
-    console.warn('Editor is now available, initializing sync...');
     const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
+    initializeSync(editorInstance, isInstructor);
+    stopWatching();
+  }, { immediate: true });
 
+  function initializeSync(editorInstance: MonacoCore.editor.IStandaloneCodeEditor, isInstructor: boolean): void {
     pks.onMessage(async (message: AnyMessage) => {
       // Ignore system messages for now
       if (message.type === 'system') {
@@ -272,7 +275,7 @@ export function useReplSync(): void {
       editorInstance.setScrollTop(payload.scrollTop);
       editorInstance.setScrollLeft(payload.scrollLeft);
     }
-  }, { immediate: true });
+  } // End of initializeSync function
 
   function setupInstructorHandlers(
     store: ReplStore,
