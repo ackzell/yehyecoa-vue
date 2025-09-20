@@ -6,7 +6,7 @@ async function minifyWorkers() {
   const workerFiles = glob.sync('dist/**/*.worker*.js');
 
   for (const file of workerFiles) {
-    console.log(`Processing ${file}...`);
+    console.warn(`Processing ${file}...`);
     const originalCode = readFileSync(file, 'utf8');
     const originalSize = (originalCode.length / 1024 / 1024).toFixed(2);
 
@@ -26,7 +26,7 @@ async function minifyWorkers() {
     if (result.code) {
       writeFileSync(file, result.code);
       const newSize = (result.code.length / 1024 / 1024).toFixed(2);
-      console.log(`✓ ${file}: ${originalSize}MB → ${newSize}MB`);
+      console.warn(`✓ ${file}: ${originalSize}MB → ${newSize}MB`);
     }
   }
 }

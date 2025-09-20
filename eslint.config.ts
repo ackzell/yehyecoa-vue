@@ -14,6 +14,7 @@ export default antfu({
   ignores: [
     '**/fixtures',
     'packages/vue-repl/**', // Let vue-repl use its own ESLint config
+    '.github/copilot-instructions.md', // Exclude documentation file with code examples
   ],
 }, {
   // Additional config for more specific rules
