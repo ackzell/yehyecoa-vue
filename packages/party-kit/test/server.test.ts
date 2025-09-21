@@ -48,9 +48,9 @@ describe('workshopParty', () => {
   });
 
   describe('onMessage', () => {
-    it('only processes messages from instructor', async () => {
+    it('processes messages from users', async () => {
       const regularUser = new MockConnection('test-user');
-      const message = createTestMessage('repl', 'FULL_SYNC', { content: 'test' });
+      const message = createTestMessage('repl', 'REQUEST_FULL_SYNC');
 
       await server.onMessage(message, asPartyConnection(regularUser, room));
       // Verify no state change or broadcasts occurred
