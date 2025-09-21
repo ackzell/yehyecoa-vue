@@ -191,7 +191,7 @@ describe('message handling', () => {
       expect(receivedMessage).toBeUndefined();
     });
 
-    it('handles unknown message types gracefully', async () => {
+    it('ignores unknown message types from instructor', async () => {
       await server.onConnect(asPartyConnection(instructor, room));
       await server.onConnect(asPartyConnection(attendee, room));
 
@@ -201,16 +201,13 @@ describe('message handling', () => {
       await server.onMessage(
         JSON.stringify({
           type: 'unknown',
+          code: 'UNKNOWN_CODE',
           payload: { data: 'test' },
         }),
         asPartyConnection(instructor, room),
       );
 
-      expect(receivedMessage).toBeDefined();
-      const message = decompressMessage(receivedMessage!);
-      expect(message.type).toBe('repl');
-      expect(message.code).toBe('FULL_SYNC'); // Unknown types default to FULL_SYNC
-      expect(message.payload).toEqual({ data: 'test' });
+      expect(receivedMessage).toBeUndefined();
     });
   });
 });

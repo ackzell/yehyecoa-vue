@@ -1,3 +1,4 @@
+import type { ReplMessage, SystemMessage } from '@calmecac-vue/shared-types';
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate';
 
 // Create a minimal mock that only implements what we need for testing
@@ -88,9 +89,14 @@ export function decompressMessage(message: ArrayBuffer | Uint8Array): any {
   return JSON.parse(strFromU8(decompressSync(uint8Array)));
 }
 
-export function createTestMessage(type: string, payload: any = {}): ArrayBuffer {
+export function createTestMessage(
+  type: ReplMessage['type'] | SystemMessage['type'] = 'repl',
+  code: ReplMessage['code'] | SystemMessage['code'] = 'FULL_SYNC',
+  payload: ReplMessage['payload'] | SystemMessage['payload'] = {},
+): ArrayBuffer {
   return compressMessage({
     type,
+    code,
     id: 'test-id',
     payload,
     timestamp: Date.now(),

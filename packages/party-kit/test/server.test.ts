@@ -50,7 +50,7 @@ describe('workshopParty', () => {
   describe('onMessage', () => {
     it('only processes messages from instructor', async () => {
       const regularUser = new MockConnection('test-user');
-      const message = createTestMessage('full_sync', { content: 'test' });
+      const message = createTestMessage('repl', 'FULL_SYNC', { content: 'test' });
 
       await server.onMessage(message, asPartyConnection(regularUser, room));
       // Verify no state change or broadcasts occurred
@@ -60,7 +60,7 @@ describe('workshopParty', () => {
     it('processes full sync messages correctly', async () => {
       const instructor = new MockConnection('instructor');
       const payload = { files: { 'App.vue': 'content' } };
-      const message = createTestMessage('full_sync', payload);
+      const message = createTestMessage('repl', 'FULL_SYNC', payload);
 
       await server.onMessage(message, asPartyConnection(instructor, room));
 
@@ -75,7 +75,7 @@ describe('workshopParty', () => {
         file: 'App.vue',
         selection: { start: { line: 1, column: 1 }, end: { line: 1, column: 5 } },
       };
-      const message = createTestMessage('selection', payload);
+      const message = createTestMessage('repl', 'SELECTION', payload);
 
       await server.onMessage(message, asPartyConnection(instructor, room));
 
@@ -90,7 +90,7 @@ describe('workshopParty', () => {
         file: 'App.vue',
         scrollTop: 100,
       };
-      const message = createTestMessage('scroll', payload);
+      const message = createTestMessage('repl', 'SCROLL', payload);
 
       await server.onMessage(message, asPartyConnection(instructor, room));
 

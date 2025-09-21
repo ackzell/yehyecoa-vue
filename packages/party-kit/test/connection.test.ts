@@ -56,7 +56,8 @@ describe('connection handling', () => {
 
     await server.onMessage(
       JSON.stringify({
-        type: 'full_sync',
+        type: 'repl',
+        code: 'FULL_SYNC',
         payload: fullSyncPayload,
       }),
       asPartyConnection(instructor, room),

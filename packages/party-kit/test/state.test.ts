@@ -1,3 +1,4 @@
+import type { ReplMessage } from '@calmecac-vue/shared-types';
 import { beforeEach, describe, expect, it } from 'vitest';
 import WorkshopParty from '../src/server';
 import { asPartyConnection, asPartyRoom, asTestableServer } from './types';
@@ -38,8 +39,10 @@ describe('state management', () => {
     const instructor = new MockConnection('instructor');
     await server.onConnect(asPartyConnection(instructor));
 
-    const fullSyncMessage = {
-      type: 'full_sync',
+    const fullSyncMessage: ReplMessage = {
+      id: 'instructor',
+      type: 'repl',
+      code: 'FULL_SYNC',
       payload: { files: { 'App.vue': 'new content' } },
       timestamp: Date.now(),
     };
@@ -62,8 +65,10 @@ describe('state management', () => {
     const instructor = new MockConnection('instructor');
     await server.onConnect(asPartyConnection(instructor, room));
 
-    const initialState = {
-      type: 'full_sync',
+    const initialState: ReplMessage = {
+      id: 'instructor',
+      type: 'repl',
+      code: 'FULL_SYNC',
       payload: { files: { 'App.vue': 'initial content' } },
       timestamp: Date.now(),
     };
@@ -104,8 +109,10 @@ describe('state management', () => {
     await server.onConnect(asPartyConnection(attendee, room));
 
     // Send state update from instructor
-    const stateUpdate = {
-      type: 'full_sync',
+    const stateUpdate: ReplMessage = {
+      id: 'instructor',
+      type: 'repl',
+      code: 'FULL_SYNC',
       payload: { files: { 'App.vue': 'updated content' } },
       timestamp: Date.now(),
     };

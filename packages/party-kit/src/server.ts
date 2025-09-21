@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import type { ReplMessage, SystemMessage } from '@calmecac-vue/shared-types';
+import type { AnyMessage, ReplMessage, SystemMessage } from '@calmecac-vue/shared-types';
 import type * as Party from 'partykit/server';
 
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate';
@@ -124,6 +124,7 @@ export default class WorkshopParty implements Party.Server {
           comment: 'Instructor is online.',
           isInstructorConnected: true,
         },
+      // except the instructor themselves
       }, [conn.id]);
     }
 
@@ -168,7 +169,7 @@ export default class WorkshopParty implements Party.Server {
       return;
     }
 
-    let parsed: any;
+    let parsed: AnyMessage;
     try {
       if (message instanceof ArrayBuffer) {
         const decompressed = decompressSync(new Uint8Array(message));
@@ -184,146 +185,93 @@ export default class WorkshopParty implements Party.Server {
 
     this.lastInstructorActivity = Date.now();
 
-    // Handle both old format (during transition) and new format
-    if (parsed.type === 'repl') {
-      // New format with type: 'repl' and code
-      switch (parsed.code) {
-        case 'FULL_SYNC':
-          console.warn('[DEBUG] Instructor sent FULL_SYNC, updating cache');
-          console.warn('[DEBUG] New content for activeFile:', `${parsed.payload?.files?.[parsed.payload?.activeFile]?.substring(0, 100)}...`);
-          this.latestRepl = {
-            type: 'repl',
-            code: 'FULL_SYNC',
-            id: 'instructor',
-            payload: parsed.payload,
-            timestamp: Date.now(),
-          };
-          await this.saveState();
-          this.broadcastReplMessage({
-            type: 'repl',
-            code: 'FULL_SYNC',
-            id: 'instructor',
-            payload: parsed.payload,
-          }, [sender.id]);
-          break;
-
-        case 'CONTENT':
-          // New CONTENT code for individual file updates
-          console.warn('[DEBUG] Instructor sent CONTENT update, updating cache');
-          console.warn('[DEBUG] Updating file:', parsed.payload?.filename);
-
-          // Update the cached state with the new content
-          if (this.latestRepl && this.latestRepl.payload?.files) {
-            this.latestRepl.payload.files[parsed.payload.filename] = parsed.payload.content;
-            await this.saveState();
-            console.warn('[DEBUG] Cache updated for file:', parsed.payload.filename);
-          }
-          else {
-            console.warn('[DEBUG] No cached state to update, CONTENT ignored');
-          }
-
-          this.broadcastReplMessage({
-            type: 'repl',
-            code: 'CONTENT',
-            id: 'instructor',
-            payload: parsed.payload,
-          }, [sender.id]);
-          break;
-
-        case 'SELECTION':
-          this.latestSelections = {
-            type: 'repl',
-            code: 'SELECTION',
-            id: 'instructor',
-            payload: parsed.payload,
-            timestamp: Date.now(),
-          };
-          await this.saveState();
-          this.broadcastReplMessage({
-            type: 'repl',
-            code: 'SELECTION',
-            id: 'instructor',
-            payload: parsed.payload,
-          }, [sender.id]);
-          break;
-
-        case 'SCROLL':
-          this.latestScroll = {
-            type: 'repl',
-            code: 'SCROLL',
-            id: 'instructor',
-            payload: parsed.payload,
-            timestamp: Date.now(),
-          };
-          await this.saveState();
-          this.broadcastReplMessage({
-            type: 'repl',
-            code: 'SCROLL',
-            id: 'instructor',
-            payload: parsed.payload,
-          }, [sender.id]);
-          break;
-      }
+    if (!parsed || !parsed.type || !parsed.code) {
+      return;
     }
-    else {
-      // Legacy format support (type directly as 'full_sync', 'selection', etc.)
-      let updateMessage: ReplMessage;
 
-      switch (parsed.type) {
-        case 'full_sync':
-          updateMessage = {
-            type: 'repl',
-            code: 'FULL_SYNC',
-            id: 'instructor',
-            payload: parsed.payload,
-            timestamp: Date.now(),
-          };
-          this.latestRepl = updateMessage;
+    if (parsed.type !== 'repl') {
+      // log and ignore unknown message types
+      console.error('Unknown message type received from instructor:', parsed.type);
+      console.error('Ignoring message:', JSON.stringify(parsed, null, 2));
+
+      return;
+    }
+
+    switch (parsed.code) {
+      case 'FULL_SYNC':
+        console.warn('[DEBUG] Instructor sent FULL_SYNC, updating cache');
+        console.warn('[DEBUG] New content for activeFile:', `${parsed.payload?.files?.[parsed.payload?.activeFile]?.substring(0, 100)}...`);
+        this.latestRepl = {
+          type: 'repl',
+          code: 'FULL_SYNC',
+          id: 'instructor',
+          payload: parsed.payload,
+          timestamp: Date.now(),
+        };
+        await this.saveState();
+        this.broadcastReplMessage({
+          type: 'repl',
+          code: 'FULL_SYNC',
+          id: 'instructor',
+          payload: parsed.payload,
+        }, [sender.id]);
+        break;
+
+      case 'CONTENT':
+        console.warn('[DEBUG] Instructor sent CONTENT update, updating cache');
+        console.warn('[DEBUG] Updating file:', parsed.payload?.filename);
+
+        // Update the cached state with the new content
+        if (this.latestRepl && this.latestRepl.payload?.files) {
+          this.latestRepl.payload.files[parsed.payload.filename] = parsed.payload.content;
           await this.saveState();
-          break;
+          console.warn('[DEBUG] Cache updated for file:', parsed.payload.filename);
+        }
+        else {
+          console.warn('[DEBUG] No cached state to update, CONTENT ignored');
+        }
 
-        case 'selection':
-          updateMessage = {
-            type: 'repl',
-            code: 'SELECTION',
-            id: 'instructor',
-            payload: parsed.payload,
-            timestamp: Date.now(),
-          };
-          this.latestSelections = updateMessage;
-          await this.saveState();
-          break;
+        this.broadcastReplMessage({
+          type: 'repl',
+          code: 'CONTENT',
+          id: 'instructor',
+          payload: parsed.payload,
+        }, [sender.id]);
+        break;
 
-        case 'scroll':
-          updateMessage = {
-            type: 'repl',
-            code: 'SCROLL',
-            id: 'instructor',
-            payload: parsed.payload,
-            timestamp: Date.now(),
-          };
-          this.latestScroll = updateMessage;
-          await this.saveState();
-          break;
+      case 'SELECTION':
+        this.latestSelections = {
+          type: 'repl',
+          code: 'SELECTION',
+          id: 'instructor',
+          payload: parsed.payload,
+          timestamp: Date.now(),
+        };
+        await this.saveState();
+        this.broadcastReplMessage({
+          type: 'repl',
+          code: 'SELECTION',
+          id: 'instructor',
+          payload: parsed.payload,
+        }, [sender.id]);
+        break;
 
-        default:
-          updateMessage = {
-            type: 'repl',
-            code: 'FULL_SYNC', // Default fallback
-            id: 'instructor',
-            payload: parsed.payload,
-            timestamp: Date.now(),
-          };
-          break;
-      }
-
-      // Broadcast legacy format as new format
-      this.broadcastReplMessage({
-        type: updateMessage.type,
-        code: updateMessage.code,
-        id: updateMessage.id,
-        payload: updateMessage.payload,
-      }, [sender.id]);
+      case 'SCROLL':
+        this.latestScroll = {
+          type: 'repl',
+          code: 'SCROLL',
+          id: 'instructor',
+          payload: parsed.payload,
+          timestamp: Date.now(),
+        };
+        await this.saveState();
+        this.broadcastReplMessage({
+          type: 'repl',
+          code: 'SCROLL',
+          id: 'instructor',
+          payload: parsed.payload,
+        }, [sender.id]);
+        break;
     }
   }
 
