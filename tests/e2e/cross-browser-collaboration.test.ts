@@ -127,7 +127,7 @@ test.describe('Cross-Browser Real-time Collaboration', () => {
 
       // Test instructor presence detection
       await attendeePage.waitForTimeout(2000);
-      const attendeeInstructorIcon = attendeePage.locator('[i-carbon-user-filled]');
+      const attendeeInstructorIcon = attendeePage.locator('[i-ph-broadcast-fill]');
       await expect(attendeeInstructorIcon).toBeVisible({ timeout: 5000 });
 
       // Test content sync

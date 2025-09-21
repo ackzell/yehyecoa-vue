@@ -22,7 +22,7 @@ test.describe('Instructor/Attendee Mode', () => {
 
     // Check for the instructor user icon (should be visible regardless of connection status)
     // When instructor, the icon should be pink-500 if connected, otherwise neutral
-    const userIcon = page.locator('[i-carbon-user-filled]');
+    const userIcon = page.locator('[i-ph-broadcast-fill]');
     await expect(userIcon).toBeVisible();
   });
 
@@ -46,7 +46,7 @@ test.describe('Instructor/Attendee Mode', () => {
     await page.waitForTimeout(2000);
 
     // Check for the user icon (should show instructor status, not attendee status)
-    const userIcon = page.locator('[i-carbon-user-filled]');
+    const userIcon = page.locator('[i-ph-broadcast-fill]');
     await expect(userIcon).toBeVisible();
   });
 

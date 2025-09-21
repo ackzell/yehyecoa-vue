@@ -159,7 +159,7 @@ test.describe('Fast Real-time Collaboration Tests', () => {
 
       // Check for instructor presence indicator on attendee page
       await attendeePage.waitForTimeout(1000);
-      const instructorIcon = attendeePage.locator('[i-carbon-user-filled]');
+      const instructorIcon = attendeePage.locator('[i-ph-broadcast-fill]');
       await expect(instructorIcon).toBeVisible({ timeout: 5000 });
     }
     finally {

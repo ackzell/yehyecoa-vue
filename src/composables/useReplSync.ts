@@ -68,7 +68,7 @@ export function useReplSync(): void {
 
   function initializeSync(editorInstance: MonacoCore.editor.IStandaloneCodeEditor, isInstructor: boolean): void {
     pks.onMessage(async (message: AnyMessage) => {
-      // Ignore system messages for now
+      // these are handled on the lower level in usePartyKitStore
       if (message.type === 'system') {
         return;
       }

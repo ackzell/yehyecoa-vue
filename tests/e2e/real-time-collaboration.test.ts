@@ -56,7 +56,7 @@ test.describe('Real-time Collaboration', () => {
         await expect(attendeeConnectionBtn).toBeVisible({ timeout: 5000 });
 
         // Verify instructor icon status for attendee (should show instructor is online)
-        const attendeeInstructorIcon = attendeePage.locator('[i-carbon-user-filled]');
+        const attendeeInstructorIcon = attendeePage.locator('[i-ph-broadcast-fill]');
         await expect(attendeeInstructorIcon).toBeVisible({ timeout: 5000 });
       });
 
@@ -201,7 +201,7 @@ test.describe('Real-time Collaboration', () => {
       await attendeePage.waitForTimeout(2000);
 
       // Verify attendee sees instructor as connected (filled icon)
-      const attendeeInstructorIcon = attendeePage.locator('[i-carbon-user-filled]');
+      const attendeeInstructorIcon = attendeePage.locator('[i-ph-broadcast-fill]');
       await expect(attendeeInstructorIcon).toBeVisible({ timeout: 5000 });
 
       // Disconnect instructor
@@ -213,7 +213,7 @@ test.describe('Real-time Collaboration', () => {
       await attendeePage.waitForTimeout(2000);
 
       // Verify attendee sees instructor as offline (unfilled icon)
-      const attendeeInstructorOfflineIcon = attendeePage.locator('[i-carbon-user]:not([i-carbon-user-filled])');
+      const attendeeInstructorOfflineIcon = attendeePage.locator('[i-ph-broadcast]:not([i-ph-broadcast-fill])');
       await expect(attendeeInstructorOfflineIcon).toBeVisible({ timeout: 5000 });
     }
     finally {
