@@ -27,10 +27,14 @@ export const usePartyKitStore = defineStore('partyKitStore', () => {
       ? 'instructor'
       : `attendee-${crypto.randomUUID().slice(0, 8)}`;
 
+    // Get room from URL parameter or default to 'test-workshop'
+    const urlParams = new URLSearchParams(window.location.search);
+    const room = urlParams.get('room') || 'test-workshop';
+
     onBeforeMount(() => {
       connection = new PartySocket({
         host: 'http://127.0.0.1:1999',
-        room: 'test-workshop',
+        room,
         id,
       });
 

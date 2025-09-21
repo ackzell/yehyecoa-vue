@@ -17,6 +17,8 @@
     "lint:fix": "eslint . --fix",
     "lint:packages": "pnpm -r run lint",
     "lint:all": "pnpm run lint && pnpm run lint:packages",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "sync:vue-repl": "git subtree pull --prefix=packages/vue-repl git@github.com:ackzell/vue-repl.git main --squash",
     "sync:party-kit": "git subtree pull --prefix=packages/party-kit https://github.com/ackzell/party-kit.git main --squash",
     "format": "prettier --write src/",
@@ -48,6 +50,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.2.1",
+    "@playwright/test": "^1.55.0",
     "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.16.5",
     "@vitejs/plugin-vue": "^6.0.1",

@@ -366,3 +366,15 @@ console.error('Error details:', error);
 - Test both instructor and attendee scenarios
 - Verify compression/decompression of messages
 - Test synchronization edge cases
+
+### Playwright E2E Testing
+- **UnoCSS Icon Selectors**: Icon utilities like `i-carbon-user-filled` become HTML attributes, not CSS classes
+  ```typescript
+  // ✅ Correct - UnoCSS creates attributes
+  page.locator('[i-carbon-user-filled]')
+  
+  // ❌ Incorrect - looking for classes
+  page.locator('[class*="i-carbon-user-filled"]')
+  ```
+- Use attribute selectors for UnoCSS icon utilities in tests
+- Test real-time collaboration with dual browser contexts
