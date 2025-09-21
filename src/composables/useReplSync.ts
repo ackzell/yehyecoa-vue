@@ -1,5 +1,5 @@
 import type { ReplStore } from '@calmecac-vue/repl';
-import type { AnyMessage, ContentPayload, FullSyncPayload, ReplMessage, ScrollPayload, SelectionPayload } from '@calmecac-vue/shared-types';
+import type { AnyMessage, AttendeeMessage, ContentPayload, FullSyncPayload, ReplMessage, ReplMessagePayloads, ScrollPayload, SelectionPayload } from '@calmecac-vue/shared-types';
 
 import { useReplEditor } from '@calmecac-vue/repl';
 import { useDebounceFn } from '@vueuse/core';
@@ -14,15 +14,48 @@ export function useReplSync(): void {
   const fm = useFileManagerStore();
   const pks = usePartyKitStore();
   const { toast } = useToastsStore();
+  const { editor } = useReplEditor();
 
   let instructorDecorations: string[] = [];
   let lastInstructorSelections: MonacoCore.ISelection[] = [];
 
-  function sendReplMessage(code: ReplMessage['code'], payload: any): void {
+  const stopEditorWatcher = watch(editor, (editorInstance) => {
+    if (!editorInstance) {
+      return;
+    }
+
+    const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
+    initializeSync(editorInstance, isInstructor);
+    stopEditorWatcher();
+  }, { immediate: true });
+
+  watch(() => pks.isFollowingInstructor, (isFollowingInstructor) => {
+    if (isFollowingInstructor) {
+      sendAttendeeMessage('REQUEST_FULL_SYNC', pks.currentId);
+    }
+  });
+
+  function sendAttendeeMessage(
+    code: AttendeeMessage['code'],
+    id: string,
+  ): void {
+    pks.send<AttendeeMessage>({
+      type: 'repl',
+      code,
+      id,
+      timestamp: Date.now(),
+    });
+  }
+
+  function sendReplMessage(
+    code: ReplMessage['code'],
+    payload: ReplMessagePayloads[typeof code],
+    id: string = 'instructor',
+  ): void {
     pks.send<ReplMessage>({
       type: 'repl',
       code,
-      id: 'instructor',
+      id,
       payload,
       timestamp: Date.now(),
     });
@@ -44,27 +77,15 @@ export function useReplSync(): void {
       editorStates,
     };
 
-    console.warn('[DEBUG] Instructor sending full sync:', {
-      filesSending: Object.keys(files),
-      activeFile: payload.activeFile,
-      fileSizes: Object.entries(files).map(([name, content]) => ({ name, size: content.length })),
-      activeFileContent: `${files[payload.activeFile]?.substring(0, 100)}...`, // First 100 chars of active file
-    });
+    // console.warn('[DEBUG] Instructor sending full sync:', {
+    //   filesSending: Object.keys(files),
+    //   activeFile: payload.activeFile,
+    //   fileSizes: Object.entries(files).map(([name, content]) => ({ name, size: content.length })),
+    //   activeFileContent: `${files[payload.activeFile]?.substring(0, 100)}...`, // First 100 chars of active file
+    // });
 
     sendReplMessage('FULL_SYNC', payload);
   }
-
-  const { editor } = useReplEditor();
-
-  const stopWatching = watch(editor, (editorInstance) => {
-    if (!editorInstance) {
-      return;
-    }
-
-    const isInstructor = sessionStorage.getItem('isInstructor') === 'yes';
-    initializeSync(editorInstance, isInstructor);
-    stopWatching();
-  }, { immediate: true });
 
   function initializeSync(editorInstance: MonacoCore.editor.IStandaloneCodeEditor, isInstructor: boolean): void {
     pks.onMessage(async (message: AnyMessage) => {
@@ -75,6 +96,11 @@ export function useReplSync(): void {
 
       // Ignore instructor's own messages
       if (message.id === 'instructor' && isInstructor) {
+        return;
+      }
+
+      // User opted to pause the sync
+      if (!pks.isUserInstructor && !pks.isFollowingInstructor) {
         return;
       }
 
@@ -107,10 +133,10 @@ export function useReplSync(): void {
         () => fm.replStore.activeFilename, // Only watch filename, not the file object
       ], ([isConnected, fileCount, activeFilename]) => {
         if (isConnected && fileCount > 0 && activeFilename) {
-          console.warn('[DEBUG] Instructor state ready, sending sync...', {
-            filesCount: fileCount,
-            activeFile: activeFilename,
-          });
+          // console.warn('[DEBUG] Instructor state ready, sending sync...', {
+          //   filesCount: fileCount,
+          //   activeFile: activeFilename,
+          // });
           sendFullSync();
         }
       }, { immediate: true }); // Removed deep: true since we're not watching objects
@@ -121,12 +147,12 @@ export function useReplSync(): void {
 
     async function handleFullSync(payload: FullSyncPayload): Promise<void> {
       try {
-        console.warn('[DEBUG] Handling full sync from instructor...', {
-          filesReceived: Object.keys(payload.files || {}),
-          activeFile: payload.activeFile,
-          editorStatesReceived: payload.editorStates ? Object.keys(payload.editorStates) : [],
-          activeFileContent: `${payload.files[payload.activeFile]?.substring(0, 100)}...`, // First 100 chars of active file
-        });
+        // console.warn('[DEBUG] Handling full sync from instructor...', {
+        //   filesReceived: Object.keys(payload.files || {}),
+        //   activeFile: payload.activeFile,
+        //   editorStatesReceived: payload.editorStates ? Object.keys(payload.editorStates) : [],
+        //   activeFileContent: `${payload.files[payload.activeFile]?.substring(0, 100)}...`, // First 100 chars of active file
+        // });
 
         if (!payload.files || !payload.activeFile) {
           console.error('Invalid sync payload received:', payload);
@@ -136,8 +162,8 @@ export function useReplSync(): void {
         // Use applyFullState for efficient state application
         await fm.replStore.applyFullState(payload.files, payload.activeFile);
 
-        console.warn('[DEBUG] State applied, current files:', Object.keys(fm.replStore.files));
-        console.warn('[DEBUG] Active file content after sync:', `${fm.replStore.files[payload.activeFile]?.code?.substring(0, 100)}...`);
+        // console.warn('[DEBUG] State applied, current files:', Object.keys(fm.replStore.files));
+        // console.warn('[DEBUG] Active file content after sync:', `${fm.replStore.files[payload.activeFile]?.code?.substring(0, 100)}...`);
 
         // Restore editor view states if available
         if (payload.editorStates) {
@@ -162,7 +188,7 @@ export function useReplSync(): void {
           }
         }
 
-        console.warn('[DEBUG] Full sync completed successfully');
+        // console.warn('[DEBUG] Full sync completed successfully');
       }
       catch (error) {
         console.error('Error during full sync:', error);

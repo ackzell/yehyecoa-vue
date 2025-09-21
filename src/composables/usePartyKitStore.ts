@@ -1,7 +1,9 @@
+import type { AnyMessage } from 'packages/shared-types/dist';
+
 import { compressSync, decompressSync, strFromU8, strToU8 } from 'fflate';
 import PartySocket from 'partysocket';
 import { defineStore } from 'pinia';
-import { onBeforeMount, onUnmounted, readonly, ref, shallowRef } from 'vue';
+import { onBeforeMount, onUnmounted, readonly, ref } from 'vue';
 
 import { useToastsStore } from '@/components/toasts/useToastsStore';
 
@@ -10,107 +12,106 @@ type MessageHandler = (message: any) => void;
 export const usePartyKitStore = defineStore('partyKitStore', () => {
   let connection: PartySocket | null = null;
   const isConnected = ref(false);
+  const isFollowingInstructor = ref(true);
   const isInstructorConnected = ref(false);
-  // const isWorkshopActive = ref(false);
+  const isWorkshopAvailable = ref(false);
   const currentRoomId = ref('');
-  const offlineInstructorTimeLeft = shallowRef(0);
+  const currentId = ref('');
   const messageHandlers = new Set<MessageHandler>();
   let initialized = false;
 
   const { toast } = useToastsStore();
   const isUserInstructor = ref(sessionStorage.getItem('isInstructor') === 'yes');
 
+  // Get room from URL parameter or default to 'test-workshop'
+  const urlParams = new URLSearchParams(window.location.search);
+  currentRoomId.value = urlParams.get('room') || 'test-workshop';
+
   if (!initialized) {
     initialized = true;
 
-    const id = isUserInstructor.value
-      ? 'instructor'
-      : `attendee-${crypto.randomUUID().slice(0, 8)}`;
-
-    // Get room from URL parameter or default to 'test-workshop'
-    const urlParams = new URLSearchParams(window.location.search);
-    const room = urlParams.get('room') || 'test-workshop';
-
-    onBeforeMount(() => {
-      connection = new PartySocket({
-        host: 'http://127.0.0.1:1999',
-        room,
-        id,
-      });
-
-      connection.addEventListener('open', () => {
-        isConnected.value = true;
-      });
-
-      connection.addEventListener('message', async (event) => {
-        let message: any;
-
-        try {
-          if (event.data instanceof Blob) {
-            const buffer = await event.data.arrayBuffer();
-            const decompressed = decompressSync(new Uint8Array(buffer));
-            const jsonString = strFromU8(decompressed);
-            message = JSON.parse(jsonString);
-
-            if (message.type === 'system') {
-              switch (message.code) {
-                case 'WELCOME':
-                  currentRoomId.value = message.payload.roomId;
-                  isInstructorConnected.value = message.payload.isInstructorConnected;
-                  // isWorkshopActive.value = message.payload.isWorkshopActive;
-                  // if (isWorkshopActive.value) {
-                  toast.success(currentRoomId.value, { description: 'Connected.' });
-                  console.warn(message.payload.comment);
-                  // }
-
-                  break;
-
-                case 'INSTRUCTOR_CONNECTED':
-                  isInstructorConnected.value = true;
-                  // isWorkshopActive.value = message.payload.isWorkshopActive;
-                  if (!(sessionStorage.getItem('isInstructor') === 'yes')) {
-                    toast.success('Instructor is online');
-                    console.warn(message.payload.comment);
-                  }
-                  break;
-
-                case 'INSTRUCTOR_DISCONNECTED':
-                  isInstructorConnected.value = message.payload.isInstructorConnected;
-                  toast.warning('Instructor is offline');
-                  console.warn(message.payload.comment);
-                  break;
-
-                  // case 'WORKSHOP_ENDED':
-                  //   isWorkshopActive.value = message.payload.isWorkshopActive;
-                  //   toast.info('Workshop ended');
-                  //   console.warn(message.payload.comment);
-                  //   break;
-
-                default:
-                  break;
-              }
-            }
-          }
-          else if (typeof event.data === 'string') {
-            message = JSON.parse(event.data);
-          }
-        }
-        catch (error) {
-          console.error('Failed to process incoming message:', error, 'Raw data:', event.data);
-        }
-
-        messageHandlers.forEach(handler => handler(message));
-      });
-
-      connection.addEventListener('close', () => {
-        isConnected.value = false;
-      });
+    onBeforeMount(async () => {
+      await checkForAvailableWorkshop(currentRoomId.value);
+      if (isWorkshopAvailable.value) {
+        initializeConnection(currentRoomId.value);
+      }
     });
 
     onUnmounted(() => {
       connection?.close();
       messageHandlers.clear();
       initialized = false; // Reset for HMR or next full page load
+    });
+  }
+
+  function initializeConnection(room: string): void {
+    currentId.value = isUserInstructor.value
+      ? 'instructor'
+      : `attendee-${crypto.randomUUID().slice(0, 8)}`;
+
+    connection = new PartySocket({
+      host: 'http://127.0.0.1:1999',
+      room,
+      id: currentId.value,
+    });
+
+    connection.addEventListener('open', () => {
+      isConnected.value = true;
+    });
+
+    connection.addEventListener('message', async (event) => {
+      let message: AnyMessage;
+
+      try {
+        if (event.data instanceof Blob) {
+          const buffer = await event.data.arrayBuffer();
+          const decompressed = decompressSync(new Uint8Array(buffer));
+          const jsonString = strFromU8(decompressed);
+          message = JSON.parse(jsonString);
+
+          if (message.type === 'system') {
+            switch (message.code) {
+              case 'WELCOME':
+                currentRoomId.value = message.payload.roomId;
+                isInstructorConnected.value = message.payload.isInstructorConnected;
+                isFollowingInstructor.value = true;
+                toast.success(currentRoomId.value, { description: 'Connected.' });
+                console.warn(message.payload.comment);
+                break;
+
+              case 'INSTRUCTOR_CONNECTED':
+                isInstructorConnected.value = true;
+                isFollowingInstructor.value = true;
+                if (!(isUserInstructor.value)) {
+                  toast.success('Instructor is online');
+                  console.warn(message.payload.comment);
+                }
+                break;
+
+              case 'INSTRUCTOR_DISCONNECTED':
+                isInstructorConnected.value = message.payload.isInstructorConnected;
+                toast.warning('Instructor is offline');
+                console.warn(message.payload.comment);
+                break;
+
+              default:
+                break;
+            }
+          }
+        }
+        else if (typeof event.data === 'string') {
+          message = JSON.parse(event.data);
+        }
+      }
+      catch (error) {
+        console.error('Failed to process incoming message:', error, 'Raw data:', event.data);
+      }
+
+      messageHandlers.forEach(handler => handler(message));
+    });
+
+    connection.addEventListener('close', () => {
+      isConnected.value = false;
     });
   }
 
@@ -143,16 +144,73 @@ export const usePartyKitStore = defineStore('partyKitStore', () => {
     connection?.reconnect();
   }
 
+  /**
+   * Checks if the PartyKit room (workshop) is available by making a fetch request to the PartyKit server.
+   * Sets isWorkshopAvailable accordingly.
+   * Returns true if available, false otherwise.
+   */
+  async function checkForAvailableWorkshop(room?: string): Promise<boolean> {
+    // Use the same logic as connection for room name
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomName = room || urlParams.get('room') || 'test-workshop';
+    // Use PartySocket.fetch to check the /status endpoint
+    try {
+      const res = await PartySocket.fetch({
+        host: 'http://127.0.0.1:1999',
+        room: roomName,
+        path: 'status',
+      }, {
+        method: 'GET',
+      });
+      if (res.ok) {
+        isWorkshopAvailable.value = true;
+        return true;
+      }
+      isWorkshopAvailable.value = false;
+      return false;
+    }
+    catch {
+      isWorkshopAvailable.value = false;
+      return false;
+    }
+  }
+
+  async function joinWorkshop(): Promise<void> {
+    await checkForAvailableWorkshop();
+    if (isWorkshopAvailable.value) {
+      initializeConnection('test-workshop');
+    }
+    else {
+      if (isUserInstructor.value) {
+        toast.error('No workshop available', {
+          description: 'Please create a workshop first.',
+        });
+        return;
+      }
+      toast.error('No workshop available', {
+        description: 'Please wait for the instructor to start it.',
+      });
+    }
+  }
+
+  function toggleFollowingInstructor(newValue: boolean): void {
+    isFollowingInstructor.value = newValue;
+  }
+
   return {
     isConnected: readonly(isConnected),
+    isFollowingInstructor: readonly(isFollowingInstructor),
     isUserInstructor: readonly(isUserInstructor),
     isInstructorConnected: readonly(isInstructorConnected),
-    // isWorkshopActive: readonly(isWorkshopActive),
+    isWorkshopAvailable: readonly(isWorkshopAvailable),
     currentRoomId: readonly(currentRoomId),
-    offlineInstructorTimeLeft: readonly(offlineInstructorTimeLeft),
+    currentId: readonly(currentId),
     send,
     onMessage,
     disconnect,
+    toggleFollowingInstructor,
     reconnect,
+    checkForAvailableWorkshop,
+    joinWorkshop,
   };
 });

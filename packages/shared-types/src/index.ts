@@ -10,6 +10,13 @@ export type ReplMessage = {
   timestamp: number;
 };
 
+export type AttendeeMessage = {
+  type: 'repl';
+  id: string;
+  code: 'REQUEST_FULL_SYNC';
+  timestamp: number;
+};
+
 export type SystemMessage = {
   type: 'system';
   code: 'WELCOME' | 'INSTRUCTOR_CONNECTED' | 'INSTRUCTOR_DISCONNECTED';

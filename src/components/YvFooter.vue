@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import YvOnlineStatus from './YvOnlineStatus.vue';
+import YvWorkshopJoiner from './YvWorkshopJoiner.vue';
 
 const version = import.meta.env.PACKAGE_VERSION;
 </script>
@@ -8,7 +8,7 @@ const version = import.meta.env.PACKAGE_VERSION;
   <div>
     <div
       flex="~ justify-between items-center"
-      relative p-2 pr-6 z-999
+      relative p-2 pr-6 z-40
       shadow-md
       bg="light dark:dark-900"
       border="b neutral-300/10"
@@ -17,8 +17,8 @@ const version = import.meta.env.PACKAGE_VERSION;
       transition="background-color 0.2s ease"
     >
       <div>
+        <YvWorkshopJoiner />
         <slot name="begin" />
-        <!-- <YvOnlineStatus /> -->
       </div>
       <div>
         <slot name="middle" />
