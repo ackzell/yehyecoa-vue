@@ -1,13 +1,13 @@
+import { shikiToMonaco } from '@shikijs/monaco'
 import * as monaco from 'monaco-editor-core'
 import { createHighlighterCoreSync } from 'shiki/core'
 import { createJavaScriptRegexEngine } from 'shiki/engine-javascript.mjs'
-import { shikiToMonaco } from '@shikijs/monaco'
 
-import langVue from 'shiki/langs/vue.mjs'
-import langTsx from 'shiki/langs/tsx.mjs'
 import langJsx from 'shiki/langs/jsx.mjs'
-import themeDark from 'shiki/themes/dark-plus.mjs'
-import themeLight from 'shiki/themes/light-plus.mjs'
+import langTsx from 'shiki/langs/tsx.mjs'
+import langVue from 'shiki/langs/vue.mjs'
+import themeLight from 'shiki/themes/snazzy-light.mjs'
+import themeDark from 'shiki/themes/vesper.mjs'
 
 let registered = false
 export function registerHighlighter() {
