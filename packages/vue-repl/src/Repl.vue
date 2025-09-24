@@ -4,6 +4,9 @@ import Output from './output/Output.vue'
 import { type Store, useStore } from './store'
 import { computed, provide, toRefs, useTemplateRef } from 'vue'
 import {
+    type ConsoleComponentType,
+
+
   type EditorComponentType,
   injectKeyPreviewRef,
   injectKeyProps,
@@ -15,6 +18,9 @@ export interface Props {
   theme?: 'dark' | 'light'
   previewTheme?: boolean
   editor: EditorComponentType
+    console?: ConsoleComponentType
+
+
   store?: Store
   autoResize?: boolean
   showCompileOutput?: boolean
@@ -22,6 +28,9 @@ export interface Props {
   showImportMap?: boolean
   showSsrOutput?: boolean
   showTsConfig?: boolean
+    showConsole?: boolean
+
+
   clearConsole?: boolean
   layout?: 'horizontal' | 'vertical'
   layoutReverse?: boolean
@@ -59,6 +68,9 @@ const props = withDefaults(defineProps<Props>(), {
   showImportMap: true,
   showSsrOutput: false,
   showTsConfig: true,
+    showConsole: false,
+
+
   clearConsole: true,
   layoutReverse: false,
   ssr: false,
@@ -72,6 +84,10 @@ if (!props.editor) {
   throw new Error('The "editor" prop is now required.')
 }
 
+const consoleWrapper = computed<ConsoleComponentType>(
+  () => props.console ?? (() => ({})),
+)
+
 const outputRef = useTemplateRef('output')
 
 props.store.init()
@@ -81,6 +97,9 @@ const outputSlotName = computed(() => (props.layoutReverse ? 'left' : 'right'))
 
 provide(injectKeyProps, {
   ...toRefs(props),
+    console: consoleWrapper,
+
+
   autoSave,
 })
 provide(
@@ -108,6 +127,7 @@ defineExpose({ reload })
         <Output
           ref="output"
           :editor-component="editor"
+          :console-component="consoleWrapper"
           :show-compile-output="props.showCompileOutput"
           :show-open-source-map="props.showOpenSourceMap"
           :show-ssr-output="props.showSsrOutput"

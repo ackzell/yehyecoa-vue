@@ -18,7 +18,7 @@ import type {
 import * as defaultCompiler from 'vue/compiler-sfc'
 import { type ImportMap, mergeImportMap, useVueImportMap } from './import-map'
 import { compileFile } from './transform'
-import type { OutputModes } from './types'
+import type { LogPayload, OutputModes } from './types'
 import { atou, utoa } from './utils'
 
 import newSFCCode from './template/new-sfc.vue?raw'
@@ -626,6 +626,8 @@ const applyFullState: ReplStore['applyFullState'] = async (fileState, activeFile
   }
   activeFilename ||= ref(mainFile.value)
   const activeFile = computed(() => files.value[activeFilename.value])
+  const executeLog = ref()
+  const clearConsole = ref()
 
   applyBuiltinImportMap()
 
@@ -675,7 +677,11 @@ const applyFullState: ReplStore['applyFullState'] = async (fileState, activeFile
     getFileLastModified,
     hasFile,
     batchUpdate,
-    applyFullState
+    applyFullState,
+
+    // console
+    executeLog,
+    clearConsole,
   })
 
   return store
@@ -774,6 +780,10 @@ export interface ReplStore<E extends Editor = Editor> extends UnwrapRef<StoreSta
   hasFile(filename: string): boolean
   batchUpdate(updates: BatchUpdateOperation[]): Promise<void>
   applyFullState(fileState: Record<string, string>, activeFilenameHint?: string): Promise<void>
+
+  // console
+  executeLog?(payload: LogPayload): void
+  clearConsole?(): void
 }
 
 export type Store<E extends Editor = Editor> = Pick<
@@ -799,6 +809,8 @@ export type Store<E extends Editor = Editor> = Pick<
   | 'renameFile'
   | 'getImportMap'
   | 'getTsConfig'
+   | 'executeLog'
+  | 'clearConsole'
 >
 
 function addSrcPrefix(file: string) {

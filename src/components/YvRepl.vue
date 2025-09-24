@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Repl, useReplEditor } from '@calmecac-vue/repl';
+import LunaConsole from '@calmecac-vue/repl/luna-console';
 import Monaco from '@calmecac-vue/repl/monaco-editor';
 import { useIntervalFn } from '@vueuse/core';
 import * as MonacoCore from 'monaco-editor-core';
@@ -35,6 +36,8 @@ onMounted(() => {
         type: 'manual',
         message: 'Manual save from editor',
       });
+
+      // editor.getAction('editor.action.formatDocument')?.run();
     });
   }
   else {
@@ -52,6 +55,8 @@ onMounted(() => {
   >
     <Repl
       :editor="Monaco"
+      :console="LunaConsole"
+      :show-console="true"
       :show-compile-output="false"
       :show-import-map="false"
       :show-ts-config="false"
