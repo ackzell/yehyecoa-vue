@@ -9,7 +9,7 @@ This file tracks the remaining work needed to complete CodeMirror support in the
 
 ## Required Changes
 
-### 1. Update Editor Types in `editor-composable.ts`
+### 1. Update Editor Types in `useReplEditor.ts`
 ```typescript
 // Current (Monaco only)
 type MonacoEditor = editor.IStandaloneCodeEditor
@@ -23,7 +23,7 @@ const currentEditor: Ref<Editor | undefined> = ref()
 ### 2. Add Integration to `codemirror/CodeMirror.vue`
 Similar to how Monaco.vue integrates:
 ```typescript
-import { useReplEditor } from '../editor-composable'
+import { useReplEditor } from '../useReplEditor'
 
 const { setEditor, clearEditor } = useReplEditor()
 

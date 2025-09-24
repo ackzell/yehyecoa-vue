@@ -14,7 +14,7 @@ import { initMonaco } from './env'
 import { getOrCreateModel } from './utils'
 import { type EditorMode, injectKeyProps } from '../types'
 import { registerHighlighter } from './highlight'
-import { useReplEditor } from '../editor-composable'
+import { useReplEditor } from '../useReplEditor'
 
 const props = withDefaults(
   defineProps<{

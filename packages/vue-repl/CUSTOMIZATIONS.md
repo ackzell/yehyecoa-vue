@@ -25,7 +25,7 @@ This document tracks the customizations made to the official @vue/repl for yehye
 ### Added Files
 - **CUSTOMIZATIONS.md**: This documentation file
 - **dist/** files: Built distribution files for package consumption
-- **src/editor-composable.ts**: New composable for clean editor access patterns
+- **src/useReplEditor.ts**: New composable for clean editor access patterns
 
 ### Editor Access Patterns
 - **New composable pattern**: Use `useReplEditor()` for clean separation of concerns
