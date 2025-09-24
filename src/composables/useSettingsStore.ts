@@ -1,0 +1,45 @@
+import type { RemovableRef } from '@vueuse/core';
+import { useStorage } from '@vueuse/core';
+import { nextTick, ref } from 'vue';
+
+type Theme = 'dark' | 'light';
+type Layout = 'horizontal' | 'vertical';
+
+type YVSettingsStore = {
+  settings: typeof settings;
+  toggleLayout: () => void;
+  toggleTheme: () => void;
+};
+
+type YVSettings = {
+  theme: RemovableRef<Theme>;
+  layout: RemovableRef<Layout>;
+};
+
+const settings = ref<YVSettings>({
+  theme: useStorage<Theme>('yehyecoa-vue-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+  layout: useStorage<Layout>('yehyecoa-vue-layout', 'horizontal'),
+});
+
+export function useSettingsStore(): YVSettingsStore {
+  function toggleLayout(): void {
+    settings.value.layout = settings.value.layout === 'horizontal' ? 'vertical' : 'horizontal';
+  }
+
+  const cls = document.documentElement.classList;
+
+  function toggleTheme(): void {
+    settings.value.theme = settings.value.theme === 'dark' ? 'light' : 'dark';
+
+    nextTick(() => {
+      if (settings.value.theme === 'dark') {
+        cls.add('dark');
+      }
+      else {
+        cls.remove('dark');
+      }
+    });
+  }
+
+  return { settings, toggleLayout, toggleTheme };
+}

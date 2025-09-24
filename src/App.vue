@@ -1,61 +1,31 @@
 <script setup lang="ts">
-import { Repl, useStore } from '@vue/repl'
-import Monaco from '@vue/repl/monaco-editor'
-import '@vue/repl/style.css'
-import { onMounted, ref } from 'vue'
-import ReplHeader from './ReplHeader.vue'
-import { useStorage } from '@vueuse/core'
+import YVHeader from '@/components/YvHeader.vue';
+import YvToasts from './components/toasts/YvToasts.vue';
+// import Drawer from './components/ui/drawer/Drawer.vue';
+import YvFooter from './components/YvFooter.vue';
+import YvRepl from './components/YvRepl.vue';
+import YvSidebar from './components/YvSidebar/YvSidebar.vue';
+import '@calmecac-vue/repl/style.css';
 
-const preferDark = useStorage('vue-sfc-playground-prefer-dark', true)
-
-const theme = ref<'dark' | 'light'>('dark')
-function setTheme(newTheme: 'dark' | 'light') {
-  theme.value = newTheme
-  preferDark.value = newTheme == 'dark'
+function setVH() {
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);
 }
+window.addEventListener('resize', setVH);
 
-const setVH = () => {
-  document.documentElement.style.setProperty('--vh', window.innerHeight + `px`)
-}
-window.addEventListener('resize', setVH)
-setVH()
-
-const store = useStore()
-
-const errormessage = ref('')
-
-onMounted(async () => {
-  // Initial load
-  try {
-    const fileContents = await fetch('/lessonFile.vue').then((r) => r.text())
-    store.setFiles({ 'src/App.vue': fileContents })
-  } catch {
-    errormessage.value = 'Failed to load lessonFile.vue'
-    console.error(
-      'Failed to load `lessonFile.vue`, makes sure you created one in the root directory.',
-    )
-  }
-
-  // Live updates via SSE
-  const es = new EventSource('/events')
-  es.addEventListener('fileUpdate', (event) => {
-    const { filename, content } = JSON.parse(event.data)
-    if (filename === 'lessonFile.vue') {
-      store.setFiles({ 'src/App.vue': content })
-    }
-  })
-})
+setVH();
 </script>
 
 <template>
-  <div class="repl-container">
-    <div v-if="errormessage" class="error">{{ errormessage }}</div>
-    <ReplHeader :theme="theme" @set-theme="setTheme" />
-    <Repl :editor="Monaco" :show-compile-output="false" :show-import-map="false" :show-ts-config="false" :theme="theme"
-      @keydown.ctrl.s.prevent @keydown.meta.s.prevent :editor-options="{
-        autoSaveText: false,
-      }" :store />
-  </div>
+  <!-- <Drawer v-model:open="isDo" :default-open="true" direction="right"> -->
+  <main class="repl-container" font-sans text-primary vaul-drawer-wrapper>
+    <YvToasts :stack-limit="4" />
+    <YVHeader />
+    <YvSidebar>
+      <YvRepl />
+    </YvSidebar>
+    <YvFooter />
+  </main>
+  <!-- </Drawer> -->
 </template>
 
 <style>
@@ -67,22 +37,10 @@ body {
   margin: 0;
   --base: #444;
   --nav-height: 50px;
-}
-
-.repl-container {
-  height: calc(var(--vh) - var(--nav-height)) !important;
-  color-scheme: dark;
+  --footer-height: 40px;
 }
 
 .dark {
   color-scheme: dark;
-}
-
-button {
-  border: none;
-  outline: none;
-  cursor: pointer;
-  margin: 0;
-  background-color: transparent;
 }
 </style>

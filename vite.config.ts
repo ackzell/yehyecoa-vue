@@ -1,18 +1,40 @@
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL } from 'node:url';
 
-import vue from '@vitejs/plugin-vue'
-import { defineConfig } from 'vite'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import vue from '@vitejs/plugin-vue';
+import UnoCSS from 'unocss/vite';
+import { defineConfig } from 'vite';
+import version from 'vite-plugin-package-version';
+import vueDevTools from 'vite-plugin-vue-devtools';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     vueDevTools(),
+    UnoCSS(),
+    version(),
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-})
+  build: {
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        // Force all chunks to be processed
+        inlineDynamicImports: false,
+      },
+    },
+  },
+  optimizeDeps: {
+    exclude: [
+      '@calmecac-vue/repl',
+      'monaco-editor',
+    ],
+  },
+  worker: {
+    // This ensures all workers, including those from dependencies, are bundled as ES modules.
+    format: 'es',
+  },
+});
