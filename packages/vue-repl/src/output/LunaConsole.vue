@@ -3,8 +3,10 @@ import { inject, onMounted, ref, useTemplateRef, watch } from 'vue'
 import LunaConsole from 'luna-console'
 import { type LogPayload, injectKeyProps } from '../types'
 import 'luna-object-viewer/luna-object-viewer.css'
+import 'luna-dom-viewer/luna-dom-viewer.css'
 import 'luna-data-grid/luna-data-grid.css'
 import 'luna-console/luna-console.css'
+import toEl from 'licia/toEl'
 
 const { store, theme } = inject(injectKeyProps)!
 const lunaRef = useTemplateRef('luna-ref')
@@ -16,7 +18,8 @@ onMounted(() => {
     theme: theme.value || 'light',
   })
   store.value.executeLog = ({ logLevel, data = [] }: LogPayload) => {
-    ;(lunaConsole.value?.[logLevel] as any)?.(...data)
+    const deserialized = data.map(deserializeMessage)
+      ; (lunaConsole.value?.[logLevel] as any)?.(...deserialized)
   }
   store.value.clearConsole = clearLunaConsole
 })
@@ -26,6 +29,107 @@ function clearLunaConsole() {
 }
 
 watch(() => store.value.activeFile.code, clearLunaConsole)
+
+/**
+ * Lossless deserialization:
+ * - Recreates primitives as-is
+ * - Returns enriched objects for complex types (with __type metadata)
+ * - Keeps outerHTML, function source, accessor info, etc.
+ */
+function deserializeMessage(arg: any): any {
+  if (arg === null || arg === undefined) return arg
+  if (typeof arg !== 'object' || !arg.__type) return arg
+
+  switch (arg.__type) {
+    case 'undefined':
+      return undefined
+
+    case 'function': {
+      // Approximated with a Function constructor (non-invocable stub)
+      const fn = new Function(`/* [Function ${arg.name}] */`)
+        ; (fn as any).__isStub = true
+        ; (fn as any).__preview = `[Function ${arg.name}]${arg.isNative ? ' [native]' : ''}`
+      return fn
+    }
+
+    case 'symbol':
+      return Symbol(arg.description ?? '')
+
+    case 'bigint':
+      try {
+        return BigInt(arg.value)
+      } catch {
+        return Object(`BigInt(${arg.value})`) // fallback object wrapper
+      }
+
+     case 'date':
+      return arg.invalid ? new Date('Invalid Date') : new Date(arg.value).toString()
+
+    case 'regexp':
+      return new RegExp(arg.source, arg.flags)
+
+    case 'error': {
+      const e = new Error(arg.message)
+      e.name = arg.name
+        ; (e as any).stack = arg.stack
+      return e
+    }
+
+   case 'dom': {
+     if (arg.outerHTML) {
+       const el = toEl(arg.outerHTML)
+       Object.defineProperty(el, '__preview', {
+         value: arg.outerHTML.replace(/\n/g, ''), // one-liner preview
+         enumerable: false,
+       })
+       return el
+     }
+     if (arg.nodeType === 3 && arg.textContent) {
+       return document.createTextNode(arg.textContent)
+     }
+     return `[DOM ${arg.tagName || 'Unknown'}]`
+   }
+
+    case 'vue_component':
+      return `[VueComponent ${arg.name}]`
+
+    case 'array': {
+      const items = arg.items?.map(deserializeMessage) ?? []
+      if (arg.truncated) {
+        items.push(`...and ${arg.truncated} more items`)
+      }
+      return items
+    }
+
+    case 'object': {
+      const out: Record<string, any> = {}
+      for (const key in arg.properties) {
+        const prop = arg.properties[key]
+        if (prop && 'value' in prop) {
+          out[key] = deserializeMessage(prop.value)
+        }
+      }
+      if (arg.truncatedProperties) {
+        out['__truncated__'] = `${arg.truncatedProperties} more properties`
+      }
+      // Method, not property
+      Object.defineProperty(out, 'toString', {
+        value: () => `[Object ${arg.constructor}]`,
+        enumerable: false,
+      })
+      return out
+    }
+
+    case 'circular':
+      return `[Circular ${arg.path ?? ''}]`
+
+    case 'accessor':
+      return `[Getter/Setter]`
+
+    default:
+      return `[Unrecognized ${arg.__type}]`
+  }
+}
 </script>
 
 <template>
@@ -48,8 +152,9 @@ watch(() => store.value.activeFile.code, clearLunaConsole)
 .luna-container {
   height: 100%;
   width: 100%;
-  overflow: scroll;
+  overflow: auto;
 }
+
 .luna-console-theme-dark {
   background-color: var(--bg) !important;
 }
@@ -69,14 +174,15 @@ watch(() => store.value.activeFile.code, clearLunaConsole)
 .clear-btn {
   font-size: 0.85rem;
   font-family: var(--font-code);
-  color: #999;
-  padding: 0.4rem;
+  color: var(--text-light);
+  padding: 0.3rem;
   margin: 0.2rem;
   background-color: var(--bg);
   border-radius: 4px;
   border: 1px solid var(--border);
-  &:hover {
-    color: var(--color-branding);
-  }
+}
+
+.clear-btn:hover {
+  color: var(--color-branding);
 }
 </style>

@@ -125,6 +125,9 @@ function changeViewSize() {
   font-size: 12px;
   color: var(--text-light);
   z-index: 100;
+  background-color: var(--bg-soft);
+  padding: 0.5rem;
+  border-radius: 4px;
 }
 .left {
   border-right: 1px solid var(--border);

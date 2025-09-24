@@ -56,10 +56,11 @@ const App = {
       h(Repl, {
         store,
         theme: theme.value,
-        previewTheme: previewTheme.value,
+        previewTheme: true,
         editor: MonacoEditor,
         showOpenSourceMap: true,
         // layout: 'vertical',
+
         ssr: true,
         showConsole: true,
         showSsrOutput: true,
