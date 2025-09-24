@@ -27,4 +27,14 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    exclude: [
+      '@calmecac-vue/repl',
+      'monaco-editor',
+    ],
+  },
+  worker: {
+    // This ensures all workers, including those from dependencies, are bundled as ES modules.
+    format: 'es',
+  },
 });

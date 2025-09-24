@@ -18,7 +18,7 @@ function compressFilesInDir(dir, dirName) {
       const compressed = zlib.gzipSync(content);
       fs.writeFileSync(`${filePath}.gz`, compressed);
 
-      console.log(`Compressed ${dirName}/${file}: ${Math.round(content.length / 1024)}KB → ${Math.round(compressed.length / 1024)}KB`);
+      console.warn(`Compressed ${dirName}/${file}: ${Math.round(content.length / 1024)}KB → ${Math.round(compressed.length / 1024)}KB`);
     });
 }
 

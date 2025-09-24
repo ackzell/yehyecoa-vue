@@ -31,40 +31,195 @@ This will first build the project and then copy the required contents from the `
 > [!Note]
 > Take a look at `amoxtli-vue/src/templates/yehyecoa/server.js` as it contains logic to _notify_ `yehyecoa-vue` when the contents of the file have been updated. This is if you want to dynamically update the contents of the editor (and thus perfect for embedding into a tk webcontainer).
 
-# Original Readme:
+## Development Environment Setup
 
-## Recommended IDE Setup
+### Prerequisites
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- **Node.js**: Version 24.5.0 (exact version specified in `.node-version` file and `engines` field)
 
-## Type Support for `.vue` Imports in TS
+  **Recommended**: Use [fnm](https://github.com/Schniz/fnm) to manage Node.js versions:
+  ```bash
+  # Install fnm (if not already installed)
+  curl -fsSL https://fnm.vercel.app/install | bash
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+  # Use the project's Node.js version (reads .node-version automatically)
+  fnm use
 
-## Customize configuration
+  # Or install and use the specific version
+  fnm install 24.5.0
+  fnm use 24.5.0
+  ```
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- **pnpm**: Version 10.17.0 (specified as packageManager)
+  ```bash
+  npm install -g pnpm@10.17.0
+  ```
 
-## Project Setup
+### Recommended IDE Setup
 
-```sh
-pnpm install
-```
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [UnoCSS](https://marketplace.visualstudio.com/items?itemName=antfu.unocss)
 
-### Compile and Hot-Reload for Development
+#### Recommended VSCode Extensions
 
-```sh
+- **Vue.volar** - Vue language support
+- **dbaeumer.vscode-eslint** - ESLint integration
+- **antfu.unocss** - UnoCSS IntelliSense
+- **bradlc.vscode-tailwindcss** - TailwindCSS IntelliSense (for CSS utilities)
+- **Vue.vscode-typescript-vue-plugin** - Vue TypeScript support
+
+### Project Architecture
+
+This is a **pnpm workspace** with multiple packages:
+
+- **Root**: Main Vue application with real-time collaboration
+- **`packages/party-kit/`**: PartyKit server for WebSocket communication
+- **`packages/vue-repl/`**: Enhanced Vue REPL component (forked from @vue/repl)
+- **`packages/shared-types/`**: Shared TypeScript types
+
+### Installation
+
+1. **Clone and install dependencies**:
+   ```bash
+   git clone <repository-url>
+   cd yehyecoa-vue
+   pnpm install
+   ```
+
+2. **Install dependencies for all workspace packages**:
+   ```bash
+   # This installs dependencies for all packages in the workspace
+   pnpm install --recursive
+   ```
+
+### Development Workflow
+
+#### Option 1: Full Development Setup (Recommended)
+
+For complete real-time collaboration features, you need both the main app and PartyKit server:
+
+1. **Start the PartyKit server** (in a separate terminal):
+   ```bash
+   cd packages/party-kit
+   pnpm dev
+   ```
+   This starts the WebSocket server at `http://localhost:1999`
+
+2. **Start the main application** (in another terminal):
+   ```bash
+   # From project root
+   pnpm dev
+   ```
+   This starts the Vue app at `http://localhost:5173`
+
+#### Option 2: Frontend Only Development
+
+If you're only working on UI components and don't need real-time features:
+
+```bash
 pnpm dev
 ```
 
-### Type-Check, Compile and Minify for Production
+> [!Note]
+> Without the PartyKit server, collaboration features will be disabled but the REPL will still function as a standalone editor.
 
-```sh
+#### Option 3: Working on vue-repl Package
+
+If you're modifying the core REPL functionality:
+
+```bash
+cd packages/vue-repl
+pnpm dev
+```
+
+### Available Scripts
+
+#### Root Package Scripts
+
+- `pnpm dev` - Start development server with hot reload
+- `pnpm build` - Build for production (includes all optimizations)
+- `pnpm preview` - Preview production build
+- `pnpm type-check` - Run TypeScript type checking
+- `pnpm lint` - Lint the main package
+- `pnpm lint:all` - Lint all packages in workspace
+- `pnpm lint:fix` - Auto-fix linting issues
+
+#### Specialized Scripts
+
+- `pnpm bi` - **Build and Install**: Build project and copy to amoxtli-vue
+- `pnpm sync:vue-repl` - Sync with upstream vue-repl fork
+- `pnpm sync:party-kit` - Sync with upstream party-kit fork
+
+### Environment Configuration
+
+The project uses:
+
+- **UnoCSS** for utility-first CSS with multiple presets
+- **Monaco Editor** for code editing with TypeScript support
+- **Pinia** for state management
+- **PartyKit** for real-time WebSocket communication
+- **Vite** for build tooling and development server
+
+### Type Support for `.vue` Imports in TS
+
+TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+
+### Testing
+
+```bash
+# Run tests for party-kit package
+cd packages/party-kit
+pnpm test
+
+# Run tests with coverage
+pnpm test:coverage
+```
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Node version mismatch**: Ensure you're using Node.js 24.5.0+
+2. **pnpm version issues**: Use the exact version specified (`10.17.0`)
+3. **WebSocket connection fails**: Make sure PartyKit server is running on port 1999
+4. **Monaco Editor not loading**: Check that workers are properly bundled (handled by build scripts)
+
+#### Workspace Dependencies
+
+If you encounter issues with workspace packages:
+
+```bash
+# Clean and reinstall all dependencies
+pnpm clean
+rm -rf node_modules packages/*/node_modules
+pnpm install
+
+# Rebuild all packages
+pnpm -r run build
+```
+
+### Build and Deployment
+
+#### Production Build
+
+```bash
 pnpm build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+This will:
+1. Type-check all files
+2. Build the main application
+3. Minify workers and assets
+4. Build the server component
+5. Compress assets for optimal loading
 
-```sh
-pnpm lint
+#### TutorialKit Integration Build
+
+```bash
+pnpm bi
 ```
+
+This builds the project and copies the distribution files to the amoxtli-vue template directory.
+
+### Customize Configuration
+
+See [Vite Configuration Reference](https://vite.dev/config/) and [UnoCSS Configuration](https://unocss.dev/config/).

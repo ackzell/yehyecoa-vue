@@ -5,7 +5,7 @@ import YvToasts from './components/toasts/YvToasts.vue';
 import YvFooter from './components/YvFooter.vue';
 import YvRepl from './components/YvRepl.vue';
 import YvSidebar from './components/YvSidebar/YvSidebar.vue';
-import '@vue/repl/style.css';
+import '@calmecac-vue/repl/style.css';
 
 function setVH() {
   document.documentElement.style.setProperty('--vh', `${window.innerHeight}px`);

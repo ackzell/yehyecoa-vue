@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
+import YvOnlineStatus from './YvOnlineStatus.vue';
 
 const { settings, toggleLayout, toggleTheme } = useSettingsStore();
 
@@ -19,14 +20,21 @@ const fm = useFileManagerStore();
       h="var(--nav-height)"
       transition="background-color 0.2s ease"
     >
-      <h1 text-lg font-500 inline-flex items-center>
+      <h1 text-md font-500 inline-flex items-center>
         <!-- TODO: maybe a logo would be cool -->
         <!-- <img alt="logo" src="/logo.svg" /> -->
         <!-- <span>yehyecoa-vue</span> -->
+        <!-- yehyecoa-vue -->
       </h1>
-      <!-- <div>
-            submenus here
-          </div> -->
+
+      <!-- true center -->
+      <div
+        absolute w-max
+        class="-translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"
+      >
+        <YvOnlineStatus />
+      </div>
+
       <div flex gap-4 text-neutral-500>
         <button
           v-tooltip.bottom="'Save snapshot'"

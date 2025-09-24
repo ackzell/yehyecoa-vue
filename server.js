@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+
 import zlib from 'node:zlib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const PORT = process.env.PORT || 3000;
 const baseDir = __dirname;
 
@@ -54,7 +55,7 @@ let indexHTMLGzipped = null;
 try {
   indexHTML = fs.readFileSync(indexPath, 'utf-8');
   indexHTMLGzipped = zlib.gzipSync(indexHTML);
-  console.log('[startup] Loaded index.html into memory.');
+  console.warn('[startup] Loaded index.html into memory.');
 }
 catch (err) {
   console.error('[startup] Could not read index.html:', err);
@@ -85,11 +86,11 @@ function setupWatcher() {
     // Watch the directory for the specific file
     watcher = fs.watch(baseDir, (eventType, filename) => {
       if (filename === 'yv-lesson.json') {
-        console.log(`[watcher] yv-lesson.json ${eventType}`);
+        console.warn(`[watcher] yv-lesson.json ${eventType}`);
         sendFileContents();
       }
     });
-    console.log('[watcher] File watcher established');
+    console.warn('[watcher] File watcher established');
   }
   catch (err) {
     console.error('[watcher] Failed to setup file watcher:', err);
@@ -124,11 +125,11 @@ function sendFileContents() {
       const lessonFileContent = fs.readFileSync(lessonFilePath, 'utf-8');
       const yvLesson = JSON.parse(lessonFileContent);
       lessonName = yvLesson.lessonName;
-      console.log(`[files] Lesson file found: ${lessonName}`);
+      console.warn(`[files] Lesson file found: ${lessonName}`);
     }
     else {
       error = 'yv-lesson.json not found';
-      console.log('[files] yv-lesson.json not found, continuing with other files');
+      console.warn('[files] yv-lesson.json not found, continuing with other files');
     }
   }
   catch (err) {
@@ -161,7 +162,7 @@ function sendFileContents() {
       }
     });
 
-    console.log(`[files] Sending ${Object.keys(files).length} files to clients`);
+    console.warn(`[files] Sending ${Object.keys(files).length} files to clients`);
   }
   catch (dirErr) {
     console.error('[files] Could not read directory:', dirErr.message);
@@ -185,11 +186,11 @@ const server = http.createServer((req, res) => {
     res.write('\n');
     clients.push(res);
 
-    console.log('[SSE] Client connected');
+    console.warn('[SSE] Client connected');
     sendFileContents();
 
     req.on('close', () => {
-      console.log('[SSE] Client disconnected');
+      console.warn('[SSE] Client disconnected');
       const idx = clients.indexOf(res);
       if (idx !== -1)
         clients.splice(idx, 1);
@@ -258,16 +259,16 @@ const server = http.createServer((req, res) => {
 
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n[shutdown] Closing server...');
+  console.warn('\n[shutdown] Closing server...');
   if (watcher) {
     watcher.close();
   }
   server.close(() => {
-    console.log('[shutdown] Server closed');
+    console.warn('[shutdown] Server closed');
     process.exit(0);
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.warn(`Server running at http://localhost:${PORT}`);
 });

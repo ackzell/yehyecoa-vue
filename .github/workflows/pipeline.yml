@@ -25,3 +25,18 @@ jobs:
         run: pnpm install
       - name: Run linter
         run: pnpm lint
+
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js from .node-version
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run Vitest unit tests (party-kit)
+        run: pnpm --filter @calmecac-vue/party-kit test
