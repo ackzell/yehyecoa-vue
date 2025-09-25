@@ -57,10 +57,11 @@ const App = {
         store,
         theme: theme.value,
         previewTheme: true,
+        showOutput: true,
         editor: MonacoEditor,
         showOpenSourceMap: true,
-        // layout: 'vertical',
-
+        layout: 'vertical',
+        outputLayout: 'horizontal',
         ssr: true,
         showConsole: true,
         showSsrOutput: true,

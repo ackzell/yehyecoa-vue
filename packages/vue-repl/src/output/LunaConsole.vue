@@ -28,7 +28,8 @@ function clearLunaConsole() {
   lunaConsole.value?.clear(true)
 }
 
-watch(() => store.value.activeFile.code, clearLunaConsole)
+// maybe make this configurable, but don't do it by default
+// watch(() => store.value.activeFile.code, clearLunaConsole)
 
 /**
  * Lossless deserialization:

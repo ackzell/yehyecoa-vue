@@ -13,14 +13,13 @@ import {
 } from './types'
 import EditorContainer from './editor/EditorContainer.vue'
 import type * as monaco from 'monaco-editor-core'
+import LunaConsole from './output/LunaConsole.vue'
 
 export interface Props {
   theme?: 'dark' | 'light'
   previewTheme?: boolean
   editor: EditorComponentType
-    console?: ConsoleComponentType
-
-
+  console?: ConsoleComponentType
   store?: Store
   autoResize?: boolean
   showCompileOutput?: boolean
@@ -28,11 +27,11 @@ export interface Props {
   showImportMap?: boolean
   showSsrOutput?: boolean
   showTsConfig?: boolean
-    showConsole?: boolean
-
-
+  showConsole?: boolean
   clearConsole?: boolean
+  showOutput?: boolean
   layout?: 'horizontal' | 'vertical'
+  outputLayout?: 'horizontal' | 'vertical'
   layoutReverse?: boolean
   ssr?: boolean
   previewOptions?: {
@@ -62,19 +61,20 @@ const props = withDefaults(defineProps<Props>(), {
   theme: 'light',
   previewTheme: false,
   store: () => useStore(),
+  console: LunaConsole,
   autoResize: true,
   showCompileOutput: true,
   showOpenSourceMap: false,
   showImportMap: true,
   showSsrOutput: false,
   showTsConfig: true,
-    showConsole: false,
-
-
+  showOutput: true,
+  showConsole: false,
   clearConsole: true,
   layoutReverse: false,
   ssr: false,
   layout: 'horizontal',
+  outputLayout: 'vertical',
   previewOptions: () => ({}),
   editorOptions: () => ({}),
   splitPaneOptions: () => ({}),
@@ -119,7 +119,7 @@ defineExpose({ reload })
 
 <template>
   <div class="vue-repl">
-    <SplitPane :layout="layout">
+    <SplitPane v-if="showOutput" :layout="layout">
       <template #[editorSlotName]>
         <EditorContainer :editor-component="editor" />
       </template>
@@ -128,6 +128,8 @@ defineExpose({ reload })
           ref="output"
           :editor-component="editor"
           :console-component="consoleWrapper"
+          :show-output="props.showOutput"
+          :layout="outputLayout"
           :show-compile-output="props.showCompileOutput"
           :show-open-source-map="props.showOpenSourceMap"
           :show-ssr-output="props.showSsrOutput"

@@ -17,6 +17,8 @@ const props = defineProps<{
   showOpenSourceMap?: boolean
   showSsrOutput?: boolean
   ssr: boolean
+  showOutput: boolean
+  layout: 'horizontal' | 'vertical'
 }>()
 
 const { store, showConsole } = inject(injectKeyProps)!
@@ -75,7 +77,7 @@ defineExpose({ reload, previewRef })
   </div>
 
   <div class="output-container">
-    <SplitPane v-if="showConsole" layout="vertical">
+    <SplitPane v-if="showConsole" :layout="layout">
       <template #left>
         <Preview ref="preview" :show="mode === 'preview'" :ssr="ssr" />
       </template>
