@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { inject, onMounted, ref, useTemplateRef } from 'vue'
 import LunaConsole from 'luna-console'
 import { type LogPayload, injectKeyProps } from '../types'
 import 'luna-object-viewer/luna-object-viewer.css'

@@ -13,7 +13,7 @@ import {
 } from './types'
 import EditorContainer from './editor/EditorContainer.vue'
 import type * as monaco from 'monaco-editor-core'
-import LunaConsole from './output/LunaConsole.vue'
+import LunaConsole from './output/luna-console.vue'
 
 export interface Props {
   theme?: 'dark' | 'light'
@@ -137,6 +137,8 @@ defineExpose({ reload })
         />
       </template>
     </SplitPane>
+
+    <EditorContainer v-else :editor-component="editor" />
   </div>
 </template>
 

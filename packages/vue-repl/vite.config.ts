@@ -60,7 +60,7 @@ export default mergeConfig(base, {
         core: './src/core.ts',
         'monaco-editor': './src/editor/MonacoEditor.vue',
         'codemirror-editor': './src/editor/CodeMirrorEditor.vue',
-        'luna-console': './src/output/LunaConsole.vue',
+        'luna-console': './src/output/luna-console.vue',
       },
       formats: ['es'],
       fileName: () => '[name].js',

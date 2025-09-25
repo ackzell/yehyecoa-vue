@@ -68,7 +68,7 @@ export default defineConfig({
     transformerDirectives(),
   ],
   shortcuts: {
-    'sc-toolbar-btn': 'cursor-pointer hover:text-foreground/80 hover:scale-120 transition duration-200',
+    'sc-toolbar-btn': 'cursor-pointer hover:text-foreground/80 hover:scale-120 transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100',
     'sc-btn-base': 'p-2 rounded-lg bg-transparent',
     'btn': 'sc-btn-base bg-neutral-800 text-neutral-200 dark:bg-neutral-200 dark:text-dark-900',
     'sc-btn-outline': 'sc-btn-base outline-solid outline-neutral text-neutral hover',

@@ -3,7 +3,7 @@ import { createApp, h, ref, watchEffect } from 'vue'
 import { type OutputModes, Repl, useStore, useVueImportMap } from '../src'
 // @ts-ignore
 import MonacoEditor from '../src/editor/MonacoEditor.vue'
-import LunaConsole from '../src/output/LunaConsole.vue'
+import LunaConsole from '../src/output/luna-console.vue'
 // @ts-ignore
 
 const window = globalThis.window as any
@@ -57,7 +57,7 @@ const App = {
         store,
         theme: theme.value,
         previewTheme: true,
-        showOutput: true,
+        showOutput: false,
         editor: MonacoEditor,
         showOpenSourceMap: true,
         layout: 'vertical',

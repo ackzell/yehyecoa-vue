@@ -56,12 +56,14 @@ onMounted(() => {
     <Repl
       :editor="Monaco"
       :console="LunaConsole"
-      :show-console="true"
+      :show-console="settings.showConsole"
       :show-compile-output="false"
       :show-import-map="false"
       :show-ts-config="false"
       :theme="settings.theme"
       :layout="settings.layout"
+      :show-output="settings.showOutput"
+      :output-layout="settings.outputLayout"
       :editor-options="{
         autoSaveText: false,
         showErrorText: false,
