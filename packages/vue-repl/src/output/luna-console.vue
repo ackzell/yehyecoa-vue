@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { inject, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import LunaConsole from 'luna-console'
 import { type LogPayload, injectKeyProps } from '../types'
 import 'luna-object-viewer/luna-object-viewer.css'
@@ -21,6 +21,8 @@ onMounted(() => {
   store.value.executeLog = ({ logLevel, data = [] }: LogPayload) => {
     const deserialized = data.map(deserializeMessage)
     ;(lunaConsole.value?.[logLevel] as any)?.(...deserialized)
+    // Ensure theme is applied after log (for late-rendered viewers)
+    updateLunaThemeClass(theme.value || 'light')
   }
   store.value.clearConsole = clearLunaConsole
 })
@@ -31,9 +33,37 @@ watch(
   (newTheme) => {
     if (lunaConsole.value) {
       lunaConsole.value.setOption('theme', newTheme || 'light')
+      // Update theme class on root and sub-viewers
+      updateLunaThemeClass(newTheme || 'light')
+    }
+  },
+  { immediate: true }
+)
+
+async function updateLunaThemeClass(theme: string) {
+  // Helper to update theme classes
+  function applyTheme() {
+    const root = lunaRef.value
+    if (!root) return
+    root.classList.remove('luna-console-theme-dark', 'luna-console-theme-light')
+    root.classList.add(`luna-console-theme-${theme}`)
+
+    const viewerTypes = ['object-viewer', 'dom-viewer', 'data-grid']
+    for (const type of viewerTypes) {
+      // Update theme class on all theme-marked elements
+      const themeEls = root.querySelectorAll(`[class*="luna-${type}-theme-"]`)
+      themeEls.forEach(el => {
+        el.classList.remove(`luna-${type}-theme-dark`, `luna-${type}-theme-light`)
+        el.classList.add(`luna-${type}-theme-${theme}`)
+      })
     }
   }
-)
+  // Run immediately
+  applyTheme()
+  // Run again after DOM updates using Vue's nextTick
+  await nextTick()
+  applyTheme()
+}
 
 function clearLunaConsole() {
   lunaConsole.value?.clear(true)
