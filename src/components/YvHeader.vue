@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AnimatePresence, motion } from 'motion-v';
 import { ref } from 'vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
@@ -20,6 +21,25 @@ const {
 const isLayoutPopoverOpen = ref(false);
 
 const fm = useFileManagerStore();
+
+const groupVariants = {
+  initial: { opacity: 0, y: 16 },
+  enter: {
+    opacity: 1,
+    y: 0,
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+  },
+  leave: {
+    opacity: 0,
+    y: 16,
+    transition: { staggerChildren: 0.08, delayChildren: 0.05, staggerDirection: -1 },
+  },
+};
+const itemVariants = {
+  initial: { opacity: 0, y: 0 },
+  enter: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 16 },
+};
 </script>
 
 <template>
@@ -80,61 +100,83 @@ const fm = useFileManagerStore();
               />
             </button>
           </PopoverTrigger>
-          <PopoverContent w-auto>
-            <div flex flex-col gap-3 text-neutral-500>
-              <button
-                v-tooltip.left-start="`Switch to ${settings.layout === 'vertical' ? 'horizontal' : 'vertical'} layout`"
-                sc-toolbar-btn
-                @click="toggleLayout"
+          <PopoverContent class="w-auto">
+            <AnimatePresence>
+              <motion.div
+                v-if="isLayoutPopoverOpen"
+                role="menu"
+                tabindex="0"
+                flex flex-col gap-3 text-neutral-500
+                :variants="groupVariants"
+                initial="initial"
+                animate="enter"
+                exit="leave"
               >
-                <div
-                  :class="settings.layout === 'vertical'
-                    ? 'i-mynaui:rectangle hover:i-mynaui:rectangle-solid'
-                    : 'i-mynaui:rectangle-vertical hover:i-mynaui:rectangle-vertical-solid'"
-                />
-              </button>
+                <motion.div :variants="itemVariants">
+                  <button
+                    v-tooltip.left-start="`${settings.showOutput ? 'Hide' : 'Show'} preview`"
+                    class="sc-toolbar-btn"
 
-              <button
-                v-tooltip.left-start="`${settings.showOutput ? 'Hide' : 'Show'} preview`"
-                sc-toolbar-btn
-                @click="toggleOutput"
-              >
-                <div
-                  class="hover:i-mynaui-desktop-solid"
-                  :class="settings.showOutput
-                    ? 'i-mynaui-desktop-solid'
-                    : 'i-mynaui-desktop'"
-                />
-              </button>
+                    @click.prevent="toggleOutput"
+                  >
+                    <div
+                      class="hover:i-mynaui-desktop-solid"
+                      :class="settings.showOutput
+                        ? 'i-mynaui-desktop-solid'
+                        : 'i-mynaui-desktop'"
+                    />
+                  </button>
+                </motion.div>
 
-              <button
-                v-tooltip.left-start="`${settings.showConsole ? 'Hide' : 'Show'} console`"
-                sc-toolbar-btn
-                :disabled="!settings.showOutput"
-                @click="toggleConsole"
-              >
-                <div
-                  class="hover:i-mynaui-terminal-solid"
-                  :class="settings.showConsole
-                    ? 'i-mynaui-terminal-solid'
-                    : 'i-mynaui-terminal'"
-                />
-              </button>
+                <motion.div :variants="itemVariants">
+                  <button
+                    v-tooltip.left-start="`Switch to ${settings.layout === 'vertical' ? 'horizontal' : 'vertical'} layout`"
+                    class="sc-toolbar-btn"
+                    :disabled="!settings.showOutput"
 
-              <button
-                v-tooltip.left-start="`Switch to ${settings.outputLayout === 'vertical' ? 'horizontal' : 'vertical'} output layout`"
-                :disabled="!settings.showConsole || !settings.showOutput"
-                sc-toolbar-btn
-                @click="toggleOutputLayout"
-              >
-                <div
-                  class="hover:i-mynaui-square-half-solid"
-                  :class="settings.outputLayout === 'vertical'
-                    ? 'i-mynaui-square-half rotate-90'
-                    : 'i-mynaui-square-half'"
-                />
-              </button>
-            </div>
+                    @click="toggleLayout"
+                  >
+                    <div
+                      :class="settings.layout === 'vertical'
+                        ? 'i-mynaui:rectangle hover:i-mynaui:rectangle-solid'
+                        : 'i-mynaui:rectangle-vertical hover:i-mynaui:rectangle-vertical-solid'"
+                    />
+                  </button>
+                </motion.div>
+                <motion.div :variants="itemVariants">
+                  <button
+                    v-tooltip.left-start="`${settings.showConsole ? 'Hide' : 'Show'} console`"
+                    class="sc-toolbar-btn"
+                    :disabled="!settings.showOutput"
+
+                    @click="toggleConsole"
+                  >
+                    <div
+                      class="hover:i-mynaui-terminal-solid"
+                      :class="settings.showConsole
+                        ? 'i-mynaui-terminal-solid'
+                        : 'i-mynaui-terminal'"
+                    />
+                  </button>
+                </motion.div>
+                <motion.div :variants="itemVariants">
+                  <button
+                    v-tooltip.left-start="`Switch to ${settings.outputLayout === 'vertical' ? 'horizontal' : 'vertical'} output layout`"
+                    :disabled="!settings.showConsole || !settings.showOutput"
+                    class="sc-toolbar-btn"
+
+                    @click="toggleOutputLayout"
+                  >
+                    <div
+                      class="hover:i-mynaui-square-half-solid"
+                      :class="settings.outputLayout === 'vertical'
+                        ? 'i-mynaui-square-half rotate-90'
+                        : 'i-mynaui-square-half'"
+                    />
+                  </button>
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
           </PopoverContent>
         </Popover>
 

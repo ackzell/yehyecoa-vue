@@ -148,6 +148,7 @@ function deserializeMessage(arg: any): any {
 <style scoped>
 .console-wrapper {
   height: 100%;
+  border-left: 1px solid var(--border);
 }
 
 .luna-container {
