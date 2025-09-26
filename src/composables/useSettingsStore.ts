@@ -12,6 +12,7 @@ type YVSettingsStore = {
   toggleOutput: () => void;
   toggleConsole: () => void;
   toggleOutputLayout?: () => void;
+  toggleLayoutReverse?: () => void;
 };
 
 type YVSettings = {
@@ -20,6 +21,7 @@ type YVSettings = {
   showOutput?: RemovableRef<boolean>;
   showConsole?: RemovableRef<boolean>;
   outputLayout?: RemovableRef<Layout>;
+  layoutReverse?: RemovableRef<boolean>;
 };
 
 const settings = ref<YVSettings>({
@@ -28,6 +30,7 @@ const settings = ref<YVSettings>({
   showOutput: useStorage<boolean>('yehyecoa-vue-show-output', true),
   showConsole: useStorage<boolean>('yehyecoa-vue-show-console', true),
   outputLayout: useStorage<Layout>('yehyecoa-vue-output-layout', 'vertical'),
+  layoutReverse: useStorage<boolean>('yehyecoa-vue-layout-reverse', false),
 });
 
 export function useSettingsStore(): YVSettingsStore {
@@ -64,6 +67,10 @@ export function useSettingsStore(): YVSettingsStore {
       : 'horizontal';
   }
 
+  function toggleLayoutReverse(): void {
+    settings.value.layoutReverse = !settings.value.layoutReverse;
+  }
+
   return {
     settings,
     toggleLayout,
@@ -71,5 +78,6 @@ export function useSettingsStore(): YVSettingsStore {
     toggleOutput,
     toggleConsole,
     toggleOutputLayout,
+    toggleLayoutReverse,
   };
 }

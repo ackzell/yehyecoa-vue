@@ -62,6 +62,7 @@ onMounted(() => {
       :show-ts-config="false"
       :theme="settings.theme"
       :layout="settings.layout"
+      :layout-reverse="settings.layoutReverse"
       :show-output="settings.showOutput"
       :output-layout="settings.outputLayout"
       :editor-options="{
