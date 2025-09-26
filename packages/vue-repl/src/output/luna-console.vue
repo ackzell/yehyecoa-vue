@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, useTemplateRef } from 'vue'
+import { inject, onMounted, ref, useTemplateRef, watch } from 'vue'
 import LunaConsole from 'luna-console'
 import { type LogPayload, injectKeyProps } from '../types'
 import 'luna-object-viewer/luna-object-viewer.css'
@@ -7,6 +7,7 @@ import 'luna-dom-viewer/luna-dom-viewer.css'
 import 'luna-data-grid/luna-data-grid.css'
 import 'luna-console/luna-console.css'
 import toEl from 'licia/toEl'
+
 
 const { store, theme } = inject(injectKeyProps)!
 const lunaRef = useTemplateRef('luna-ref')
@@ -19,10 +20,20 @@ onMounted(() => {
   })
   store.value.executeLog = ({ logLevel, data = [] }: LogPayload) => {
     const deserialized = data.map(deserializeMessage)
-      ; (lunaConsole.value?.[logLevel] as any)?.(...deserialized)
+    ;(lunaConsole.value?.[logLevel] as any)?.(...deserialized)
   }
   store.value.clearConsole = clearLunaConsole
 })
+
+// Watch for theme changes and update LunaConsole theme reactively
+watch(
+  () => theme.value,
+  (newTheme) => {
+    if (lunaConsole.value) {
+      lunaConsole.value.setOption('theme', newTheme || 'light')
+    }
+  }
+)
 
 function clearLunaConsole() {
   lunaConsole.value?.clear(true)
