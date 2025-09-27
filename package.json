@@ -1,7 +1,7 @@
 {
   "name": "yehyecoa-vue",
   "type": "module",
-  "version": "0.2.0-beta",
+  "version": "0.3.0-beta",
   "private": true,
   "packageManager": "pnpm@10.17.0",
   "engines": {
