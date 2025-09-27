@@ -6,8 +6,9 @@
         color-scheme: dark;
       }
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-          Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       }
     </style>
     <!-- PREVIEW-OPTIONS-HEAD-HTML -->
@@ -28,6 +29,233 @@
 
         window.__dynamic_import__ = (key) => {
           return Promise.resolve(window.__modules__[key])
+        }
+
+        // Enhanced serialization for Luna Console
+        function serializeForPostMessage(data, maxDepth = 10, currentDepth = 0) {
+          if (currentDepth >= maxDepth) return '[Max Depth Reached]'
+          if (data === null) return null
+          if (data === undefined) return { __type: 'undefined' }
+          
+          const dataType = typeof data
+          
+          // Handle primitives
+          if (dataType === 'boolean' || dataType === 'number' || dataType === 'string') {
+            return data
+          }
+          
+          // Handle functions
+          if (dataType === 'function') {
+            return {
+              __type: 'function',
+              name: data.name || 'anonymous',
+              source: data.toString().substring(0, 500),
+              isNative: data.toString().includes('[native code]')
+            }
+          }
+          
+          // Handle symbols
+          if (dataType === 'symbol') {
+            return {
+              __type: 'symbol',
+              description: data.description,
+              toString: data.toString()
+            }
+          }
+          
+          // Handle bigint
+          if (dataType === 'bigint') {
+            return {
+              __type: 'bigint',
+              value: data.toString()
+            }
+          }
+          
+          // For objects, we need to be more careful
+          if (dataType === 'object') {
+            // Use WeakSet to track circular references within this serialization call
+            const seen = serializeForPostMessage._seen || (serializeForPostMessage._seen = new WeakSet())
+            
+            if (seen.has(data)) {
+              return { __type: 'circular', toString: Object.prototype.toString.call(data) }
+            }
+            seen.add(data)
+            
+            try {
+              // Handle dates
+              if (data instanceof Date) {
+                return {
+                  __type: 'date',
+                  value: data.toISOString(),
+                  invalid: isNaN(data.getTime())
+                }
+              }
+              
+              // Handle regexps
+              if (data instanceof RegExp) {
+                return {
+                  __type: 'regexp',
+                  source: data.source,
+                  flags: data.flags
+                }
+              }
+              
+              // Handle errors
+              if (data instanceof Error) {
+                return {
+                  __type: 'error',
+                  name: data.name,
+                  message: data.message,
+                  stack: data.stack
+                }
+              }
+              
+              // Handle DOM nodes
+              if (data.nodeType) {
+                const result = {
+                  __type: 'dom',
+                  nodeType: data.nodeType,
+                  nodeName: data.nodeName
+                }
+                
+                if (data.nodeType === 1) { // Element node
+                  result.tagName = data.tagName
+                  result.className = data.className
+                  result.id = data.id
+                  result.outerHTML = data.outerHTML?.substring(0, 200)
+                  result.attributes = Array.from(data.attributes || []).map(attr => ({
+                    name: attr.name,
+                    value: attr.value
+                  }))
+                } else if (data.nodeType === 3) { // Text node
+                  result.textContent = data.textContent
+                }
+                
+                return result
+              }
+              
+              // Handle Vue component proxies
+              if (isComponentProxy(data)) {
+                return {
+                  __type: 'vue_component',
+                  name: data.$options?.name || data.$.type?.name || 'Anonymous',
+                  props: serializeForPostMessage(data.$props, maxDepth, currentDepth + 1),
+                  data: serializeForPostMessage(data.$data, maxDepth, currentDepth + 1)
+                }
+              }
+              
+              // Handle arrays
+              if (Array.isArray(data)) {
+                const result = {
+                  __type: 'array',
+                  length: data.length,
+                  items: []
+                }
+                
+                // Only serialize first 100 items for performance
+                const itemsToSerialize = Math.min(data.length, 100)
+                for (let i = 0; i < itemsToSerialize; i++) {
+                  try {
+                    result.items[i] = serializeForPostMessage(data[i], maxDepth, currentDepth + 1)
+                  } catch (e) {
+                    result.items[i] = { __type: 'error', message: 'Serialization failed' }
+                  }
+                }
+                
+                if (data.length > 100) {
+                  result.truncated = data.length - 100
+                }
+                
+                return result
+              }
+              
+              // Handle plain objects and other object types
+              const result = {
+                __type: 'object',
+                constructor: data.constructor?.name,
+                toString: Object.prototype.toString.call(data),
+                properties: {}
+              }
+              
+              // Get all property names (including non-enumerable)
+              const allKeys = new Set([
+                ...Object.keys(data),
+                ...Object.getOwnPropertyNames(data)
+              ])
+              
+              let propertyCount = 0
+              const maxProperties = 50 // Limit properties for performance
+              
+              for (const key of allKeys) {
+                if (propertyCount >= maxProperties) {
+                  result.truncatedProperties = allKeys.size - maxProperties
+                  break
+                }
+                
+                try {
+                  const descriptor = Object.getOwnPropertyDescriptor(data, key)
+                  if (descriptor) {
+                    const prop = {
+                      enumerable: descriptor.enumerable,
+                      configurable: descriptor.configurable,
+                      writable: descriptor.writable
+                    }
+                    
+                    if (descriptor.get || descriptor.set) {
+                      prop.getter = !!descriptor.get
+                      prop.setter = !!descriptor.set
+                      prop.value = { __type: 'accessor' }
+                    } else {
+                      prop.value = serializeForPostMessage(descriptor.value, maxDepth, currentDepth + 1)
+                    }
+                    
+                    result.properties[key] = prop
+                  }
+                } catch (e) {
+                  result.properties[key] = {
+                    value: { __type: 'error', message: 'Property access failed' },
+                    enumerable: false
+                  }
+                }
+                propertyCount++
+              }
+              
+              return result
+              
+            } finally {
+              seen.delete(data)
+            }
+          }
+          
+          return { __type: 'unknown', typeof: dataType }
+        }
+
+        // Helper function to detect Vue component proxy
+        function isComponentProxy(value) {
+          return (
+            value &&
+            typeof value === 'object' &&
+            value.__v_skip === true &&
+            typeof value.$nextTick === 'function' &&
+            value.$ &&
+            value._
+          )
+        }
+
+        // Fallback toString function for unsupported types
+        function toString(value) {
+          if (value instanceof Error) {
+            return value.message
+          }
+          for (const fn of [
+            String,
+            (v) => Object.prototype.toString.call(v),
+            (v) => typeof v,
+          ]) {
+            try {
+              return fn(value)
+            } catch (err) {}
+          }
         }
 
         async function handle_message(ev) {
@@ -122,7 +350,7 @@
         window.onerror = function (msg, url, lineNo, columnNo, error) {
           // ignore errors from import map polyfill - these are necessary for
           // it to detect browser support
-          if (msg.includes('module specifier “vue”')) {
+          if (msg.includes('module specifier "vue"')) {
             // firefox only error, ignore
             return false
           }
@@ -158,49 +386,83 @@
           }
         })
 
-        let previous = { level: null, args: null }
-
-        ;['clear', 'log', 'info', 'dir', 'warn', 'error', 'table'].forEach(
-          (level) => {
-            const original = console[level]
-            console[level] = (...args) => {
-              const msg = args[0]
-              if (typeof msg === 'string') {
-                if (
-                  msg.includes('You are running a development build of Vue') ||
-                  msg.includes('You are running the esm-bundler build of Vue')
-                ) {
-                  return
-                }
-              }
-
-              original(...args)
-
-              const stringifiedArgs = stringify(args)
+        const errorColorStr = 'color: #fb2c36'
+        const errorMsg = 'please open the devtool to see correctly this log'
+        
+        // Enhanced console methods with proper serialization
+        ;[
+          'clear',
+          'log',
+          'info',
+          'dir',
+          'warn',
+          'error',
+          'table',
+          'debug',
+          'time',
+          'timeLog',
+          'timeEnd',
+          'assert',
+          'count',
+          'countReset',
+        ].forEach((level) => {
+          const original = console[level]
+          console[level] = (...args) => {
+            const msg = args[0]
+            if (typeof msg === 'string') {
               if (
-                previous.level === level &&
-                previous.args &&
-                previous.args === stringifiedArgs
+                msg.includes('You are running a development build of Vue') ||
+                msg.includes('You are running the esm-bundler build of Vue')
               ) {
-                parent.postMessage(
-                  { action: 'console', level, duplicate: true },
-                  '*',
-                )
-              } else {
-                previous = { level, args: stringifiedArgs }
-
-                try {
-                  parent.postMessage({ action: 'console', level, args }, '*')
-                } catch (err) {
-                  parent.postMessage(
-                    { action: 'console', level, args: args.map(toString) },
-                    '*',
-                  )
-                }
+                return
               }
             }
-          },
-        )
+            original(...args)
+            
+            // Enhanced serialization for Luna Console
+            try {
+              // Clear the WeakSet for each console call to avoid memory leaks
+              serializeForPostMessage._seen = new WeakSet()
+              
+              const serializedArgs = args.map(arg => serializeForPostMessage(arg))
+              
+              parent.postMessage({ 
+                action: 'console', 
+                level, 
+                args: serializedArgs,
+                timestamp: Date.now()
+              }, '*')
+              
+            } catch (error) {
+              // Fallback to original behavior if serialization completely fails
+              console.warn('Serialization failed:', error)
+              try {
+                const fallbackArgs = args.map(toString)
+                parent.postMessage({ 
+                  action: 'console', 
+                  level, 
+                  args: fallbackArgs.length ? fallbackArgs : [
+                    `[vue-repl]: %c Serialization failed, ${errorMsg}`,
+                    errorColorStr,
+                  ],
+                  timestamp: Date.now()
+                }, '*')
+              } catch (fallbackError) {
+                parent.postMessage({ 
+                  action: 'console', 
+                  level: 'error', 
+                  args: [
+                    `[vue-repl]: %c Console message could not be displayed, ${errorMsg}`,
+                    errorColorStr,
+                  ],
+                  timestamp: Date.now()
+                }, '*')
+              }
+            }
+          }
+        })
+        
+        // Console group methods
         ;[
           { method: 'group', action: 'console_group' },
           { method: 'groupEnd', action: 'console_group_end' },
@@ -208,160 +470,33 @@
         ].forEach((group_action) => {
           const original = console[group_action.method]
           console[group_action.method] = (label) => {
-            parent.postMessage({ action: group_action.action, label }, '*')
+            parent.postMessage({ 
+              action: group_action.action, 
+              label: label ? serializeForPostMessage(label) : undefined,
+              timestamp: Date.now()
+            }, '*')
 
             original(label)
           }
         })
-
-        const timers = new Map()
-        const original_time = console.time
-        const original_timelog = console.timeLog
-        const original_timeend = console.timeEnd
-
-        console.time = (label = 'default') => {
-          original_time(label)
-          timers.set(label, performance.now())
-        }
-        console.timeLog = (label = 'default') => {
-          original_timelog(label)
-          const now = performance.now()
-          if (timers.has(label)) {
-            parent.postMessage(
-              {
-                action: 'console',
-                level: 'system-log',
-                args: [`${label}: ${now - timers.get(label)}ms`],
-              },
-              '*',
-            )
-          } else {
-            parent.postMessage(
-              {
-                action: 'console',
-                level: 'system-warn',
-                args: [`Timer '${label}' does not exist`],
-              },
-              '*',
-            )
+        
+        // Unsupported console methods
+        ;['profile', 'profileEnd', 'trace', 'dirXml'].forEach((level) => {
+          const original = console[level]
+          console[level] = (...args) => {
+            original(...args)
+            const fallbackArgs = [
+              `[vue-repl]: %c Cannot handle "${level}" log, ${errorMsg}.`,
+              errorColorStr,
+            ]
+            parent.postMessage({ 
+              action: 'console', 
+              level: 'log', 
+              args: fallbackArgs,
+              timestamp: Date.now()
+            }, '*')
           }
-        }
-        console.timeEnd = (label = 'default') => {
-          original_timeend(label)
-          const now = performance.now()
-          if (timers.has(label)) {
-            parent.postMessage(
-              {
-                action: 'console',
-                level: 'system-log',
-                args: [`${label}: ${now - timers.get(label)}ms`],
-              },
-              '*',
-            )
-          } else {
-            parent.postMessage(
-              {
-                action: 'console',
-                level: 'system-warn',
-                args: [`Timer '${label}' does not exist`],
-              },
-              '*',
-            )
-          }
-          timers.delete(label)
-        }
-
-        const original_assert = console.assert
-        console.assert = (condition, ...args) => {
-          if (condition) {
-            const stack = new Error().stack
-            parent.postMessage(
-              { action: 'console', level: 'assert', args, stack },
-              '*',
-            )
-          }
-          original_assert(condition, ...args)
-        }
-
-        const counter = new Map()
-        const original_count = console.count
-        const original_countreset = console.countReset
-
-        console.count = (label = 'default') => {
-          counter.set(label, (counter.get(label) || 0) + 1)
-          parent.postMessage(
-            {
-              action: 'console',
-              level: 'system-log',
-              args: `${label}: ${counter.get(label)}`,
-            },
-            '*',
-          )
-          original_count(label)
-        }
-
-        console.countReset = (label = 'default') => {
-          if (counter.has(label)) {
-            counter.set(label, 0)
-          } else {
-            parent.postMessage(
-              {
-                action: 'console',
-                level: 'system-warn',
-                args: `Count for '${label}' does not exist`,
-              },
-              '*',
-            )
-          }
-          original_countreset(label)
-        }
-
-        const original_trace = console.trace
-
-        console.trace = (...args) => {
-          const stack = new Error().stack
-          parent.postMessage(
-            { action: 'console', level: 'trace', args, stack },
-            '*',
-          )
-          original_trace(...args)
-        }
-
-        function toString(value) {
-          if (value instanceof Error) {
-            return value.message
-          }
-          for (const fn of [
-            String,
-            (v) => Object.prototype.toString.call(v),
-            (v) => typeof v,
-          ]) {
-            try {
-              return fn(value)
-            } catch (err) {}
-          }
-        }
-
-        function isComponentProxy(value) {
-          return (
-            value &&
-            typeof value === 'object' &&
-            value.__v_skip === true &&
-            typeof value.$nextTick === 'function' &&
-            value.$ &&
-            value._
-          )
-        }
-
-        function stringify(args) {
-          try {
-            return JSON.stringify(args, (key, value) => {
-              return isComponentProxy(value) ? '{component proxy}' : value
-            })
-          } catch (error) {
-            return null
-          }
-        }
+        })
       })()
     </script>
 

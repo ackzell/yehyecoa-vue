@@ -33,9 +33,9 @@ const { settings } = useSettingsStore();
 const typeColors = computed((): TypeColorConfig => {
   const colorMap: Record<SnapshotType, TypeColorConfig> = {
     manual: {
-      dot: 'bg-orange-700 outline-orange-700',
-      line: 'before:bg-orange-700',
-      text: 'text-orange-700',
+      dot: 'bg-orange-600 outline-orange-600',
+      line: 'before:bg-orange-600',
+      text: 'text-orange-600',
     },
     periodic: {
       dot: 'bg-violet-700 outline-violet-700',
@@ -43,9 +43,9 @@ const typeColors = computed((): TypeColorConfig => {
       text: 'text-violet-700',
     },
     auto: {
-      dot: 'bg-pink-700 outline-pink-700',
-      line: 'before:bg-pink-700',
-      text: 'text-pink-700',
+      dot: 'bg-sky-600 outline-sky-600',
+      line: 'before:bg-sky-600',
+      text: 'text-sky-600',
     },
   };
 
@@ -82,7 +82,7 @@ const didFilesChange = computed(() => {
             typeColors.line,
           ]"
         />
-        <p text="sm" font-bold mr-2 :class="typeColors.text">
+        <p text="xs font-sans" mr-2 :class="typeColors.text">
           {{ props.snapshot.type }}
         </p>
         <Menu v-if="didFilesChange" theme="diff-card" :arrow-overflow="true" arrow-padding="1rem">

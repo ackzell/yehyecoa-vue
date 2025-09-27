@@ -43,7 +43,10 @@ watch(showMessage, () => {
     />
     <Message v-show="showMessage" :err="store.errors[0]" />
 
-    <div class="editor-floating">
+    <div
+      v-show="editorOptions?.showErrorText !== false || editorOptions?.autoSaveText !== false"
+      class="editor-floating"
+    >
       <ToggleButton
         v-if="editorOptions?.showErrorText !== false"
         v-model="showMessage"

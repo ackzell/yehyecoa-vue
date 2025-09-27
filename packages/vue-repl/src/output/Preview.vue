@@ -30,5 +30,6 @@ defineExpose({
     :preview-options="previewOptions"
     :ssr="props.ssr"
     :clear-console="clearConsole"
+    @log="store.executeLog"
   />
 </template>

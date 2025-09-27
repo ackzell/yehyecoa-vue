@@ -35,7 +35,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
       v-bind="{ ...forwarded, ...$attrs }"
       :class="
         cn(
-          `bg-popover relative
+          `bg-background relative
            text-popover-foreground
            data-[state=open]:animate-in
            data-[state=closed]:animate-out
@@ -43,8 +43,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
            data-[state=open]:fade-in-0
            data-[state=closed]:zoom-out-95
            data-[state=open]:zoom-in-95
-           data-[side=bottom]
-           :slide-in-from-top-2
+           data-[side=bottom]:slide-in-from-top-2
            data-[side=left]:slide-in-from-right-2
            data-[side=right]:slide-in-from-left-2
            data-[side=top]:slide-in-from-bottom-2
@@ -59,3 +58,18 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits);
     </PopoverContent>
   </PopoverPortal>
 </template>
+
+<style>
+/**
+  todo: follow up on the animations
+  somehow, this animates the popover but also the select
+*/
+
+[data-state="open"] {
+  animation-duration: 200ms !important;
+}
+
+[data-state="closed"] {
+  animation-duration: 200ms !important;
+}
+</style>

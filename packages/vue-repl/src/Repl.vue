@@ -4,17 +4,22 @@ import Output from './output/Output.vue'
 import { type Store, useStore } from './store'
 import { computed, provide, toRefs, useTemplateRef } from 'vue'
 import {
+    type ConsoleComponentType,
+
+
   type EditorComponentType,
   injectKeyPreviewRef,
   injectKeyProps,
 } from './types'
 import EditorContainer from './editor/EditorContainer.vue'
 import type * as monaco from 'monaco-editor-core'
+import LunaConsole from './output/luna-console.vue'
 
 export interface Props {
   theme?: 'dark' | 'light'
   previewTheme?: boolean
   editor: EditorComponentType
+  console?: ConsoleComponentType
   store?: Store
   autoResize?: boolean
   showCompileOutput?: boolean
@@ -22,8 +27,11 @@ export interface Props {
   showImportMap?: boolean
   showSsrOutput?: boolean
   showTsConfig?: boolean
+  showConsole?: boolean
   clearConsole?: boolean
+  showOutput?: boolean
   layout?: 'horizontal' | 'vertical'
+  outputLayout?: 'horizontal' | 'vertical'
   layoutReverse?: boolean
   ssr?: boolean
   previewOptions?: {
@@ -53,16 +61,20 @@ const props = withDefaults(defineProps<Props>(), {
   theme: 'light',
   previewTheme: false,
   store: () => useStore(),
+  console: LunaConsole,
   autoResize: true,
   showCompileOutput: true,
   showOpenSourceMap: false,
   showImportMap: true,
   showSsrOutput: false,
   showTsConfig: true,
+  showOutput: true,
+  showConsole: false,
   clearConsole: true,
   layoutReverse: false,
   ssr: false,
   layout: 'horizontal',
+  outputLayout: 'vertical',
   previewOptions: () => ({}),
   editorOptions: () => ({}),
   splitPaneOptions: () => ({}),
@@ -71,6 +83,10 @@ const props = withDefaults(defineProps<Props>(), {
 if (!props.editor) {
   throw new Error('The "editor" prop is now required.')
 }
+
+const consoleWrapper = computed<ConsoleComponentType>(
+  () => props.console ?? (() => ({})),
+)
 
 const outputRef = useTemplateRef('output')
 
@@ -81,6 +97,9 @@ const outputSlotName = computed(() => (props.layoutReverse ? 'left' : 'right'))
 
 provide(injectKeyProps, {
   ...toRefs(props),
+    console: consoleWrapper,
+
+
   autoSave,
 })
 provide(
@@ -100,7 +119,7 @@ defineExpose({ reload })
 
 <template>
   <div class="vue-repl">
-    <SplitPane :layout="layout">
+    <SplitPane v-if="showOutput" :layout="layout">
       <template #[editorSlotName]>
         <EditorContainer :editor-component="editor" />
       </template>
@@ -108,6 +127,9 @@ defineExpose({ reload })
         <Output
           ref="output"
           :editor-component="editor"
+          :console-component="consoleWrapper"
+          :show-output="props.showOutput"
+          :layout="outputLayout"
           :show-compile-output="props.showCompileOutput"
           :show-open-source-map="props.showOpenSourceMap"
           :show-ssr-output="props.showSsrOutput"
@@ -115,6 +137,8 @@ defineExpose({ reload })
         />
       </template>
     </SplitPane>
+
+    <EditorContainer v-else :editor-component="editor" />
   </div>
 </template>
 

@@ -11,21 +11,19 @@ const pks = usePartyKitStore();
 <template>
   <div>
     <Popover v-if="pks.isConnected">
-      <div
-
-        flex="~ items-center gap-1"
-      >
+      <div flex="~ items-center gap-1">
         <PopoverTrigger>
-          <span
+          <button
             v-tooltip.right="'Leave workshop'"
-            class="sc-toolbar-btn"
+            class="flex items-center sc-toolbar-btn"
           >
-            <div
+            <span
+              inline-block
               w-3.5 h-3.5
               bg-emerald-500
               i-ph-broadcast-fill
             />
-          </span>
+          </button>
         </PopoverTrigger>
         <div text="xs emerald-500/60">
           {{ pks.currentRoomId }}
@@ -44,20 +42,22 @@ const pks = usePartyKitStore();
     </Popover>
 
     <Popover v-else>
-      <PopoverTrigger>
-        <span
-          v-if="!pks.isConnected"
-          v-tooltip.right="'Check for workshops'"
-          class="sc-toolbar-btn"
-          p-0
-          m-0 @click="pks.checkForAvailableWorkshop()"
-        >
-          <div
-            w-3.5 h-3.5
-            i-ph-broadcast-fill
-          />
-        </span>
-      </PopoverTrigger>
+      <div flex="~ items-center gap-1">
+        <PopoverTrigger>
+          <button
+            v-if="!pks.isConnected"
+            v-tooltip.right="'Check for workshops'"
+            class="flex items-center sc-toolbar-btn"
+            @click="pks.checkForAvailableWorkshop()"
+          >
+            <span
+              inline-block
+              w-3.5 h-3.5
+              i-ph-broadcast-fill
+            />
+          </button>
+        </PopoverTrigger>
+      </div>
 
       <PopoverContent w-auto>
         <div v-if="!pks.isConnected && pks.isWorkshopAvailable">

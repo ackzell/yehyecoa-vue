@@ -1,8 +1,8 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { type Plugin, mergeConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 import base from './vite.preview.config'
-import fs from 'node:fs'
-import path from 'node:path'
 
 const genStub: Plugin = {
   name: 'gen-stub',
@@ -26,7 +26,7 @@ const patchCssFiles: Plugin = {
   writeBundle() {
     //  inject css imports to the files
     const outDir = path.resolve('dist')
-    ;['vue-repl', 'monaco-editor', 'codemirror-editor'].forEach((file) => {
+    ;['vue-repl', 'monaco-editor', 'codemirror-editor', 'luna-console'].forEach((file) => {
       const filePath = path.resolve(outDir, file + '.js')
       const content = fs.readFileSync(filePath, 'utf-8')
       fs.writeFileSync(filePath, `import './${file}.css'\n${content}`)
@@ -60,6 +60,7 @@ export default mergeConfig(base, {
         core: './src/core.ts',
         'monaco-editor': './src/editor/MonacoEditor.vue',
         'codemirror-editor': './src/editor/CodeMirrorEditor.vue',
+        'luna-console': './src/output/luna-console.vue',
       },
       formats: ['es'],
       fileName: () => '[name].js',

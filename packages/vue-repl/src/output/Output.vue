@@ -3,20 +3,26 @@ import Preview from './Preview.vue'
 import SsrOutput from './SsrOutput.vue'
 import { computed, inject, useTemplateRef, watchEffect } from 'vue'
 import {
+  type ConsoleComponentType,
   type EditorComponentType,
   type OutputModes,
   injectKeyProps,
 } from '../types'
+import OutputSplitPane from '../OutputSplitPane.vue'
 
 const props = defineProps<{
   editorComponent: EditorComponentType
+  consoleComponent: ConsoleComponentType
   showCompileOutput?: boolean
   showOpenSourceMap?: boolean
   showSsrOutput?: boolean
   ssr: boolean
+  showOutput: boolean
+  layout: 'horizontal' | 'vertical'
+  outputLayout?: 'horizontal' | 'vertical'
 }>()
 
-const { store } = inject(injectKeyProps)!
+const { store, showConsole } = inject(injectKeyProps)!
 const previewRef = useTemplateRef('preview')
 const modes = computed(() => {
   const outputModes: OutputModes[] = ['preview']
@@ -51,6 +57,9 @@ function openSourceMap() {
 
 function reload() {
   previewRef.value?.reload()
+  store.value.clearConsole?.()
+
+
 }
 
 defineExpose({ reload, previewRef })
@@ -69,7 +78,15 @@ defineExpose({ reload, previewRef })
   </div>
 
   <div class="output-container">
-    <Preview ref="preview" :show="mode === 'preview'" :ssr="ssr" />
+    <OutputSplitPane v-if="showConsole" :layout="props.outputLayout || layout">
+      <template #first>
+        <Preview ref="preview" :show="mode === 'preview'" :ssr="ssr" />
+      </template>
+      <template #second>
+        <props.consoleComponent />
+      </template>
+    </OutputSplitPane>
+    <Preview v-else ref="preview" :show="mode === 'preview'" :ssr="ssr" />
     <SsrOutput
       v-if="mode === 'ssr output'"
       :context="store.ssrOutput.context"

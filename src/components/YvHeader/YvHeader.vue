@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import YvOnlineStatus from '@/components/YvOnlineStatus.vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
-import YvOnlineStatus from './YvOnlineStatus.vue';
+import YvLayoutMenu from './YvLayoutMenu.vue';
 
-const { settings, toggleLayout, toggleTheme } = useSettingsStore();
+const {
+  settings,
+  toggleTheme,
+} = useSettingsStore();
 
 const fm = useFileManagerStore();
 </script>
@@ -12,7 +16,7 @@ const fm = useFileManagerStore();
   <div>
     <nav
       flex="~ justify-between"
-      relative p-4 pr-6 z-999
+      relative p-4 pr-6 z-40
       shadow-md
       bg="light dark:dark-900"
       border="b neutral-300/10"
@@ -45,19 +49,18 @@ const fm = useFileManagerStore();
         </button>
 
         <button
-          v-tooltip.bottom="`${fm.isDrawerOpen ? 'Close' : 'Open'} history`" class="sc-toolbar-btn"
+          v-tooltip.bottom="`${fm.isDrawerOpen ? 'Close' : 'Open'} history`"
+          class="sc-toolbar-btn"
           @click="fm.isDrawerOpen = !fm.isDrawerOpen"
         >
           <div class="i-mynaui:clock-hexagon hover:i-mynaui:clock-hexagon-solid" :class="fm.isDrawerOpen ? 'i-mynaui:clock-hexagon-solid' : 'i-mynaui:clock-hexagon'" />
         </button>
 
-        <button v-tooltip.bottom-end="`Switch to ${settings.layout === 'vertical' ? 'horizontal' : 'vertical'} layout`" sc-toolbar-btn @click="toggleLayout">
-          <div :class="settings.layout === 'vertical' ? 'i-mynaui:rectangle hover:i-mynaui:rectangle-solid' : 'i-mynaui:rectangle-vertical hover:i-mynaui:rectangle-vertical-solid'" />
-        </button>
+        <YvLayoutMenu />
 
         <button
           v-tooltip.bottom-end="`Switch to ${settings.theme === 'dark' ? 'light' : 'dark'} theme`"
-          sc-toolbar-btn
+          class="sc-toolbar-btn"
           @click="toggleTheme"
         >
           <div class="i-mynaui:sun hover:i-mynaui:sun-solid dark:i-mynaui:moon dark:hover:i-mynaui:moon-solid" />
