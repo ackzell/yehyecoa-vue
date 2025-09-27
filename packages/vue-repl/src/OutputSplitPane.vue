@@ -60,28 +60,17 @@ function changeViewSize() {
 
 <template>
   <div
-    ref="container"
-    class="split-pane"
-    :class="{
+    ref="container" class="split-pane" :class="{
       dragging: state.dragging,
       reverse: layoutReverse,
       vertical: isVertical,
-    }"
-    @mousemove="dragMove"
-    @mouseup="dragEnd"
-    @mouseleave="dragEnd"
+    }" @mousemove="dragMove" @mouseup="dragEnd" @mouseleave="dragEnd"
   >
-    <div
-      class="first"
-      :style="{ [isVertical ? 'height' : 'width']: boundSplit + '%' }"
-    >
+    <div class="first" :style="{ [isVertical ? 'height' : 'width']: boundSplit + '%' }">
       <slot name="first" />
       <div class="dragger" @mousedown.prevent="dragStart" />
     </div>
-    <div
-      class="second"
-      :style="{ [isVertical ? 'height' : 'width']: 100 - boundSplit + '%' }"
-    >
+    <div class="second" :style="{ [isVertical ? 'height' : 'width']: 100 - boundSplit + '%' }">
       <div v-show="state.dragging" class="view-size">
         {{ `${state.viewWidth}px x ${state.viewHeight}px` }}
       </div>
@@ -91,9 +80,7 @@ function changeViewSize() {
     <button class="toggler" @click="store.showOutput = !store.showOutput">
       {{
         store.showOutput
-          ? splitPaneOptions?.codeTogglerText || '< Code'
-          : splitPaneOptions?.outputTogglerText || 'Output >'
-      }}
+          ? splitPaneOptions?.codeTogglerText || '< Code' : splitPaneOptions?.outputTogglerText || 'Output >' }}
     </button>
   </div>
 </template>
@@ -101,21 +88,26 @@ function changeViewSize() {
 <style scoped>
 .split-pane {
   display: flex;
+  flex-direction: row;
   height: 100%;
   position: relative;
 }
+
 .split-pane.dragging {
   cursor: ew-resize;
 }
+
 .dragging .first,
 .dragging .second {
   pointer-events: none;
 }
+
 .first,
 .second {
   position: relative;
   height: 100%;
 }
+
 .view-size {
   position: absolute;
   top: 40px;
@@ -127,19 +119,16 @@ function changeViewSize() {
   padding: 0.5rem;
   border-radius: 4px;
 }
+
 .first {
   border-right: 1px solid var(--border);
 }
+
 .dragger {
   position: absolute;
   z-index: 3;
-  top: 0;
-  bottom: 0;
-  right: -5px;
-  width: 10px;
-  height: 10px;
-  cursor: ew-resize;
 }
+
 .vertical .dragger {
   top: auto;
   height: 10px;
@@ -149,6 +138,7 @@ function changeViewSize() {
   bottom: -5px;
   cursor: ns-resize;
 }
+
 .toggler {
   display: none;
   z-index: 3;
@@ -168,21 +158,22 @@ function changeViewSize() {
   background-color: var(--bg);
 }
 
+
+.split-pane:not(.vertical) .dragger {
+  top: 0;
+  bottom: 0;
+  left: auto;
+  right: -5px;
+  width: 10px;
+  height: 100%;
+  cursor: ew-resize;
+}
+
 .split-pane.vertical {
-  display: block;
+  flex-direction: column;
 }
 
 .split-pane.vertical.dragging {
-  cursor: ns-resize;
-}
-
-.vertical .dragger {
-  top: auto;
-  height: 10px;
-  width: 100%;
-  left: 0;
-  right: 0;
-  bottom: -5px;
   cursor: ns-resize;
 }
 
@@ -190,11 +181,9 @@ function changeViewSize() {
 .vertical .second {
   width: 100%;
 }
+
 .vertical .first {
   border-right: none;
   border-bottom: 1px solid var(--border);
 }
-
-
-
 </style>
