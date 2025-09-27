@@ -60,8 +60,8 @@ function changeViewSize() {
 
 <template>
   <div
-    ref="container" class="split-pane" :class="{
-      dragging: state.dragging,
+    ref="container" class="output-split-pane" :class="{
+      'osp-dragging': state.dragging,
       reverse: layoutReverse,
       vertical: isVertical,
     }" @mousemove="dragMove" @mouseup="dragEnd" @mouseleave="dragEnd"
@@ -86,19 +86,19 @@ function changeViewSize() {
 </template>
 
 <style scoped>
-.split-pane {
+.output-split-pane {
   display: flex;
   flex-direction: row;
   height: 100%;
   position: relative;
 }
 
-.split-pane.dragging {
+.output-split-pane.osp-dragging {
   cursor: ew-resize;
 }
 
-.dragging .first,
-.dragging .second {
+.osp-dragging .first,
+.osp-dragging .second {
   pointer-events: none;
 }
 
@@ -159,7 +159,7 @@ function changeViewSize() {
 }
 
 
-.split-pane:not(.vertical) .dragger {
+.output-split-pane:not(.vertical) .dragger {
   top: 0;
   bottom: 0;
   left: auto;
@@ -169,11 +169,11 @@ function changeViewSize() {
   cursor: ew-resize;
 }
 
-.split-pane.vertical {
+.output-split-pane.vertical {
   flex-direction: column;
 }
 
-.split-pane.vertical.dragging {
+.output-split-pane.vertical.osp-dragging {
   cursor: ns-resize;
 }
 
