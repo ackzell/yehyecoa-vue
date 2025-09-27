@@ -193,7 +193,7 @@ function deserializeMessage(arg: any): any {
 }
 
 .luna-container {
-  height: 100%;
+  height: calc(100% - var(--header-height));
   width: 100%;
   overflow: auto;
 }
@@ -203,6 +203,7 @@ function deserializeMessage(arg: any): any {
 }
 
 .console-title {
+  height: var(--header-height);
   position: sticky;
   top: 0;
   border-bottom: 1px solid var(--border);
