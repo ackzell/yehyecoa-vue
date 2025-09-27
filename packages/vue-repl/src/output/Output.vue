@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Preview from './Preview.vue'
-import SplitPane from '../SplitPane.vue'
 import SsrOutput from './SsrOutput.vue'
 import { computed, inject, useTemplateRef, watchEffect } from 'vue'
 import {
@@ -9,6 +8,7 @@ import {
   type OutputModes,
   injectKeyProps,
 } from '../types'
+import OutputSplitPane from '../OutputSplitPane.vue'
 
 const props = defineProps<{
   editorComponent: EditorComponentType
@@ -19,6 +19,7 @@ const props = defineProps<{
   ssr: boolean
   showOutput: boolean
   layout: 'horizontal' | 'vertical'
+  outputLayout?: 'horizontal' | 'vertical'
 }>()
 
 const { store, showConsole } = inject(injectKeyProps)!
@@ -77,15 +78,15 @@ defineExpose({ reload, previewRef })
   </div>
 
   <div class="output-container">
-    <SplitPane v-if="showConsole" :layout="layout">
-      <template #left>
+    <OutputSplitPane v-if="showConsole" :layout="props.outputLayout || layout">
+      <template #first>
         <Preview ref="preview" :show="mode === 'preview'" :ssr="ssr" />
       </template>
-      <template #right>
+      <template #second>
         <props.consoleComponent />
       </template>
-    </SplitPane>
-    <Preview ref="preview" :show="mode === 'preview'" :ssr="ssr" />
+    </OutputSplitPane>
+    <Preview v-else ref="preview" :show="mode === 'preview'" :ssr="ssr" />
     <SsrOutput
       v-if="mode === 'ssr output'"
       :context="store.ssrOutput.context"
