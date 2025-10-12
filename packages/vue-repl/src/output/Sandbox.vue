@@ -203,7 +203,7 @@ function createSandbox() {
 
 async function updatePreview() {
   if (import.meta.env.PROD && clearConsole.value) {
-    console.clear()
+    // console.clear()
   }
   runtimeError.value = undefined
   runtimeWarning.value = undefined
