@@ -6,8 +6,8 @@ import { createJavaScriptRegexEngine } from 'shiki/engine-javascript.mjs'
 import langJsx from 'shiki/langs/jsx.mjs'
 import langTsx from 'shiki/langs/tsx.mjs'
 import langVue from 'shiki/langs/vue.mjs'
-import themeLight from 'shiki/themes/snazzy-light.mjs'
 import themeDark from 'shiki/themes/vesper.mjs'
+import themeLight from './snazzy-light.mjs'
 
 let registered = false
 export function registerHighlighter() {
@@ -21,6 +21,9 @@ export function registerHighlighter() {
     shikiToMonaco(highlighter, monaco)
     registered = true
   }
+
+  // console.log('Registered highlighter');
+  // console.log('Light theme name:', themeLight.name);
 
   return {
     light: themeLight.name!,
