@@ -19,7 +19,7 @@ export function useReplSync(): void {
   let instructorDecorations: string[] = [];
   let lastInstructorSelections: MonacoCore.ISelection[] = [];
 
-  const stopEditorWatcher = watch(editor, (editorInstance) => {
+  const stopEditorWatcher = watch(() => editor.value, (editorInstance) => {
     if (!editorInstance) {
       return;
     }
