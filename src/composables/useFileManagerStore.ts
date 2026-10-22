@@ -11,6 +11,11 @@ import { snapshots } from '@/db/snapshots';
 
 // const IGNORE_FILES = ['tsconfig.json', 'import-map.json'];
 
+type YVLesson = {
+  lessonName: string;
+  solveButtonLabel: string;
+};
+
 export const useFileManagerStore = defineStore('fileManagerStore', () => {
   const currentSession = ref<Session>();
   const replStore = useStore<editor.IStandaloneCodeEditor>();
@@ -20,6 +25,8 @@ export const useFileManagerStore = defineStore('fileManagerStore', () => {
   const snapshotsList = ref<Snapshot[]>([]);
 
   const { toast } = useToastsStore();
+
+  const yvLessonConfig = ref<YVLesson>();
 
   initSession();
 
@@ -35,7 +42,7 @@ export const useFileManagerStore = defineStore('fileManagerStore', () => {
       });
 
       if (await sessions.getCount() === 0) {
-        currentSession.value = await sessions.create(`Session ${crypto.randomUUID().slice(0, 8)}`);
+        currentSession.value = await sessions.create(`Session ${crypto.randomUUID()}`);
       }
 
       // Use the latest available session from standalone mode
@@ -46,11 +53,11 @@ export const useFileManagerStore = defineStore('fileManagerStore', () => {
 
     // Live updates via SSE
     eventSource.addEventListener('filesChanged', async (event) => {
-      const { lessonName, files, error } = JSON.parse(event.data);
+      const { yvLesson, files, error } = JSON.parse(event.data);
+      yvLessonConfig.value = yvLesson;
 
       toast.dismissAll();
 
-      // most likely the yv-lesson.json file is not available
       if (error) {
         console.error('[yehyecoa-vue]: Server reported an issue:', error);
         toast.error('Error', {
@@ -59,18 +66,18 @@ export const useFileManagerStore = defineStore('fileManagerStore', () => {
         });
       }
 
-      console.warn('[yehyecoa-vue]: Active lesson:', lessonName);
+      console.warn('[yehyecoa-vue]: Active lesson:', yvLesson.lessonName);
       console.warn('[yehyecoa-vue]: Files changed, updating repl', files);
       replStore.setFiles(files);
 
-      if (lessonName) {
+      if (yvLesson.lessonName) {
         // only create if there is no session with the same name
-        const session = await sessions.getByName(lessonName);
+        const session = await sessions.getByName(yvLesson.lessonName);
         if (session) {
           currentSession.value = session;
         }
         else {
-          currentSession.value = await sessions.create(lessonName);
+          currentSession.value = await sessions.create(yvLesson.lessonName);
         }
       }
     });
@@ -162,7 +169,7 @@ export const useFileManagerStore = defineStore('fileManagerStore', () => {
     restoreSnapshot,
 
     sessionList,
-
+    yvLessonConfig,
   };
 });
 
