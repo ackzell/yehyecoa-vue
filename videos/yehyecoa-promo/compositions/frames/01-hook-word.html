@@ -1,0 +1,233 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Work Sans"; font-weight: 400; src: url("assets/fonts/work-sans-400.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 500; src: url("assets/fonts/work-sans-500.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 600; src: url("assets/fonts/work-sans-600.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/space-mono-700.woff2") format("woff2"); }
+
+    #root { position: absolute; inset: 0; }
+
+    /* Full-bleed ink-black ground on its own clip layer (not on #root). */
+    #f01-hook-word-ground {
+      position: absolute; inset: 0; container-type: size; overflow: hidden;
+      background: #0b0c07; color: #f5f5f5;
+      font-family: "Work Sans", sans-serif;
+    }
+    #f01-hook-word-ground .f01-hook-word-wrap {
+      position: absolute; left: 5.5cqw; right: 5.5cqw; top: 0; bottom: 0;
+      display: flex; align-items: center; gap: 6cqw;
+    }
+    #f01-hook-word-ground .f01-hook-word-block { flex: 1.1; }
+
+    /* Kicker — label ramp, magenta mono chrome. */
+    #f01-hook-word-ground .f01-hook-word-kicker {
+      font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #e4007c; margin-bottom: 1.6cqw;
+      white-space: pre; min-height: 1.4em; line-height: 1.4;
+    }
+    /* Hero — display ramp, magenta. */
+    #f01-hook-word-ground .f01-hook-word-title {
+      font-size: 10.5cqw; font-weight: 700; line-height: 0.88; letter-spacing: -0.04em;
+      color: #e4007c; white-space: pre; min-height: 0.88em;
+    }
+    /* Pronunciation — muted mono. */
+    #f01-hook-word-ground .f01-hook-word-say {
+      font-family: "Space Mono", monospace; font-size: 1.6cqw; margin-top: 2cqw;
+      color: #a7a4a3; letter-spacing: 0.04em; white-space: pre; min-height: 1.4em; line-height: 1.4;
+    }
+
+    /* Block carets: always in layout, visibility driven by the timeline only. */
+    #f01-hook-word-ground .f01-hook-word-caret {
+      display: inline-block; vertical-align: baseline; opacity: 0;
+    }
+    #f01-hook-word-ground .f01-hook-word-title .f01-hook-word-caret {
+      width: 0.075em; height: 0.74em; margin-left: 0.06em; background: #e4007c;
+    }
+    #f01-hook-word-ground .f01-hook-word-kicker .f01-hook-word-caret {
+      width: 0.6em; height: 1.05em; margin-left: 0.1em; vertical-align: -0.18em; background: #e4007c;
+    }
+    #f01-hook-word-ground .f01-hook-word-say .f01-hook-word-caret {
+      width: 0.55em; height: 1.05em; margin-left: 0.1em; vertical-align: -0.18em; background: #a7a4a3;
+    }
+
+    /* Meaning stack — fadelist ladder. */
+    #f01-hook-word-ground .f01-hook-word-stack {
+      flex: 1; display: flex; flex-direction: column; gap: 0.6cqw;
+    }
+    #f01-hook-word-ground .f01-hook-word-line {
+      font-size: 5.4cqw; font-weight: 700; line-height: 1.0; letter-spacing: -0.03em;
+      color: #f5f5f5; white-space: nowrap;
+    }
+    #f01-hook-word-ground .f01-hook-word-frag { display: inline-block; opacity: 0; }
+  </style>
+
+  <div data-hf-id="hf-5lnm" id="root" data-composition-id="01-hook-word" data-start="0" data-duration="9.4" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-jde1" id="f01-hook-word-ground" class="clip" data-start="0" data-duration="9.4" data-track-index="0">
+      <div data-hf-id="hf-xauf" class="f01-hook-word-wrap">
+        <div data-hf-id="hf-q2ja" class="f01-hook-word-block">
+          <div data-hf-id="hf-pshw" class="f01-hook-word-kicker"><span data-hf-id="hf-p16y" id="f01-hook-word-kicker-text"></span><span data-hf-id="hf-jwe7" id="f01-hook-word-caret-kicker" class="f01-hook-word-caret"></span></div>
+          <div data-hf-id="hf-jkdn" class="f01-hook-word-title"><span data-hf-id="hf-bcxn" id="f01-hook-word-title-text"></span><span data-hf-id="hf-s67y" id="f01-hook-word-caret-title" class="f01-hook-word-caret"></span></div>
+          <div data-hf-id="hf-vtts" class="f01-hook-word-say"><span data-hf-id="hf-asjq" id="f01-hook-word-say-text"></span><span data-hf-id="hf-2ygt" id="f01-hook-word-caret-say" class="f01-hook-word-caret"></span></div>
+        </div>
+        <div data-hf-id="hf-768t" class="f01-hook-word-stack">
+          <div data-hf-id="hf-makw" id="f01-hook-word-line-1" class="f01-hook-word-line"><span data-hf-id="hf-o9sl" id="f01-hook-word-l1-a" class="f01-hook-word-frag">to</span> <span data-hf-id="hf-jp2g" id="f01-hook-word-l1-b" class="f01-hook-word-frag">try</span><span data-hf-id="hf-313c" id="f01-hook-word-l1-c" class="f01-hook-word-frag">.</span></div>
+          <div data-hf-id="hf-x62j" id="f01-hook-word-line-2" class="f01-hook-word-line"><span data-hf-id="hf-qzqy" id="f01-hook-word-l2-a" class="f01-hook-word-frag">to</span> <span data-hf-id="hf-h99n" id="f01-hook-word-l2-b" class="f01-hook-word-frag">experi</span><span data-hf-id="hf-5q85" id="f01-hook-word-l2-c" class="f01-hook-word-frag">ment</span><span data-hf-id="hf-t2ss" id="f01-hook-word-l2-d" class="f01-hook-word-frag">.</span></div>
+          <div data-hf-id="hf-r0cq" id="f01-hook-word-line-3" class="f01-hook-word-line"><span data-hf-id="hf-csp3" id="f01-hook-word-l3-a" class="f01-hook-word-frag">to</span> <span data-hf-id="hf-921w" id="f01-hook-word-l3-b" class="f01-hook-word-frag">re</span><span data-hf-id="hf-oxrg" id="f01-hook-word-l3-c" class="f01-hook-word-frag">hearse</span><span data-hf-id="hf-1e7f" id="f01-hook-word-l3-d" class="f01-hook-word-frag">.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var DURATION = 9;
+      var F = 1 / 60;
+      var $ = function (id) { return document.getElementById("f01-hook-word-" + id); };
+
+      var titleText = $("title-text");
+      var kickerText = $("kicker-text");
+      var sayText = $("say-text");
+      var carets = { title: $("caret-title"), kicker: $("caret-kicker"), say: $("caret-say") };
+
+      var tl = gsap.timeline({ paused: true });
+
+      // --- discrete-text-sequence: human typing schedules (sparse states) ---
+      var TITLE = [
+        { t: 0.0, text: "" },
+        { t: 0.6, text: "y" },
+        { t: 0.76, text: "ye" },
+        { t: 0.9, text: "yeh" },
+        { t: 1.22, text: "yehy" },   // small pause at the syllable break
+        { t: 1.36, text: "yehye" },
+        { t: 1.5, text: "yehyec" },
+        { t: 1.8, text: "yehyeco" }, // second syllable break
+        { t: 1.98, text: "yehyecoa" }
+      ];
+      var KICKER = [
+        { t: 0.0, text: "" },
+        { t: 2.5, text: "N" },
+        { t: 2.58, text: "NO" },
+        { t: 2.65, text: "NO." },
+        { t: 2.78, text: "NO. 0" },
+        { t: 2.86, text: "NO. 01" },
+        { t: 2.98, text: "NO. 01 ·" },
+        { t: 3.06, text: "NO. 01 · NA" },
+        { t: 3.13, text: "NO. 01 · NAHU" },
+        { t: 3.2, text: "NO. 01 · NAHUATL" }
+      ];
+      var SAY = [
+        { t: 0.0, text: "" },
+        { t: 3.46, text: "y" },
+        { t: 3.54, text: "ye" },
+        { t: 3.62, text: "yeh" },
+        { t: 3.72, text: "yeh-" },
+        { t: 3.84, text: "yeh-y" },
+        { t: 3.92, text: "yeh-ye" },
+        { t: 4.0, text: "yeh-yeh" },
+        { t: 4.1, text: "yeh-yeh-" },
+        { t: 4.22, text: "yeh-yeh-C" },
+        { t: 4.3, text: "yeh-yeh-CO" },
+        { t: 4.38, text: "yeh-yeh-CO-" },
+        { t: 4.46, text: "yeh-yeh-CO-a" },
+        { t: 4.53, text: "yeh-yeh-CO-ah" }
+      ];
+
+      // context-sensitive-cursor: which caret is active per time window.
+      // title (typing + idle) -> kicker (typing) -> parked after the name -> pronunciation -> gone at 4.6s.
+      var CARET_SEGMENTS = [
+        { t: 0.0, seg: "title" },
+        { t: 2.46, seg: "kicker" },
+        { t: 3.26, seg: "title" },
+        { t: 3.42, seg: "say" },
+        { t: 4.6, seg: "none" }
+      ];
+
+      function textAt(seq, time) {
+        for (var i = seq.length - 1; i >= 0; i--) if (time >= seq[i].t) return seq[i].text;
+        return "";
+      }
+      function segAt(time) {
+        for (var i = CARET_SEGMENTS.length - 1; i >= 0; i--) if (time >= CARET_SEGMENTS[i].t) return CARET_SEGMENTS[i].seg;
+        return "title";
+      }
+      // Baked change times — caret holds solid while keys are landing (seek-safe, no mutable state).
+      function changeTimes(seq) {
+        var out = [];
+        for (var i = 1; i < seq.length; i++) if (seq[i].text !== seq[i - 1].text) out.push(seq[i].t);
+        return out;
+      }
+      var CHANGES = changeTimes(TITLE).concat(changeTimes(KICKER), changeTimes(SAY), [2.46, 3.26, 3.42]);
+      var TYPING_GRACE = 0.16;
+      var BLINK_CYCLES = 12; // 0.75s period, whole number across 9s
+
+      var driver = { t: 0, p: 0 };
+      tl.to(driver, {
+        t: DURATION,
+        p: Math.PI * 2 * BLINK_CYCLES,
+        duration: DURATION,
+        ease: "none",
+        onUpdate: function () {
+          var t = driver.t;
+          titleText.textContent = textAt(TITLE, t);
+          kickerText.textContent = textAt(KICKER, t);
+          sayText.textContent = textAt(SAY, t);
+
+          var typing = false;
+          for (var i = 0; i < CHANGES.length; i++) {
+            if (CHANGES[i] <= t && t - CHANGES[i] < TYPING_GRACE) { typing = true; break; }
+          }
+          var on = typing || Math.sin(driver.p) > 0;
+          var seg = segAt(t);
+          carets.title.style.opacity = seg === "title" && on ? "1" : "0";
+          carets.kicker.style.opacity = seg === "kicker" && on ? "1" : "0";
+          carets.say.style.opacity = seg === "say" && on ? "1" : "0";
+        }
+      }, 0);
+
+      // --- waterfall-entry: binary reveal + whip up from below, overlapping cascade ---
+      function cascade(start, frags) {
+        var t = start;
+        frags.forEach(function (f) {
+          var el = $(f.id);
+          tl.set(el, { opacity: 1, y: f.y }, t);
+          tl.to(el, { y: 0, duration: f.d, ease: "power4.out" }, t);
+          t = t + f.d - f.overlap * F;
+        });
+      }
+
+      // Scene 5 (4.8s): "to try." at full cream.
+      cascade(4.8, [
+        { id: "l1-a", y: 48, d: 0.22, overlap: 6 },
+        { id: "l1-b", y: 80, d: 0.3, overlap: 10 },
+        { id: "l1-c", y: 44, d: 0.16, overlap: 0 }
+      ]);
+
+      // Scene 6 (6.0s): "to experiment." arrives; "to try." steps down to 50% (discrete state step).
+      tl.set($("line-1"), { opacity: 0.5 }, 6.0);
+      cascade(6.0, [
+        { id: "l2-a", y: 48, d: 0.2, overlap: 6 },
+        { id: "l2-b", y: 76, d: 0.26, overlap: 8 },
+        { id: "l2-c", y: 84, d: 0.24, overlap: 8 },
+        { id: "l2-d", y: 44, d: 0.14, overlap: 0 }
+      ]);
+
+      // Scene 7 (7.2s): "to rehearse." lands last; stack resolves to 0.22 / 0.5 / 1.0.
+      tl.set($("line-1"), { opacity: 0.22 }, 7.2);
+      tl.set($("line-2"), { opacity: 0.5 }, 7.2);
+      cascade(7.2, [
+        { id: "l3-a", y: 48, d: 0.2, overlap: 6 },
+        { id: "l3-b", y: 80, d: 0.24, overlap: 8 },
+        { id: "l3-c", y: 88, d: 0.26, overlap: 8 },
+        { id: "l3-d", y: 44, d: 0.14, overlap: 0 }
+      ]);
+
+      // Scene 8 (8.0–9.0s): held read — nothing moves; the root transition is the exit.
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["01-hook-word"] = tl;
+    })();
+  </script>
+</template>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+  @font-face { font-family: "Work Sans"; font-weight: 400; src: url("assets/fonts/work-sans-400.woff2") format("woff2"); }
+  @font-face { font-family: "Work Sans"; font-weight: 500; src: url("assets/fonts/work-sans-500.woff2") format("woff2"); }
+  @font-face { font-family: "Work Sans"; font-weight: 600; src: url("assets/fonts/work-sans-600.woff2") format("woff2"); }
+  @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+  @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+  @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/space-mono-700.woff2") format("woff2"); }
+  #root { position: absolute; inset: 0; }
+  #f03-console-layouts-ground { position: absolute; inset: 0; container-type: size; overflow: hidden;
+    background: #0b0c07;
+    color: #f5f5f5;
+    font-family: "Work Sans", sans-serif; }
+  #f03-console-layouts-ground .kicker { font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #e4007c; }
+  #f03-console-layouts-ground .rule { width: 36px; height: 2px; background: #e4007c; }
+  #f03-console-layouts-ground .accent { color: #e4007c; }
+  #f03-console-layouts-ground .muted { color: #a7a4a3; }
+  #f03-console-layouts-ground .shot { display: block; border: 1px solid #282627; object-fit: cover; }
+  #f03-console-layouts-ground .tag { font-family: "Space Mono", monospace; font-size: 0.8cqw; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #a7a4a3; }
+  #f03-console-layouts-ground .bullets { list-style: none; display: flex; flex-direction: column; gap: 1cqw; }
+  #f03-console-layouts-ground .bullets li { font-size: 1.8cqw; line-height: 1.3; }
+  #f03-console-layouts-ground .bullets li::before { content: "/ "; font-family: "Space Mono", monospace; color: #e4007c; }
+  #f03-console-layouts-ground .f3-shot { position: absolute; left: 5.5cqw; top: 50%; transform: translateY(-50%); width: 56cqw; height: 31.5cqw; }
+  #f03-console-layouts-ground .f3-text { position: absolute; right: 5.5cqw; top: 50%; transform: translateY(-50%); width: 28cqw; display: flex; flex-direction: column; gap: 1.6cqw; }
+  #f03-console-layouts-ground .f3-head { font-size: 4.5cqw; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+  #f03-console-layouts-ground .f3-sub { font-size: 2.4cqw; font-weight: 600; line-height: 1.2; color: #a7a4a3; }
+      </style>
+      <div data-hf-id="hf-xhv6" id="root" data-composition-id="f03-console-layouts" data-start="0" data-duration="11" data-width="1920" data-height="1080">
+        <div data-hf-id="hf-z3o3" id="f03-console-layouts-ground" class="clip" data-start="0" data-duration="11" data-track-index="0">
+    <img data-hf-id="hf-w6kh" class="shot f3-shot" src="capture/screenshots/console-log-output.png" alt="" />
+    <div data-hf-id="hf-3vc3" class="f3-text">
+      <div data-hf-id="hf-dviw" class="kicker">Built in</div>
+      <div data-hf-id="hf-bjhw" class="f3-head">see every <span data-hf-id="hf-ljgb" class="accent">log.</span></div>
+      <div data-hf-id="hf-12lz" class="f3-sub">arrange it your way.</div>
+    </div>
+        </div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        // Sketch pass: static pose, no motion yet.
+        window.__timelines["f03-console-layouts"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

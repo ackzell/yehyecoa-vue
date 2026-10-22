@@ -1,0 +1,146 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Work Sans"; font-weight: 400; src: url("assets/fonts/work-sans-400.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 500; src: url("assets/fonts/work-sans-500.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 600; src: url("assets/fonts/work-sans-600.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/space-mono-700.woff2") format("woff2"); }
+
+    #root { position: absolute; inset: 0; }
+
+    #f07-close-wordmark-ground {
+      position: absolute; inset: 0; container-type: size; overflow: hidden;
+      background: #e4007c;
+      color: #0b0c07;
+      font-family: "Work Sans", sans-serif;
+    }
+    #f07-close-wordmark-ground .f7-num {
+      position: absolute; left: 5.5cqw; top: 5.5cqw;
+      font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+      color: rgba(17,17,17,0.55);
+    }
+    #f07-close-wordmark-ground .f7-meta {
+      position: absolute; right: 5.5cqw; top: 5.5cqw;
+      font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+      color: rgba(17,17,17,0.55); text-transform: uppercase;
+    }
+    #f07-close-wordmark-ground .f7-block {
+      position: absolute; left: 5.5cqw; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 1.4cqw;
+    }
+    #f07-close-wordmark-ground .f7-rule {
+      width: 36px; height: 2px; background: #0b0c07; transform-origin: 0 50%;
+    }
+    #f07-close-wordmark-ground .f7-word {
+      font-size: 11cqw; font-weight: 700; line-height: 0.88; letter-spacing: -0.04em;
+      white-space: pre; display: flex; align-items: baseline;
+    }
+    #f07-close-wordmark-ground .f7-text { white-space: pre; }
+    #f07-close-wordmark-ground .f7-caret {
+      display: inline-block; width: 0.07em; height: 0.78em;
+      margin-left: 0.06em; background: #0b0c07;
+    }
+    #f07-close-wordmark-ground .f7-lead {
+      margin-top: 2.4cqw; font-size: 2.6cqw; font-weight: 500; color: rgba(17,17,17,0.75);
+    }
+    #f07-close-wordmark-fade {
+      position: absolute; inset: 0; background: #0b0c07; opacity: 0;
+    }
+  </style>
+
+  <div data-hf-id="hf-j09f" id="root" data-composition-id="07-close-wordmark" data-start="0" data-duration="6" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-yl0u" id="f07-close-wordmark-ground" class="clip" data-start="0" data-duration="6" data-track-index="0">
+      <div data-hf-id="hf-mbv3" class="f7-num" id="f07-close-wordmark-num">NO. 07</div>
+      <div data-hf-id="hf-d4yz" class="f7-meta" id="f07-close-wordmark-meta">a Vue playground</div>
+      <div data-hf-id="hf-p4z5" class="f7-block">
+        <div data-hf-id="hf-txal" class="f7-rule" id="f07-close-wordmark-rule"></div>
+        <div data-hf-id="hf-s3fy" class="f7-word"><span data-hf-id="hf-m4ze" class="f7-text" id="f07-close-wordmark-text"></span><span data-hf-id="hf-ezqi" class="f7-caret" id="f07-close-wordmark-caret"></span></div>
+        <div data-hf-id="hf-b61p" class="f7-lead" id="f07-close-wordmark-lead">to try, to rehearse.</div>
+      </div>
+    </div>
+    <div data-hf-id="hf-ni12" id="f07-close-wordmark-fade" class="clip" data-start="0" data-duration="6" data-track-index="1"></div>
+  </div>
+
+  <script>
+    (function () {
+      const FRAME_ID = "07-close-wordmark";
+      const DURATION = 6;
+      const $ = (s) => document.getElementById("f" + FRAME_ID + "-" + s);
+      const ruleEl = $("rule");
+      const textEl = $("text");
+      const caretEl = $("caret");
+      const leadEl = $("lead");
+      const numEl = $("num");
+      const metaEl = $("meta");
+      const fadeEl = $("fade");
+
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1 (0.0–0.5s): ink rule stub draws in left to right.
+      tl.fromTo(ruleEl, { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.out" }, 0);
+
+      // Scene 2 (0.4–1.9s): "yehyecoa-vue" types on, human cadence, a beat at the hyphen.
+      const WORD = "yehyecoa-vue";
+      const STEPS = [0.40, 0.50, 0.59, 0.69, 0.78, 0.88, 0.97, 1.08, 1.34, 1.52, 1.68, 1.86];
+      const SEQUENCE = [{ t: 0, text: "" }].concat(
+        STEPS.map((t, i) => ({ t: t, text: WORD.slice(0, i + 1) }))
+      );
+      function textAt(time) {
+        for (let i = SEQUENCE.length - 1; i >= 0; i--) {
+          if (time >= SEQUENCE[i].t) return SEQUENCE[i].text;
+        }
+        return "";
+      }
+      const CHANGE_TIMES = STEPS.slice();
+      const TYPING_GRACE = 0.08; // < shortest gap between keystrokes (0.09s)
+      const CARET_OUT = 2.9;
+      const BLINK_CYCLES = 8; // over DURATION: 0.75s period, whole number
+
+      const driver = { t: 0, p: 0 };
+      tl.to(driver, {
+        t: DURATION,
+        p: Math.PI * 2 * BLINK_CYCLES,
+        duration: DURATION,
+        ease: "none",
+        onUpdate: function () {
+          const t = driver.t;
+          textEl.textContent = textAt(t);
+          let on;
+          if (t >= CARET_OUT) {
+            on = false;
+          } else {
+            const typing = (t >= STEPS[0] && t < STEPS[STEPS.length - 1] + TYPING_GRACE) ||
+              CHANGE_TIMES.some((c) => c <= t && t - c < TYPING_GRACE);
+            on = typing ? true : Math.sin(driver.p) > 0;
+          }
+          caretEl.style.opacity = on ? "1" : "0";
+        },
+      }, 0);
+
+      // Scene 3 (2.1–2.9s): lead line slides up on one long-tail settle.
+      tl.fromTo(leadEl,
+        { y: 40, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "expo.out" },
+        2.1);
+
+      // Scene 4 (2.9–3.4s): quiet chrome arrives.
+      tl.fromTo([numEl, metaEl],
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5, ease: "power2.out" },
+        2.9);
+
+      // Scene 5 (3.4–5.4s): held read — completely still.
+
+      // Scene 6 (5.4–6.0s): the video's only exit — the card fades to ink-black.
+      tl.fromTo(fadeEl,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6, ease: "power1.inOut" },
+        5.4);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines[FRAME_ID] = tl;
+    })();
+  </script>
+</template>

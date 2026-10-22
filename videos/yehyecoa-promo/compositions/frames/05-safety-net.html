@@ -1,0 +1,265 @@
+<template>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    @font-face { font-family: "Work Sans"; font-weight: 400; src: url("assets/fonts/work-sans-400.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 500; src: url("assets/fonts/work-sans-500.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 600; src: url("assets/fonts/work-sans-600.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/space-mono-700.woff2") format("woff2"); }
+
+    #root { position: absolute; inset: 0; overflow: hidden; }
+
+    /* Full-bleed ground + text column + the slot's under-layer (still prologue). */
+    #f05-safety-net-ground {
+      position: absolute; inset: 0; container-type: size; overflow: hidden;
+      background: #0b0c07; color: #f5f5f5; font-family: "Work Sans", sans-serif;
+    }
+    #f05-safety-net-ground .f05-safety-net-kicker {
+      font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #e4007c;
+    }
+    #f05-safety-net-ground .f05-safety-net-accent { color: #e4007c; }
+    #f05-safety-net-ground .f05-safety-net-text {
+      position: absolute; left: 5.5cqw; top: 50%; transform: translateY(-50%);
+      width: 30cqw; display: flex; flex-direction: column; gap: 2cqw;
+    }
+    #f05-safety-net-ground .f05-safety-net-head {
+      font-size: 5cqw; font-weight: 700; line-height: 0.95; letter-spacing: -0.03em;
+    }
+    #f05-safety-net-ground .f05-safety-net-w { display: inline-block; }
+    #f05-safety-net-ground .f05-safety-net-bullets {
+      list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1cqw;
+    }
+    #f05-safety-net-ground .f05-safety-net-bullets li { font-size: 1.8cqw; line-height: 1.3; }
+    #f05-safety-net-ground .f05-safety-net-bullets li::before {
+      content: "/ "; font-family: "Space Mono", monospace; color: #e4007c;
+    }
+
+    /* Slot geometry (1920x1080 px): content rect 739.2,237.6 1075.2x604.8 (56cqw x 31.5cqw,
+       right pad 5.5cqw, vertically centred). 1px hairline frame sits just outside it. */
+    #f05-safety-net-slot {
+      position: absolute; left: 738.2px; top: 236.6px; width: 1077.2px; height: 606.8px;
+      box-sizing: border-box; border: 1px solid #282627; background: #0f0f0f; overflow: hidden;
+    }
+    #f05-safety-net-world-under, #f05-safety-net-world-over {
+      position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+      transform-origin: 0 0; will-change: transform;
+    }
+    #f05-safety-net-still { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: block; }
+
+    /* Over-layer: sits above the hoisted clip (z-index) so crisp plates, the marker and
+       the cursor read over the footage. Outside the ground on purpose: the ground's
+       size containment would trap these z-indexes. */
+    #f05-safety-net-over { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+    #f05-safety-net-over-slot {
+      position: absolute; left: 739.2px; top: 237.6px; width: 1075.2px; height: 604.8px; overflow: hidden;
+    }
+    #f05-safety-net-diff-plate { position: absolute; left: 901px; top: 496px; width: 1024px; height: 336px; display: block; }
+    #f05-safety-net-drawer-plate { position: absolute; left: 1570px; top: 50px; width: 350px; height: 990px; display: block; }
+    #f05-safety-net-marker { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+    #f05-safety-net-marker path {
+      fill: none; stroke: #e4007c; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    /* oversized-cursor (registry component, merged): 224px arrow, tip at (5/24, 3/24).
+       Flat per frame.md (no drop shadow); click ring restyled magenta. */
+    #f05-safety-net-cursor {
+      position: absolute; left: 0; top: 0; width: 224px; height: 224px;
+      transform-origin: 20.83% 12.5%; will-change: transform;
+    }
+    #f05-safety-net-cursor svg { display: block; width: 100%; height: 100%; stroke-linejoin: round; stroke-linecap: round; }
+    #f05-safety-net-cursor path { fill: #ffffff; stroke: #141414; stroke-width: 1.4; }
+    #f05-safety-net-ring {
+      position: absolute; left: 0; top: 0; width: 72px; height: 72px; margin: -36px 0 0 -36px;
+      border-radius: 50%; border: 3px solid #e4007c; box-sizing: border-box;
+    }
+  </style>
+
+  <div data-hf-id="hf-6oq3" id="root" data-composition-id="05-safety-net" data-start="0" data-duration="20.4" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-xvj4" id="f05-safety-net-ground" class="clip" data-start="0" data-duration="20.4" data-track-index="0">
+      <div data-hf-id="hf-zvkw" class="f05-safety-net-text">
+        <div data-hf-id="hf-1f8y" id="f05-safety-net-kicker" class="f05-safety-net-kicker">History</div>
+        <div data-hf-id="hf-z2s7" class="f05-safety-net-head"><span data-hf-id="hf-og10" id="f05-safety-net-h1" class="f05-safety-net-w">every</span> <span data-hf-id="hf-nnun" id="f05-safety-net-h2" class="f05-safety-net-w">try</span> <span data-hf-id="hf-3pln" id="f05-safety-net-h3" class="f05-safety-net-w">is</span> <span data-hf-id="hf-0y4m" id="f05-safety-net-h4" class="f05-safety-net-w f05-safety-net-accent">saved.</span></div>
+        <ul data-hf-id="hf-t94g" class="f05-safety-net-bullets">
+          <li data-hf-id="hf-q66b" id="f05-safety-net-b1"><span data-hf-id="hf-28mi" id="f05-safety-net-b1w1" class="f05-safety-net-w">compare</span></li>
+          <li data-hf-id="hf-hiag" id="f05-safety-net-b2"><span data-hf-id="hf-xt4e" id="f05-safety-net-b2w1" class="f05-safety-net-w">restore</span></li>
+          <li data-hf-id="hf-i9y9" id="f05-safety-net-b3"><span data-hf-id="hf-nyiq" id="f05-safety-net-b3w1" class="f05-safety-net-w">experiment</span> <span data-hf-id="hf-bhx6" id="f05-safety-net-b3w2" class="f05-safety-net-w">fearlessly</span></li>
+        </ul>
+      </div>
+      <div data-hf-id="hf-9sia" id="f05-safety-net-slot">
+        <div data-hf-id="hf-kgl6" id="f05-safety-net-world-under" data-layout-allow-overflow>
+          <img data-hf-id="hf-dqqp" id="f05-safety-net-still" src="assets/safety-snapshot-saved-toast.png" alt="" />
+        </div>
+      </div>
+    </div>
+
+    <div data-hf-id="hf-5oxp" id="f05-safety-net-over" class="clip" data-start="0" data-duration="20.4" data-track-index="2">
+      <div data-hf-id="hf-zstt" id="f05-safety-net-over-slot">
+        <div data-hf-id="hf-i672" id="f05-safety-net-world-over" data-layout-allow-overflow>
+          <img data-hf-id="hf-1gj1" id="f05-safety-net-diff-plate" src="assets/safety-diff-view-crop.png" alt="" />
+          <svg data-hf-id="hf-r82k" id="f05-safety-net-marker" viewBox="0 0 1920 1080" aria-hidden="true">
+            <path data-hf-id="hf-5iex" id="f05-safety-net-marker-path" pathLength="1"
+              d="M 1884 595 C 1690 586, 1160 589, 934 597 C 884 599, 879 632, 934 636 C 1200 643, 1700 641, 1898 631 C 1936 628, 1932 600, 1856 592" />
+          </svg>
+          <img data-hf-id="hf-uefm" id="f05-safety-net-drawer-plate" src="assets/safety-history-drawer-crop.png" alt="" />
+        </div>
+      </div>
+      <div data-hf-id="hf-wrp4" id="f05-safety-net-ring"></div>
+      <div data-hf-id="hf-ge5l" id="f05-safety-net-cursor" aria-hidden="true">
+        <svg data-hf-id="hf-35ls" viewBox="0 0 24 24" aria-hidden="true"><path data-hf-id="hf-fueh" d="M5 3 L5 19 L9 15 L12 22 L15 20.5 L11.5 14 L18 14 Z" /></svg>
+      </div>
+    </div>
+
+    <!-- Focal clip: hoisted to the host root by assemble-index (geometry = slot content rect).
+         Frame time = clip time + 5.0s. The camera below drives its transform/clip-path by id. -->
+    <!-- approved frame video hoisted by assemble-index -->
+  </div>
+
+  <script>
+    (function () {
+      var ID = "05-safety-net";
+      var $ = function (id) { return document.getElementById("f05-safety-net-" + id); };
+
+      // Slot: content rect on the 1920x1080 frame; the world is the app at native 1920x1080.
+      var SX = 739.2, SY = 237.6, W = 1075.2, H = 604.8, K = W / 1920; // 0.56
+      // Measured on the clip/screenshot (native px): toasts, drawer, diff popover, oldest Restore.
+      var RESTORE = { x: 1655, y: 546 };
+
+      var under = $("world-under"), over = $("world-over");
+      var cursorEl = $("cursor"), ringEl = $("ring");
+      var videoEl = null;
+
+      // ONE camera state: zoom s, native focus point (cx, cy) shown at slot centre, blur px.
+      var cam = { s: 1, cx: 960, cy: 540, blur: 0 };
+      // Cursor offset from its (camera-tracked) target in screen px, plus click scale.
+      var cur = { dx: 170, dy: 660, sc: 1 };
+
+      function findVideo() {
+        if (videoEl && videoEl.isConnected) return videoEl;
+        videoEl = window.document.getElementById("f05-safety-net-clip"); // hoisted to the host root; the frame-scoped `document` cannot see it
+        if (videoEl) { videoEl.style.zIndex = "2"; videoEl.style.transformOrigin = "0 0"; }
+        return videoEl;
+      }
+
+      // Single writer: every leg, the hoisted clip, the over-layer and the cursor follow cam.
+      function applyCamera() {
+        var z = K * cam.s;
+        var tx = W / 2 - z * cam.cx;
+        var ty = H / 2 - z * cam.cy;
+        var tf = "translate(" + tx + "px," + ty + "px) scale(" + z + ")";
+        var f = cam.blur > 0.01 ? "blur(" + cam.blur + "px)" : "none";
+        under.style.transform = tf;
+        under.style.filter = f;
+        over.style.transform = tf;
+        var v = findVideo();
+        if (v) {
+          var s = cam.s;
+          v.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + s + ")";
+          var l = -tx / s, t = -ty / s, r = W - (W - tx) / s, b = H - (H - ty) / s;
+          v.style.clipPath = "inset(" + t + "px " + r + "px " + b + "px " + l + "px)";
+          v.style.filter = f;
+        }
+        var px = SX + tx + z * RESTORE.x;
+        var py = SY + ty + z * RESTORE.y;
+        cursorEl.style.transform =
+          "translate(" + (px + cur.dx - 46.66) + "px," + (py + cur.dy - 28) + "px) scale(" + cur.sc + ")";
+        ringEl.style.left = px + "px";
+        ringEl.style.top = py + "px";
+      }
+
+      var tl = gsap.timeline({ paused: true, onUpdate: applyCamera });
+      function camTo(at, dur, ease, to) {
+        tl.to(cam, Object.assign({ duration: dur, ease: ease, onUpdate: applyCamera }, to), at);
+      }
+      function rise(el, at, dur) {
+        tl.fromTo(el, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: dur || 0.4, ease: "power3.out" }, at);
+      }
+      function glow(el, at) {
+        tl.fromTo(el, { textShadow: "0 0 0px rgba(228,0,124,0)" },
+          { textShadow: "0 0 28px rgba(228,0,124,0.9)", duration: 0.3, ease: "power2.out" }, at);
+        tl.to(el, { textShadow: "0 0 0px rgba(228,0,124,0)", duration: 0.7, ease: "power2.inOut" }, at + 0.3);
+      }
+
+      // Initial states (seek-safe: fromTo / set at 0).
+      tl.set(cam, { s: 1, cx: 960, cy: 540, blur: 0 }, 0);
+      tl.set(cur, { dx: 170, dy: 660, sc: 1 }, 0);
+      tl.set(cursorEl, { opacity: 0 }, 0);
+      tl.set(ringEl, { opacity: 0, scale: 0.3 }, 0);
+      tl.set($("still"), { opacity: 1 }, 0);
+      tl.set([$("diff-plate"), $("drawer-plate"), $("marker")], { opacity: 0 }, 0);
+      tl.set($("marker-path"), { strokeDasharray: 1, strokeDashoffset: 1 }, 0);
+      ["b1", "b2", "b3"].forEach(function (b) { tl.set($(b), { opacity: 0 }, 0); });
+
+      // Scene 1 (0.0-1.4): kicker, headline word by word, "saved." lands ~1.2; slot slides in.
+      rise($("kicker"), 0.05, 0.35);
+      rise($("h1"), 0.2); rise($("h2"), 0.4); rise($("h3"), 0.58); rise($("h4"), 0.85, 0.45);
+      tl.fromTo([$("slot"), $("over-slot")], { x: 140, opacity: 0 },
+        { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 0.4);
+
+      // Scene 2 (1.4-2.6): LEG 1 dive onto the two "Snapshot saved" toasts; "saved." flares.
+      camTo(1.4, 1.2, "power4.out", { s: 3.2, cx: 960, cy: 104 });
+      glow($("h4"), 2.3);
+      // Scene 3 (2.6-4.6): hold tight, near-imperceptible drift.
+      camTo(2.6, 2.0, "sine.inOut", { s: 3.3 });
+
+      // Scene 4 (4.6-5.4): pull back; cut-the-curve to the clip at peak velocity (5.0),
+      // blur envelope on the camera matched on both sides of the swap.
+      camTo(4.6, 0.8, "power2.inOut", { s: 1, cx: 960, cy: 540 });
+      tl.to(cam, { blur: 18, duration: 0.4, ease: "power2.in", onUpdate: applyCamera }, 4.6);
+      tl.to(cam, { blur: 0, duration: 0.4, ease: "power2.out", onUpdate: applyCamera }, 5.0);
+      tl.set($("still"), { opacity: 0 }, 5.0);
+
+      // Scene 5 (5.4-7.5): wide on the clip, camera locked.
+      // Scene 6 (7.5-8.9): LEG 2 travel right as the drawer slides in (clip 2.6-2.9 -> 7.6-7.9).
+      camTo(7.5, 1.4, "power2.inOut", { s: 1.35, cx: 1209, cy: 420 });
+      camTo(8.9, 1.4, "sine.inOut", { s: 1.38 });
+
+      // Scene 7: LEG 3 dive onto the diff popover (opens clip 5.4-5.6 -> 10.4-10.6).
+      camTo(10.3, 0.85, "power4.out", { s: 1.7, cx: 1355, cy: 664 });
+      tl.fromTo($("diff-plate"), { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, 11.0);
+      tl.set($("b1"), { opacity: 1 }, 11.1);
+      rise($("b1w1"), 11.1);
+      tl.set($("marker"), { opacity: 1 }, 11.8);
+      tl.to($("marker-path"), { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, 11.8);
+      camTo(11.15, 2.55, "sine.inOut", { s: 1.76, cx: 1372, cy: 650 });
+      // Popover closes at clip 8.8-9.0 (13.8-14.0): crisp plate + marker clear just before.
+      tl.to([$("diff-plate"), $("marker")], { opacity: 0, duration: 0.15, ease: "none" }, 13.6);
+
+      // Scene 8 (13.85-15.6): swoop down the drawer to the oldest snapshot's Restore.
+      camTo(13.85, 1.15, "power3.inOut", { s: 2.2, cx: 1484, cy: 546 });
+      // Crisp drawer plate only until the app's own hover state begins (clip 9.7 -> 14.7).
+      tl.fromTo($("drawer-plate"), { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, 13.95);
+      tl.to($("drawer-plate"), { opacity: 0, duration: 0.15, ease: "none" }, 14.55);
+      camTo(15.0, 0.6, "sine.inOut", { s: 2.25, cx: 1490 });
+      tl.set($("b2"), { opacity: 1 }, 15.0);
+      rise($("b2w1"), 15.0);
+      // oversized-cursor: glide in, aim, click on the clip's own click (~clip 10.5 -> 15.5).
+      tl.set(cursorEl, { opacity: 1 }, 14.6);
+      tl.to(cur, { dx: 0, dy: 0, duration: 0.55, ease: "power3.out", onUpdate: applyCamera }, 14.6);
+      tl.to(cur, { sc: 0.9, duration: 0.1, ease: "power2.in", onUpdate: applyCamera }, 15.4);
+      tl.to(cur, { sc: 1, duration: 0.22, ease: "power2.out", onUpdate: applyCamera }, 15.5);
+      tl.set(ringEl, { opacity: 1, scale: 0.3 }, 15.5);
+      tl.to(ringEl, { scale: 1.7, opacity: 0, duration: 0.55, ease: "power2.out" }, 15.5);
+
+      // Scene 9 (15.6-16.6): consequence - decelerating pull back to wide as the code reverts
+      // and the blue "auto" snapshot appears (clip 10.7-10.9); cursor settles below, exits.
+      camTo(15.6, 1.0, "power4.out", { s: 1, cx: 960, cy: 540 });
+      tl.to(cur, { dx: 48, dy: 40, duration: 0.4, ease: "power2.inOut", onUpdate: applyCamera }, 15.6);
+      tl.to(cur, { dy: 720, duration: 0.4, ease: "power2.in", onUpdate: applyCamera }, 16.2);
+      tl.set(cursorEl, { opacity: 0 }, 16.6);
+
+      // Scene 10 (16.6-17.6): last bullet, "fearlessly" flares.
+      tl.set($("b3"), { opacity: 1 }, 16.6);
+      rise($("b3w1"), 16.6); rise($("b3w2"), 16.85);
+      glow($("b3w2"), 17.15);
+
+      // Scene 11 (17.6-20.0): held wide read; the root transition is the exit.
+      tl.set({}, {}, 20);
+
+      applyCamera();
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

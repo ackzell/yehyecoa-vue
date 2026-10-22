@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+  @font-face { font-family: "Work Sans"; font-weight: 400; src: url("assets/fonts/work-sans-400.woff2") format("woff2"); }
+  @font-face { font-family: "Work Sans"; font-weight: 500; src: url("assets/fonts/work-sans-500.woff2") format("woff2"); }
+  @font-face { font-family: "Work Sans"; font-weight: 600; src: url("assets/fonts/work-sans-600.woff2") format("woff2"); }
+  @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+  @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+  @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/space-mono-700.woff2") format("woff2"); }
+  #root { position: absolute; inset: 0; }
+  #f06-home-amoxtli-ground { position: absolute; inset: 0; container-type: size; overflow: hidden;
+    background: #e4007c;
+    color: #0b0c07;
+    font-family: "Work Sans", sans-serif; }
+  #f06-home-amoxtli-ground .kicker { font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+    text-transform: uppercase; color: rgba(17,17,17,0.55); }
+  #f06-home-amoxtli-ground .rule { width: 36px; height: 2px; background: #0b0c07; }
+  #f06-home-amoxtli-ground .accent { color: #e4007c; }
+  #f06-home-amoxtli-ground .muted { color: #a7a4a3; }
+  #f06-home-amoxtli-ground .shot { display: block; border: 1px solid #282627; object-fit: cover; }
+  #f06-home-amoxtli-ground .tag { font-family: "Space Mono", monospace; font-size: 0.8cqw; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #a7a4a3; }
+  #f06-home-amoxtli-ground .bullets { list-style: none; display: flex; flex-direction: column; gap: 1cqw; }
+  #f06-home-amoxtli-ground .bullets li { font-size: 1.8cqw; line-height: 1.3; }
+  #f06-home-amoxtli-ground .bullets li::before { content: "/ "; font-family: "Space Mono", monospace; color: #e4007c; }
+  #f06-home-amoxtli-ground .f6-head { position: absolute; left: 5.5cqw; top: 5.5cqw; display: flex; flex-direction: column; gap: 1cqw; }
+  #f06-home-amoxtli-ground .f6-title { font-size: 4.5cqw; font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; }
+  #f06-home-amoxtli-ground .f6-shot { position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 72cqw; height: 42.4cqw; border: 1px solid rgba(17,17,17,0.2); object-fit: cover; object-position: top; }
+      </style>
+      <div data-hf-id="hf-qzol" id="root" data-composition-id="f06-home-amoxtli" data-start="0" data-duration="10" data-width="1920" data-height="1080">
+        <div data-hf-id="hf-dhjo" id="f06-home-amoxtli-ground" class="clip" data-start="0" data-duration="10" data-track-index="0">
+    <div data-hf-id="hf-2dgr" class="f6-head">
+      <div data-hf-id="hf-6i6m" class="kicker">Its home</div>
+      <div data-hf-id="hf-zlqv" class="f6-title">built into amoxtli-vue lessons.</div>
+    </div>
+    <img data-hf-id="hf-w593" class="f6-shot" src="capture/assets/home-amoxtli-lesson.png" alt="" />
+        </div>
+      </div>
+      <script>
+        const tl = gsap.timeline({ paused: true });
+        // Sketch pass: static pose, no motion yet.
+        window.__timelines["f06-home-amoxtli"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

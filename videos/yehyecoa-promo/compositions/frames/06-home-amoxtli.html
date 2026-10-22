@@ -1,0 +1,81 @@
+<template>
+  <style>
+    @font-face { font-family: "Work Sans"; font-weight: 400; src: url("assets/fonts/work-sans-400.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .h06-ground { position: absolute; inset: 0; container-type: size; overflow: hidden;
+      background: #e4007c; color: #0b0c07; font-family: "Work Sans", sans-serif; }
+    .h06-world { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
+    .h06-shot { position: absolute; left: 14cqw; bottom: 0; width: 72cqw; height: 42.4cqw; display: block;
+      border: 1px solid rgba(17,17,17,0.2); object-fit: cover; object-position: top; }
+    .h06-head { position: absolute; left: 5.5cqw; top: 5.5cqw; display: flex; flex-direction: column; gap: 1cqw; }
+    .h06-kicker { font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(17,17,17,0.55); white-space: pre; min-width: 12cqw; height: 1.4cqw; }
+    .h06-title { font-size: 4.5cqw; font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; white-space: nowrap; }
+    .h06-word { display: inline-block; }
+    .h06-mark { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .h06-mark path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <div data-hf-id="hf-h7ye" id="root" data-composition-id="06-home-amoxtli" data-start="0" data-duration="10.5" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-5a58" id="h06-ground" class="h06-ground clip" data-start="0" data-duration="10.5" data-track-index="0">
+      <div data-hf-id="hf-3sqs" id="h06-world" class="h06-world">
+        <img data-hf-id="hf-y2h8" class="h06-shot" src="assets/home-amoxtli-lesson.png" alt="" />
+      </div>
+      <svg data-hf-id="hf-9vsg" class="h06-mark" viewBox="0 0 1920 1080" aria-hidden="true">
+        <path data-hf-id="hf-baus" id="h06-mark-halo" stroke="#0b0c07" stroke-width="13"
+          d="M 842 322 C 1100 312, 1420 316, 1668 330 C 1676 560, 1672 820, 1662 1044 C 1380 1052, 1080 1050, 814 1040 C 806 800, 808 560, 818 340 C 900 326, 1000 318, 1120 321" />
+        <path data-hf-id="hf-de9s" id="h06-mark-core" stroke="#e4007c" stroke-width="6"
+          d="M 842 322 C 1100 312, 1420 316, 1668 330 C 1676 560, 1672 820, 1662 1044 C 1380 1052, 1080 1050, 814 1040 C 806 800, 808 560, 818 340 C 900 326, 1000 318, 1120 321" />
+      </svg>
+      <div data-hf-id="hf-w1eh" class="h06-head">
+        <div data-hf-id="hf-ys7e" class="h06-kicker" id="h06-kicker"></div>
+        <div data-hf-id="hf-xbzn" class="h06-title"><span data-hf-id="hf-k9ei" class="h06-word">built</span> <span data-hf-id="hf-aht8" class="h06-word">into</span> <span data-hf-id="hf-z0i7" class="h06-word">amoxtli-vue</span> <span data-hf-id="hf-8rkj" class="h06-word">lessons.</span></div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      const ID = "06-home-amoxtli";
+      const W = 1920, H = 1080;
+      const tl = gsap.timeline({ paused: true });
+
+      // Single-wrapper camera (viewport-change form): translate(T) scale(S), origin center.
+      // A frame-space point p lands at center when T = -(p - center) * S.
+      const S0 = 2.6;
+      const camAt = (cx, cy) => ({ scale: S0, x: -(cx - W / 2) * S0, y: -(cy - H / 2) * S0 });
+      // Close-up on the playground: preview box + swatches + top of the editor (all inside the screenshot).
+      const glideStart = camAt(1282, 560);
+      const glideEnd = camAt(1236, 612); // slow drift down-left along the editor code
+
+      // Scene 1 (0–2.6s): full-bleed close-up, gentle glide.
+      tl.fromTo("#h06-world", glideStart, { ...glideEnd, duration: 2.6, ease: "sine.inOut" }, 0);
+      // Scene 2 (2.6–3.8s): THE reveal — one heavily decelerating zoom-out, then the frame locks.
+      tl.to("#h06-world", { scale: 1, x: 0, y: 0, duration: 1.2, ease: "expo.out" }, 2.6);
+
+      // Scene 3 (4.0–5.4s): kicker types on, then the headline assembles word by word.
+      const kickerEl = document.getElementById("h06-kicker");
+      const KICK = "ITS HOME";
+      const k = { v: 0 };
+      tl.fromTo(k, { v: 0 }, { v: KICK.length, duration: 0.55, ease: "none",
+        onUpdate: () => { kickerEl.textContent = KICK.substring(0, Math.floor(k.v)); } }, 4.0);
+      tl.fromTo(".h06-word", { y: 36, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power3.out", stagger: 0.12 }, 4.6);
+
+      // Scene 4 (5.8–7.2s): hand-drawn marker outline around the yehyecoa playground pane.
+      ["#h06-mark-halo", "#h06-mark-core"].forEach((sel) => {
+        const p = document.querySelector(sel);
+        const len = Math.ceil(p.getTotalLength()) + 2;
+        tl.fromTo(p, { strokeDasharray: len, strokeDashoffset: len },
+          { strokeDashoffset: 0, duration: 1.3, ease: "power2.inOut" }, 5.8);
+      });
+
+      // Scene 5 (7.2–10s): deliberate still hold; pad the timeline to the full duration.
+      tl.to({}, { duration: 0.01 }, 9.99);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

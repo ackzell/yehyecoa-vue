@@ -1,0 +1,37 @@
+{
+  "lines": [
+    {
+      "id": "01",
+      "sfx": [
+        "typing"
+      ]
+    },
+    {
+      "id": "02",
+      "sfx": [
+        "whoosh-short"
+      ]
+    },
+    {
+      "id": "04",
+      "sfx": [
+        "whoosh-short"
+      ]
+    },
+    {
+      "id": "06",
+      "sfx": [
+        "whoosh"
+      ]
+    },
+    {
+      "id": "07",
+      "sfx": [
+        "typing"
+      ]
+    }
+  ],
+  "bgm": {
+    "mode": "none"
+  }
+}

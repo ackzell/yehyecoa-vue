@@ -1,0 +1,20 @@
+# Render output (re-create with `npx hyperframes render`)
+renders/
+
+# Raw Playwright captures (re-create with scripts/capture-app.mjs); the used clips are staged in assets/
+capture/screenshots/
+capture/assets/
+capture.err
+
+# Storyboard snapshot stills (re-create with `npx hyperframes snapshot`)
+boards/stills/
+
+# Unused original music track
+assets/bgm/track-25s-original.mp3
+
+# HyperFrames local caches and run state
+.media/
+.thumbnails/
+.waveform-cache/
+.hyperframes/*
+!.hyperframes/caption-skin.html

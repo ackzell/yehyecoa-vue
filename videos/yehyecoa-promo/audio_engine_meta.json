@@ -1,0 +1,68 @@
+{
+  "tts_provider": null,
+  "voice_id": null,
+  "bgm": {
+    "path": "assets/bgm/track.mp3",
+    "volume": 0.9,
+    "query": "warm curious upbeat minimal electronic, light percussion, steady build, no vocals",
+    "mode": "retrieve",
+    "duration_s": 25
+  },
+  "bgm_pending": false,
+  "bgm_provider": "heygen",
+  "bgm_pid": null,
+  "bgm_log": null,
+  "bgm_mode": "retrieve",
+  "bgm_target_duration_s": null,
+  "bgm_seed_duration_s": null,
+  "bgm_loop_count": null,
+  "voices": [],
+  "sfx": [
+    {
+      "id": "01",
+      "name": "typing",
+      "file": "assets/sfx/typing.mp3",
+      "source": "local",
+      "offset_s": 0,
+      "duration_s": 1.5,
+      "volume": 0.35
+    },
+    {
+      "id": "02",
+      "name": "whoosh-short",
+      "file": "assets/sfx/whoosh-short.mp3",
+      "source": "local",
+      "offset_s": 0,
+      "duration_s": 0.57,
+      "volume": 0.35
+    },
+    {
+      "id": "04",
+      "name": "whoosh-short",
+      "file": "assets/sfx/whoosh-short.mp3",
+      "source": "local",
+      "offset_s": 0,
+      "duration_s": 0.57,
+      "volume": 0.35
+    },
+    {
+      "id": "06",
+      "name": "whoosh",
+      "file": "assets/sfx/whoosh.mp3",
+      "source": "local",
+      "offset_s": 0,
+      "duration_s": 0.57,
+      "volume": 0.35
+    },
+    {
+      "id": "07",
+      "name": "typing",
+      "file": "assets/sfx/typing.mp3",
+      "source": "local",
+      "offset_s": 0,
+      "duration_s": 1.5,
+      "volume": 0.35
+    }
+  ],
+  "total_duration_s": 0
+}

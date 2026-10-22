@@ -1,0 +1,45 @@
+Notable UI text seen in the yehyecoa-vue captures (dark theme)
+
+Header / chrome
+- App.vue  (editor file tab, with "+" add-file button)
+- PREVIEW  (output tab)
+- Console  (console panel title)
+- clear  (console button)
+- yehyecoa-vue v0.3.1-beta  (footer, bottom-right)
+- vue-workshop  (footer room badge, bottom-left, when joined to a workshop)
+- Header icon tooltips (from source, not visible in captures): Save snapshot, Open history / Close history, Layout, Switch to light theme
+
+Collaboration
+- Following instructor  (student status pill, header center)
+- Follow instructor  (paused state label; not captured)
+- Tooltips (source): Instructor mode, Instructor is online., Leave workshop
+- Toasts: "vue-workshop" + "Connected." ; "Instructor is online"
+
+Layout menu (icon-only; tooltips from source)
+- Hide preview / Show preview
+- Switch to vertical layout / Switch to horizontal layout
+- Reverse layout / Normal layout
+- Hide console / Show console
+- Switch to horizontal output layout / Switch to vertical output layout
+
+History drawer
+- Your sessions (1)
+- manual / auto  (snapshot type labels, orange / blue)
+- 1 file / (no changes)
+- Manually saved
+- Manual save from editor
+- Before a snapshot was restored
+- Restore
+- Delete
+- now / 6 seconds ago / 11 seconds ago ...  (relative times)
+- Diff card: Current | Snapshot | +2 additions -2 deletions
+
+Toasts
+- Snapshot saved
+- No events endpoint available / App is running standalone.  (dismissed in all captures)
+
+Demo SFC content (preview + console)
+- Vue Workshop / Vue Playground / Vue Lab / Vue Class of 2026  (heading)
+- Clicked 0 times ... Clicked 3 times  (button)
+- Doubled: 0 ... Doubled: 6
+- count is now 1 / count is now 2 / count is now 3  (console log rows)
