@@ -36,3 +36,13 @@ export interface LayoutSplit<TPanelId extends CodePanelId = CodePanelId> {
 export type LayoutNode<TPanelId extends CodePanelId = CodePanelId> =
   | LayoutLeaf<TPanelId>
   | LayoutSplit<TPanelId>
+
+/**
+ * Generic nested node for the file tree. Each app maps its own file model onto
+ * this shape (e.g. yehyecoa-vue uses a flat list via `filesToTree`).
+ */
+export interface TreeNode {
+  path: string
+  name: string
+  children?: TreeNode[]
+}

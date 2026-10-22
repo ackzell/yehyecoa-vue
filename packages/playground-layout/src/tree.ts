@@ -5,7 +5,11 @@ import type {
   LayoutNode,
   LayoutSplit,
   SplitDirection,
+  TreeNode,
 } from './types'
+
+// Re-export TreeNode under the tree module's namespace for convenience.
+export type { TreeNode } from './types'
 
 /**
  * Produces a fresh, unique split id.
@@ -367,4 +371,21 @@ export function ensureAllPanelsExist<TPanelId extends CodePanelId>(
   }
 
   return ensureRootSplit(cleanupTree(nextRoot), nextSplitId)
+}
+
+// ---------------------------------------------------------------------------
+// filesToTree — flat file list → single-level tree (visual-only, for yehyecoa-vue)
+// ---------------------------------------------------------------------------
+
+/**
+ * Convert a flat list of files into a single-level tree of `TreeNode`s.
+ * yehyecoa-vue's file model is flat (filenames, no folders), so this just
+ * wraps each file as a leaf node — the file tree is visual-only over the
+ * flat model.
+ */
+export function filesToTree(files: readonly { path: string; name?: string }[]): TreeNode[] {
+  return files.map(file => ({
+    path: file.path,
+    name: file.name ?? file.path.split('/').pop() ?? file.path,
+  }))
 }
