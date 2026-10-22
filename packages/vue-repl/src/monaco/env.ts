@@ -10,6 +10,15 @@ import * as languageConfigs from './language-configs'
 import type { WorkerLanguageService } from '@volar/monaco/worker'
 import { debounce } from '../utils'
 
+// `typescript@latest` now resolves to TypeScript 7 (native port), which no
+// longer ships `lib/lib.*.d.ts` nor `lib/typescript.js` in the npm package.
+// Without the default lib files every global (e.g. `console`) is unresolved,
+// so pin "latest" to the newest JS-based TypeScript release.
+const LATEST_JS_TYPESCRIPT = '5.9.3'
+function resolveTsVersion(version: string) {
+  return !version || version === 'latest' ? LATEST_JS_TYPESCRIPT : version
+}
+
 let initted = false
 export function initMonaco(store: Store) {
   if (initted) return
@@ -74,7 +83,7 @@ export async function reloadLanguageTools(store: Store) {
   if (store.typescriptVersion) {
     dependencies = {
       ...dependencies,
-      typescript: store.typescriptVersion,
+      typescript: resolveTsVersion(store.typescriptVersion),
     }
   }
 
@@ -137,7 +146,7 @@ export function loadMonacoEnv(store: Store) {
           })
           worker.postMessage({
             event: 'init',
-            tsVersion: store.typescriptVersion,
+            tsVersion: resolveTsVersion(store.typescriptVersion),
             tsLocale: store.locale,
           } satisfies WorkerMessage)
         })
