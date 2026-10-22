@@ -17,11 +17,10 @@ const props = defineProps<YvButtonProps>();
     bg-neutral-200/50 dark:bg-input/30
     hover:scale-110
     text-xs text-muted-foreground
-    px-2 py-1
+    px-2 py-1 active:scale-100 active:bg-neutral-200 dark:active:bg-input/70
     `, props.class)"
-    text=""
+    flex="~ items-center gap-1"
   >
-    <slot />
     <slot v-if="props.iconClass" name="icon">
       <span
         class="transition-transform duration-200 group-hover:scale-115"
@@ -30,5 +29,6 @@ const props = defineProps<YvButtonProps>();
         inline-block align-middle
       />
     </slot>
+    <slot />
   </button>
 </template>
