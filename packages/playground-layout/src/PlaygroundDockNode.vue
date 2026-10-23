@@ -437,35 +437,37 @@ function splitChildrenWithIndex(node: LayoutNode<TPanelId>) {
   height: 0;
 }
 
+/* Accent tint and border land instantly; only the backdrop blur eases in.
+   Transitioning the tint too reads as a white veil over the panel below. */
 .zone-active {
   backdrop-filter: blur(2px);
-  border: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
-  background-color: rgba(147, 197, 253, 0.2);
+  border: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
+  background-color: var(--dock-highlight-bg, rgba(147, 197, 253, 0.2));
+  transition: backdrop-filter 200ms ease-in-out;
 }
 
 .dark .zone-active {
-  background-color: rgba(100, 116, 139, 0.2);
-  border-color: var(--primary-dark-700, rgba(100, 116, 139, 0.5));
+  background-color: var(--dock-highlight-bg, rgba(100, 116, 139, 0.2));
 }
 
 .panel-zones-overlay .zone-top.zone-active,
 .split-zones-overlay .zone-top.zone-active {
-  border-bottom: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-bottom: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .panel-zones-overlay .zone-bottom.zone-active,
 .split-zones-overlay .zone-bottom.zone-active {
-  border-top: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-top: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .panel-zones-overlay .zone-left.zone-active,
 .split-zones-overlay .zone-left.zone-active {
-  border-right: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-right: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .panel-zones-overlay .zone-right.zone-active,
 .split-zones-overlay .zone-right.zone-active {
-  border-left: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-left: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .lane-zone {
@@ -496,19 +498,19 @@ function splitChildrenWithIndex(node: LayoutNode<TPanelId>) {
 }
 
 .lane-zone-top.zone-active {
-  border-bottom: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-bottom: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .lane-zone-bottom.zone-active {
-  border-top: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-top: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .lane-zone-left.zone-active {
-  border-right: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-right: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .lane-zone-right.zone-active {
-  border-left: 1px solid var(--amv-highlight, rgba(100, 100, 100, 0.3));
+  border-left: 1px solid var(--dock-highlight, var(--amv-highlight, rgba(100, 100, 100, 0.3)));
 }
 
 .panel-zones-overlay .zone-top {
