@@ -14,6 +14,11 @@ export default antfu({
   ignores: [
     '**/fixtures',
     'packages/vue-repl/**', // Let vue-repl use its own ESLint config
+    'packages/playground-layout/**', // Shared library, kept in upstream (vue-repl) style
+    'videos/**', // Standalone HyperFrames project with its own tooling
+    'dist/**',
+    'test-results/**',
+    'playwright-report/**',
     '.github/copilot-instructions.md', // Exclude documentation file with code examples
   ],
 }, {

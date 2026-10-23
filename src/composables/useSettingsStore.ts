@@ -1,43 +1,72 @@
+import type { LayoutSplit } from '@calmecac-vue/playground-layout';
 import type { RemovableRef } from '@vueuse/core';
+import { normalizeLayoutTree } from '@calmecac-vue/playground-layout';
 import { useStorage } from '@vueuse/core';
 import { nextTick, ref } from 'vue';
 
 type Theme = 'dark' | 'light';
-type Layout = 'horizontal' | 'vertical';
+export type ReplPanelId = 'editor' | 'preview' | 'console';
 
-type YVSettingsStore = {
-  settings: typeof settings;
-  toggleLayout: () => void;
-  toggleTheme: () => void;
-  toggleOutput: () => void;
-  toggleConsole: () => void;
-  toggleOutputLayout?: () => void;
-  toggleLayoutReverse?: () => void;
+const PANEL_IDS: ReplPanelId[] = ['editor', 'preview', 'console'];
+
+/**
+ * Default dock layout mirrors the previous `<Repl>` arrangement: editor on the
+ * left, preview stacked above console on the right.
+ */
+export const DEFAULT_LAYOUT_TREE: LayoutSplit<ReplPanelId> = {
+  type: 'split',
+  id: 'split-1',
+  direction: 'horizontal',
+  children: [
+    { type: 'panel', id: 'editor' },
+    {
+      type: 'split',
+      id: 'split-2',
+      direction: 'vertical',
+      children: [
+        { type: 'panel', id: 'preview' },
+        { type: 'panel', id: 'console' },
+      ],
+    },
+  ],
 };
+
+/** Read a legacy boolean setting so existing users keep their preferences. */
+function readLegacyBoolean(key: string, fallback: boolean): boolean {
+  const stored = localStorage.getItem(key);
+  if (stored === null) {
+    return fallback;
+  }
+  return stored !== 'false';
+}
 
 type YVSettings = {
   theme: RemovableRef<Theme>;
-  layout: RemovableRef<Layout>;
-  showOutput?: RemovableRef<boolean>;
-  showConsole?: RemovableRef<boolean>;
-  outputLayout?: RemovableRef<Layout>;
-  layoutReverse?: RemovableRef<boolean>;
+  layoutTree: RemovableRef<LayoutSplit<ReplPanelId>>;
+  showPreview: RemovableRef<boolean>;
+  showConsole: RemovableRef<boolean>;
+  panelFileTree: RemovableRef<number>;
 };
 
 const settings = ref<YVSettings>({
   theme: useStorage<Theme>('yehyecoa-vue-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
-  layout: useStorage<Layout>('yehyecoa-vue-layout', 'horizontal'),
-  showOutput: useStorage<boolean>('yehyecoa-vue-show-output', true),
+  layoutTree: useStorage<LayoutSplit<ReplPanelId>>('yehyecoa-vue-layout-tree', DEFAULT_LAYOUT_TREE),
+  showPreview: useStorage<boolean>('yehyecoa-vue-show-preview', readLegacyBoolean('yehyecoa-vue-show-output', true)),
   showConsole: useStorage<boolean>('yehyecoa-vue-show-console', true),
-  outputLayout: useStorage<Layout>('yehyecoa-vue-output-layout', 'vertical'),
-  layoutReverse: useStorage<boolean>('yehyecoa-vue-layout-reverse', false),
+  panelFileTree: useStorage<number>('yehyecoa-vue-panel-file-tree', 20),
 });
 
-export function useSettingsStore(): YVSettingsStore {
-  function toggleLayout(): void {
-    settings.value.layout = settings.value.layout === 'horizontal' ? 'vertical' : 'horizontal';
-  }
+// Normalize persisted layout tree on load (drops unknown panels/duplicates).
+settings.value.layoutTree = normalizeLayoutTree(settings.value.layoutTree, PANEL_IDS);
 
+type YVSettingsStore = {
+  settings: typeof settings;
+  toggleTheme: () => void;
+  togglePreview: () => void;
+  toggleConsole: () => void;
+};
+
+export function useSettingsStore(): YVSettingsStore {
   const cls = document.documentElement.classList;
 
   function toggleTheme(): void {
@@ -53,31 +82,18 @@ export function useSettingsStore(): YVSettingsStore {
     });
   }
 
-  function toggleOutput(): void {
-    settings.value.showOutput = !settings.value.showOutput;
+  function togglePreview(): void {
+    settings.value.showPreview = !settings.value.showPreview;
   }
 
   function toggleConsole(): void {
     settings.value.showConsole = !settings.value.showConsole;
   }
 
-  function toggleOutputLayout(): void {
-    settings.value.outputLayout = settings.value.outputLayout === 'horizontal'
-      ? 'vertical'
-      : 'horizontal';
-  }
-
-  function toggleLayoutReverse(): void {
-    settings.value.layoutReverse = !settings.value.layoutReverse;
-  }
-
   return {
     settings,
-    toggleLayout,
     toggleTheme,
-    toggleOutput,
+    togglePreview,
     toggleConsole,
-    toggleOutputLayout,
-    toggleLayoutReverse,
   };
 }

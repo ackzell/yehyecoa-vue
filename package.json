@@ -28,6 +28,8 @@
     "serve": "node dist/server.js"
   },
   "dependencies": {
+    "@ark-ui/vue": "^5.39.3",
+    "@calmecac-vue/playground-layout": "workspace:*",
     "@calmecac-vue/repl": "workspace:*",
     "@calmecac-vue/shared-types": "workspace:*",
     "@iconify-json/carbon": "^1.2.13",

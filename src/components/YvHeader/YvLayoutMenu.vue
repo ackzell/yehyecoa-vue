@@ -6,13 +6,7 @@ import PopoverContent from '@/components/ui/popover/PopoverContent.vue';
 import PopoverTrigger from '@/components/ui/popover/PopoverTrigger.vue';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 
-const {
-  settings,
-  toggleLayout,
-  toggleOutput,
-  toggleConsole,
-  toggleOutputLayout,
-} = useSettingsStore();
+const { settings, togglePreview, toggleConsole } = useSettingsStore();
 
 const isLayoutPopoverOpen = ref(false);
 
@@ -65,14 +59,13 @@ const itemVariants = {
         >
           <motion.div :variants="itemVariants">
             <button
-              v-tooltip.left-start="`${settings.showOutput ? 'Hide' : 'Show'} preview`"
+              v-tooltip.left-start="`${settings.showPreview ? 'Hide' : 'Show'} preview`"
               class="sc-toolbar-btn"
-
-              @click.prevent="toggleOutput"
+              @click.prevent="togglePreview"
             >
               <div
                 class="hover:i-mynaui-desktop-solid"
-                :class="settings.showOutput
+                :class="settings.showPreview
                   ? 'i-mynaui-desktop-solid'
                   : 'i-mynaui-desktop'"
               />
@@ -81,66 +74,15 @@ const itemVariants = {
 
           <motion.div :variants="itemVariants">
             <button
-              v-tooltip.left-start="`Switch to ${settings.layout === 'vertical' ? 'horizontal' : 'vertical'} layout`"
-              class="sc-toolbar-btn"
-              :disabled="!settings.showOutput"
-              @click="toggleLayout"
-            >
-              <div
-                :class="settings.layout === 'vertical'
-                  ? 'i-mynaui:rectangle hover:i-mynaui:rectangle-solid'
-                  : 'i-mynaui:rectangle-vertical hover:i-mynaui:rectangle-vertical-solid'"
-              />
-            </button>
-          </motion.div>
-
-          <motion.div :variants="itemVariants">
-            <button
-              v-tooltip.left-start="`${settings.layoutReverse ? 'Normal' : 'Reverse'} layout`"
-              class="sc-toolbar-btn"
-              :disabled="!settings.showOutput"
-              @click="settings.layoutReverse = !settings.layoutReverse"
-            >
-              <motion.div
-                :key="settings.layout"
-                :variants="itemVariants"
-                class="transition-all duration-200"
-                :class="settings.layout === 'horizontal'
-                  ? 'i-mynaui-arrow-left-right hover:i-mynaui-arrow-left-right-solid'
-                  : 'i-mynaui-arrow-up-down hover:i-mynaui-arrow-up-down-solid'"
-              />
-            </button>
-          </motion.div>
-
-          <motion.div :variants="itemVariants">
-            <button
               v-tooltip.left-start="`${settings.showConsole ? 'Hide' : 'Show'} console`"
               class="sc-toolbar-btn"
-              :disabled="!settings.showOutput"
-
-              @click="toggleConsole"
+              @click.prevent="toggleConsole"
             >
               <div
                 class="hover:i-mynaui-terminal-solid"
                 :class="settings.showConsole
                   ? 'i-mynaui-terminal-solid'
                   : 'i-mynaui-terminal'"
-              />
-            </button>
-          </motion.div>
-          <motion.div :variants="itemVariants">
-            <button
-              v-tooltip.left-start="`Switch to ${settings.outputLayout === 'vertical' ? 'horizontal' : 'vertical'} output layout`"
-              :disabled="!settings.showConsole || !settings.showOutput"
-              class="sc-toolbar-btn"
-
-              @click="toggleOutputLayout"
-            >
-              <div
-                class="hover:i-mynaui-square-half-solid"
-                :class="settings.outputLayout === 'vertical'
-                  ? 'i-mynaui-square-half rotate-90'
-                  : 'i-mynaui-square-half'"
               />
             </button>
           </motion.div>
