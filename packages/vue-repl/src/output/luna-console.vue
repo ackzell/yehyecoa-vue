@@ -176,9 +176,23 @@ function deserializeMessage(arg: any): any {
 
 <template>
   <div class="console-wrapper">
-    <div class="console-title">
-      <strong>Console</strong>
-      <button class="clear-btn" @click="clearLunaConsole">clear</button>
+    <div
+      class="console-title"
+      data-dock-drag-handle="true"
+      draggable="true"
+      title="Drag console panel"
+    >
+      <div class="i-mynaui:terminal flex-none" aria-hidden="true" />
+      <span class="text-sm">Console</span>
+      <div class="flex-1" />
+      <button
+        v-tooltip.bottom="'Clear console'"
+        class="sc-toolbar-btn clear-btn"
+        type="button"
+        @click="clearLunaConsole"
+      >
+        <span class="i-mynaui:trash" aria-hidden="true"></span>
+      </button>
     </div>
     <div class="luna-container">
       <div ref="luna-ref" />
@@ -203,30 +217,37 @@ function deserializeMessage(arg: any): any {
 }
 
 .console-title {
-  height: var(--header-height);
-  position: sticky;
-  top: 0;
-  border-bottom: 1px solid var(--border);
-  background-color: var(--bg);
-  padding-left: 10px;
-  color: var(--text-light);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
+  height: var(--header-height);
+  flex: none;
+  padding: 0 1rem;
+  border-bottom: 1px dashed var(--border);
+  background-color: var(--bg-soft);
+  color: var(--text-light);
+  cursor: grab;
+  user-select: none;
+}
+
+.console-title:active {
+  cursor: grabbing;
 }
 
 .clear-btn {
-  font-size: 0.85rem;
-  font-family: var(--font-code);
-  color: var(--text-light);
-  padding: 0.3rem;
-  margin: 0.2rem;
-  background-color: var(--bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  border: none;
   border-radius: 4px;
-  border: 1px solid var(--border);
+  color: inherit;
+  line-height: 1;
 }
 
 .clear-btn:hover {
-  color: var(--color-branding);
+  color: var(--text);
 }
 </style>
