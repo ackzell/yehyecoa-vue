@@ -165,9 +165,6 @@ async function boot(s, query = '') {
   await page.goto(`${BASE}/${query}`);
   await page.locator('.monaco-editor').first().waitFor();
   await sleep(1500);
-  // Dismiss the standalone-mode warning toast (no /events SSE endpoint in dev) by clicking it.
-  const warn = page.getByText('No events endpoint available');
-  if (await warn.isVisible().catch(() => false)) await warn.click();
 }
 
 /** Dismiss visible toasts the way a user would (the app dismisses a toast on click). */

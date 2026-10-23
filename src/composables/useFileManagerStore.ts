@@ -11,11 +11,6 @@ import { snapshots } from '@/db/snapshots';
 
 // const IGNORE_FILES = ['tsconfig.json', 'import-map.json'];
 
-type YVLesson = {
-  lessonName: string;
-  solveButtonLabel: string;
-};
-
 export const useFileManagerStore = defineStore('fileManagerStore', () => {
   const currentSession = ref<Session>();
   const replStore = useStore<editor.IStandaloneCodeEditor>();
@@ -26,61 +21,16 @@ export const useFileManagerStore = defineStore('fileManagerStore', () => {
 
   const { toast } = useToastsStore();
 
-  const yvLessonConfig = ref<YVLesson>();
-
   initSession();
 
   async function initSession(): Promise<void> {
-    const eventSource = new EventSource('/events');
+    if (await sessions.getCount() === 0) {
+      currentSession.value = await sessions.create(`Session ${crypto.randomUUID()}`);
+    }
 
-    eventSource.onerror = async () => {
-      console.warn('[yehyecoa-vue]: events endpoint not available. App is running standalone.');
-
-      toast.warning('No events endpoint available', {
-        description: 'App is running standalone.',
-        duration: Infinity,
-      });
-
-      if (await sessions.getCount() === 0) {
-        currentSession.value = await sessions.create(`Session ${crypto.randomUUID()}`);
-      }
-
-      // Use the latest available session from standalone mode
-      if (!currentSession.value) {
-        currentSession.value = await sessions.getLatestSession();
-      }
-    };
-
-    // Live updates via SSE
-    eventSource.addEventListener('filesChanged', async (event) => {
-      const { yvLesson, files, error } = JSON.parse(event.data);
-      yvLessonConfig.value = yvLesson;
-
-      toast.dismissAll();
-
-      if (error) {
-        console.error('[yehyecoa-vue]: Server reported an issue:', error);
-        toast.error('Error', {
-          description: error,
-          duration: Infinity,
-        });
-      }
-
-      console.warn('[yehyecoa-vue]: Active lesson:', yvLesson.lessonName);
-      console.warn('[yehyecoa-vue]: Files changed, updating repl', files);
-      replStore.setFiles(files);
-
-      if (yvLesson.lessonName) {
-        // only create if there is no session with the same name
-        const session = await sessions.getByName(yvLesson.lessonName);
-        if (session) {
-          currentSession.value = session;
-        }
-        else {
-          currentSession.value = await sessions.create(yvLesson.lessonName);
-        }
-      }
-    });
+    if (!currentSession.value) {
+      currentSession.value = await sessions.getLatestSession();
+    }
   }
 
   async function saveSnapshot(snapshot: Pick<Snapshot, 'type' | 'message'>): Promise<void> {
@@ -169,7 +119,6 @@ export const useFileManagerStore = defineStore('fileManagerStore', () => {
     restoreSnapshot,
 
     sessionList,
-    yvLessonConfig,
   };
 });
 
