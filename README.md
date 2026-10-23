@@ -142,6 +142,10 @@ pnpm dev
 - `pnpm lint` - Lint the main package
 - `pnpm lint:all` - Lint all packages in workspace
 - `pnpm lint:fix` - Auto-fix linting issues
+- `pnpm tag` - Bump the patch version, regenerate `CHANGELOG.md`, commit and tag
+- `pnpm tag:minor` / `pnpm tag:major` - Same as above for minor / major bumps
+- `pnpm release:publish` - Push the current branch and its tags
+- `pnpm cz` - Interactive conventional-commit prompt (commitizen)
 
 #### Specialized Scripts
 
@@ -219,6 +223,41 @@ pnpm bi
 ```
 
 This builds the project and copies the distribution files to the amoxtli-vue template directory.
+
+### Releasing
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/). The
+scope list and commit rules live in `AGENTS.md` (mirrored in
+`.vscode/settings.json` for the Conventional Commits extension).
+
+```bash
+pnpm tag              # patch bump
+pnpm tag:minor        # minor bump
+pnpm tag:major        # major bump
+pnpm release:publish  # git push --follow-tags
+```
+
+`pnpm tag` runs [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version):
+it bumps `package.json`, regenerates `CHANGELOG.md` from the conventional
+commits since the last tag, commits the bump as `chore(release): <version>`,
+and creates a prefix-less tag (`.versionrc` sets `"tagPrefix": ""`). Pushing
+that tag triggers `.github/workflows/release.yml`, which verifies the version
+and creates a GitHub release from the matching changelog entry.
+
+The current version is shown in the footer; clicking it opens the in-app
+changelog, which is built from `CHANGELOG.md` at bundle time.
+
+Workspace packages are released separately with their package-name tag prefix
+and a package-local `CHANGELOG.md`:
+
+```bash
+pnpm tag:package playground-layout        # @calmecac-vue/playground-layout@X.Y.Z
+pnpm tag:package playground-layout minor
+pnpm tag:package @calmecac-vue/shared-types patch --dry-run
+```
+
+`vue-repl` and `party-kit` are git-subtree mirrors, so tag those in their
+upstream repositories.
 
 ### Customize Configuration
 

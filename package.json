@@ -25,7 +25,18 @@
     "install-in-amoxtli-vue": "rm -rf ../amoxtli-vue/src/templates/yehyecoa && cp -r dist/ ../amoxtli-vue/src/templates/yehyecoa",
     "bi": "npm run build && npm run install-in-amoxtli-vue",
     "build-server": "cp server.js dist/server.js",
-    "serve": "node dist/server.js"
+    "serve": "node dist/server.js",
+    "cz": "exec < /dev/tty && cz --hook || true",
+    "tag": "commit-and-tag-version --no-verify",
+    "tag:minor": "commit-and-tag-version --release-as minor --no-verify",
+    "tag:major": "commit-and-tag-version --release-as major --no-verify",
+    "tag:package": "node scripts/tag-package.mjs",
+    "release:publish": "git push --follow-tags"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   },
   "dependencies": {
     "@ark-ui/vue": "^5.39.3",
@@ -63,6 +74,9 @@
     "@vueuse/components": "^13.8.0",
     "@vueuse/core": "^13.6.0",
     "@vueuse/rxjs": "^13.7.0",
+    "commit-and-tag-version": "^12.7.3",
+    "commitizen": "^4.3.2",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^9.31.0",
     "eslint-plugin-vue": "~10.3.0",
     "fflate": "^0.8.2",
