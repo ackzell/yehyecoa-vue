@@ -30,3 +30,8 @@ coverage
 *.tsbuildinfo
 
 playwright-report/
+
+# Local agent tooling
+.atl/
+.claude/
+.codegraph/
