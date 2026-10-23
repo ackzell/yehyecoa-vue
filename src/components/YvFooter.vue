@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+import YvChangelogSheet from '@/components/YvChangelogSheet.vue';
 import YvWorkshopJoiner from './YvWorkshopJoiner.vue';
 
 const version = import.meta.env.PACKAGE_VERSION;
+const isChangelogOpen = ref(false);
 </script>
 
 <template>
@@ -25,9 +28,18 @@ const version = import.meta.env.PACKAGE_VERSION;
       </div>
       <div>
         <slot name="end">
-          <pre text="xs neutral/30" bg-transparent>yehyecoa-vue v{{ version }}</pre>
+          <button
+            type="button"
+            title="View changelog"
+            class="cursor-pointer bg-transparent font-mono text-xs text-neutral-400 transition-colors hover:text-neutral-700 dark:text-neutral-500 dark:hover:text-neutral-300"
+            @click="isChangelogOpen = true"
+          >
+            yehyecoa-vue v{{ version }}
+          </button>
         </slot>
       </div>
     </div>
+
+    <YvChangelogSheet v-model:open="isChangelogOpen" />
   </div>
 </template>
