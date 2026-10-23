@@ -5,6 +5,7 @@ import App from './App.vue';
 
 import 'floating-vue/dist/style.css';
 import 'virtual:uno.css';
+import './styles/overrides.css';
 
 const pinia = createPinia();
 

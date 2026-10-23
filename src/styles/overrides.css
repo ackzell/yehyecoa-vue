@@ -1,0 +1,92 @@
+/*
+ * Ark UI Splitter resize handles.
+ *
+ * Mirrors amoxtli-vue-2's `styles/overrides.css` so both apps share the same
+ * resize affordance: an 8px transparent hit area straddling the panel edge,
+ * a 1px divider line, and a tinted handle glyph on hover/focus.
+ *
+ * Colors use yehyecoa's REPL/shadcn tokens instead of amoxtli's palette.
+ */
+
+[data-scope='splitter'][data-part='resize-trigger'] {
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  touch-action: none;
+  outline: none;
+}
+
+[data-scope='splitter'][data-part='resize-trigger']:focus-visible {
+  outline: 2px solid oklch(var(--ring, 0.708 0 0));
+  outline-offset: -2px;
+}
+
+/* Horizontal splits render a vertical handle. */
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='horizontal'] {
+  width: 8px;
+  margin: 0 -4px;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='horizontal']::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background-color: var(--border, rgb(0 0 0 / 12%));
+}
+
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='horizontal']:hover {
+  background-color: oklch(var(--primary, 0.205 0 0) / 20%);
+}
+
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='horizontal']:hover::after {
+  content: '⋮';
+  top: 50%;
+  left: 1px;
+  width: auto;
+  height: auto;
+  transform: translateY(-50%);
+  background: none;
+  color: oklch(var(--foreground, 0.145 0 0));
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* Vertical splits render a horizontal handle. */
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='vertical'] {
+  height: 8px;
+  margin: -4px 0;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='vertical']::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--border, rgb(0 0 0 / 12%));
+}
+
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='vertical']:hover {
+  background-color: oklch(var(--primary, 0.205 0 0) / 20%);
+}
+
+[data-scope='splitter'][data-part='resize-trigger'][data-orientation='vertical']:hover::after {
+  content: '⋯';
+  top: -3px;
+  left: 50%;
+  width: auto;
+  height: auto;
+  transform: translateX(-50%);
+  background: none;
+  color: oklch(var(--foreground, 0.145 0 0));
+  font-size: 12px;
+  line-height: 1;
+}
