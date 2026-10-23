@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T extends { path: string; name: string; children?: T[] }">
-import type { TreeNode } from './types'
-import { ref, computed } from 'vue'
+import type { Component } from 'vue'
+import { ref } from 'vue'
 
 defineOptions({
   name: 'FileTree',
@@ -10,26 +10,39 @@ const props = withDefaults(defineProps<{
   nodes: T[]
   selectedPath?: string
   depth?: number
+  /** Open every directory initially (recursively). */
+  defaultOpen?: boolean
+  /**
+   * Optional icon component rendered per row. Receives `path`, `isDirectory`
+   * and `isDirectoryOpen` — the same contract as amoxtli-vue-2's `FileIcon`.
+   * Omit it to use the built-in emoji fallback.
+   */
+  icon?: Component
 }>(), {
   depth: 0,
+  defaultOpen: false,
+  icon: undefined,
 })
 
 const emit = defineEmits<{
   select: [path: string]
 }>()
 
-// TODO: config default open from templates
+// Tracks explicit toggles only. `defaultOpen` decides the initial state, so
+// each app keeps its own convention without the shared component caring.
 const openDirs = ref<Set<string>>(new Set())
+const closedDirs = ref<Set<string>>(new Set())
 
 function isOpen(path: string) {
-  return openDirs.value.has(path)
+  return props.defaultOpen ? !closedDirs.value.has(path) : openDirs.value.has(path)
 }
 
 function toggleDir(path: string) {
-  if (openDirs.value.has(path))
-    openDirs.value.delete(path)
+  const set = props.defaultOpen ? closedDirs.value : openDirs.value
+  if (set.has(path))
+    set.delete(path)
   else
-    openDirs.value.add(path)
+    set.add(path)
 }
 
 function handleClick(node: T) {
@@ -74,9 +87,17 @@ function isDirectory(node: T) {
         ></span>
         <span
           class="file-tree-icon"
-          :class="isDirectory(node) ? 'file-tree-icon--dir' : 'file-tree-icon--file'"
+          :class="icon ? undefined : (isDirectory(node) ? 'file-tree-icon--dir' : 'file-tree-icon--file')"
           aria-hidden="true"
-        ></span>
+        >
+          <component
+            :is="icon"
+            v-if="icon"
+            :path="node.name"
+            :is-directory="isDirectory(node)"
+            :is-directory-open="isOpen(node.path)"
+          />
+        </span>
         <span class="file-tree-name">{{ node.name }}</span>
       </button>
       <div v-if="isDirectory(node) && isOpen(node.path)" class="file-tree-children">
@@ -84,6 +105,8 @@ function isDirectory(node: T) {
           :nodes="node.children!"
           :selected-path="selectedPath"
           :depth="depth + 1"
+          :default-open="defaultOpen"
+          :icon="icon"
           @select="(p) => emit('select', p)"
         />
       </div>
@@ -149,7 +172,9 @@ function isDirectory(node: T) {
 }
 
 .file-tree-icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
