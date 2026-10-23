@@ -191,7 +191,7 @@ function deserializeMessage(arg: any): any {
         type="button"
         @click="clearLunaConsole"
       >
-        <span class="i-mynaui:trash" aria-hidden="true"></span>
+        <span class="i-mynaui:trash" aria-hidden="true" />
       </button>
     </div>
     <div class="luna-container">

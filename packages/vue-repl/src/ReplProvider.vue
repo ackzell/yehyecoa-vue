@@ -4,7 +4,6 @@ import type { Props } from './Repl.vue'
 import { useStore } from './store'
 import {
   type ConsoleComponentType,
-  injectKeyPreviewRef,
   injectKeyProps,
 } from './types'
 
@@ -53,11 +52,6 @@ provide(injectKeyProps, {
   console: consoleWrapper,
   autoSave,
 })
-
-// Legacy SplitPane consumers expect a preview container ref. The provider
-// itself renders no preview, so expose null; custom layouts can provide their
-// own if they need it.
-provide(injectKeyPreviewRef, computed(() => null))
 </script>
 
 <template>

@@ -1,29 +1,37 @@
 <script setup lang="ts">
-import Preview from './Preview.vue'
 import SsrOutput from './SsrOutput.vue'
+import ReplPreview from '../ReplPreview.vue'
+import ReplConsole from '../ReplConsole.vue'
+import { usePaneSplit } from '../usePaneSplit'
 import { computed, inject, useTemplateRef, watchEffect } from 'vue'
 import {
-  type ConsoleComponentType,
   type EditorComponentType,
   type OutputModes,
   injectKeyProps,
 } from '../types'
-import OutputSplitPane from '../OutputSplitPane.vue'
 
 const props = defineProps<{
   editorComponent: EditorComponentType
-  consoleComponent: ConsoleComponentType
   showCompileOutput?: boolean
   showOpenSourceMap?: boolean
   showSsrOutput?: boolean
   ssr: boolean
-  showOutput: boolean
   layout: 'horizontal' | 'vertical'
   outputLayout?: 'horizontal' | 'vertical'
 }>()
 
 const { store, showConsole } = inject(injectKeyProps)!
 const previewRef = useTemplateRef('preview')
+
+const { isVertical, state, boundSplit, dragStart, dragMove, dragEnd } =
+  usePaneSplit(() => props.outputLayout ?? props.layout)
+
+const paneStyle = computed(() =>
+  isVertical.value
+    ? { height: `${boundSplit.value}%` }
+    : { width: `${boundSplit.value}%` },
+)
+
 const modes = computed(() => {
   const outputModes: OutputModes[] = ['preview']
   if (props.showCompileOutput) {
@@ -58,11 +66,9 @@ function openSourceMap() {
 function reload() {
   previewRef.value?.reload()
   store.value.clearConsole?.()
-
-
 }
 
-defineExpose({ reload, previewRef })
+defineExpose({ reload })
 </script>
 
 <template>
@@ -78,15 +84,28 @@ defineExpose({ reload, previewRef })
   </div>
 
   <div class="output-container">
-    <OutputSplitPane v-if="showConsole" :layout="props.outputLayout || layout">
-      <template #first>
-        <Preview ref="preview" :show="mode === 'preview'" :ssr="ssr" />
-      </template>
-      <template #second>
-        <props.consoleComponent />
-      </template>
-    </OutputSplitPane>
-    <Preview v-else ref="preview" :show="mode === 'preview'" :ssr="ssr" />
+    <div
+      v-if="showConsole"
+      ref="container"
+      class="output-panes"
+      :class="{ dragging: state.dragging, vertical: isVertical }"
+      @mousemove="dragMove"
+      @mouseup="dragEnd"
+      @mouseleave="dragEnd"
+    >
+      <div class="output-pane first-pane" :style="paneStyle">
+        <ReplPreview ref="preview" :show="mode === 'preview'" />
+        <div class="dragger" @mousedown.prevent="dragStart" />
+      </div>
+      <div class="output-pane second-pane">
+        <ReplConsole />
+      </div>
+    </div>
+    <ReplPreview
+      v-else
+      ref="preview"
+      :show="mode === 'preview'"
+    />
     <SsrOutput
       v-if="mode === 'ssr output'"
       :context="store.ssrOutput.context"
@@ -113,6 +132,64 @@ defineExpose({ reload, previewRef })
   height: calc(100% - var(--header-height));
   overflow: hidden;
   position: relative;
+}
+
+.output-panes {
+  display: flex;
+  height: 100%;
+}
+
+.output-panes.vertical {
+  flex-direction: column;
+}
+
+.output-panes.dragging {
+  cursor: ew-resize;
+}
+
+.output-panes.vertical.dragging {
+  cursor: ns-resize;
+}
+
+.output-pane {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.first-pane {
+  flex: 0 0 auto;
+  border-right: 1px solid var(--border);
+}
+
+.vertical .first-pane {
+  border-right: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.second-pane {
+  flex: 1 1 0;
+}
+
+.dragger {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  bottom: 0;
+  right: -5px;
+  width: 10px;
+  cursor: ew-resize;
+}
+
+.vertical .dragger {
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  width: 100%;
+  height: 10px;
+  cursor: ns-resize;
 }
 
 .tab-buttons {
