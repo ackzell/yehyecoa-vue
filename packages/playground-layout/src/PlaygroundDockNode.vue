@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="TPanelId extends string">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, getCurrentInstance, onMounted, onBeforeUnmount } from 'vue'
 import { Splitter } from '@ark-ui/vue'
 import type { CodePanelId, DropZone, LayoutNode } from './types'
 
@@ -27,6 +27,12 @@ const emit = defineEmits<{
 }>()
 
 const ZONES: DropZone[] = ['top', 'bottom', 'left', 'right']
+
+const slots = getCurrentInstance()?.slots ?? {}
+
+// Slot names passed to this instance, re-forwarded to recursively rendered
+// child nodes so leaf panels keep their content at any nesting depth.
+const forwardedSlots = computed<string[]>(() => Object.keys(slots))
 
 const splitWrapper = ref<HTMLElement | null>(null)
 const splitExtent = ref(0)
@@ -154,6 +160,10 @@ function isFromDragHandle(e: DragEvent) {
   if (!element)
     return false
 
+  // Don't start drag from interactive controls inside headers
+  if (element.closest('button, input, select, textarea, a'))
+    return false
+
   return Boolean(element.closest('[data-dock-drag-handle="true"]'))
 }
 
@@ -169,9 +179,9 @@ function onPanelBodyDragStartCapture(e: DragEvent) {
   onPanelBodyDragStart(e, props.node.id as TPanelId)
 }
 
-function onPanelBodyDragEnd(e: DragEvent) {
-  if (!isFromDragHandle(e))
-    return
+function onPanelBodyDragEnd() {
+  // `dragend` only fires on the drag source, so any drag ending inside this
+  // panel belongs to it — always clear the drag state.
   emit('dragEnd')
 }
 
@@ -228,7 +238,11 @@ function splitChildrenWithIndex(node: LayoutNode<TPanelId>) {
               @drop-zone-leave="emit('dropZoneLeave')"
               @zone-drop="(draggedId, targetId, zone) => emit('zoneDrop', draggedId, targetId, zone)"
               @split-resize="(splitId, sizes) => emit('splitResize', splitId, sizes)"
-            />
+            >
+              <template v-for="slotName in forwardedSlots" :key="slotName" #[slotName]>
+                <slot :name="slotName" />
+              </template>
+            </PlaygroundDockNode>
           </div>
         </Splitter.Panel>
 
@@ -382,8 +396,17 @@ function splitChildrenWithIndex(node: LayoutNode<TPanelId>) {
 }
 
 .dock-body {
+  position: relative;
   height: 100%;
   min-height: 0;
+}
+
+[data-dock-drag-handle="true"] {
+  cursor: grab;
+}
+
+[data-dock-drag-handle="true"]:active {
+  cursor: grabbing;
 }
 
 .split-zones-overlay,
