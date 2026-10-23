@@ -248,7 +248,6 @@ function onFileTreeResize(d: { size: number[] }) {
                 <div
                   class="file-tree-header"
                   flex="~ items-center gap-2"
-                  m-2
                   data-dock-drag-handle="true"
                   draggable="true"
                   title="Drag editor panel"
