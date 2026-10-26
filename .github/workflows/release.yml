@@ -36,6 +36,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      # Workspace packages are gitignored as dist and nothing builds them on
+      # install, so a clean checkout cannot resolve @calmecac-vue/repl.
+      - name: Build workspace packages
+        run: pnpm -r --if-present run build
+
       - name: Build application
         run: pnpm build
 
