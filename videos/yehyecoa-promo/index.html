@@ -62,10 +62,10 @@
       ></div>
 
       <div data-hf-id="hf-eet1"
-        id="el-03-console-layouts"
+        id="el-03-console-dock"
         class="scene"
-        data-composition-id="03-console-layouts"
-        data-composition-src="compositions/frames/03-console-layouts.html"
+        data-composition-id="03-console-dock"
+        data-composition-src="compositions/frames/03-console-dock.html"
         data-start="23"
         data-duration="11.4"
         data-track-index="0"
@@ -87,7 +87,7 @@
         data-composition-id="05-safety-net"
         data-composition-src="compositions/frames/05-safety-net.html"
         data-start="54"
-        data-duration="20.4"
+        data-duration="16.4"
         data-track-index="0"
       ></div>
 
@@ -96,9 +96,19 @@
         class="scene"
         data-composition-id="06-home-amoxtli"
         data-composition-src="compositions/frames/06-home-amoxtli.html"
-        data-start="74"
+        data-start="70"
         data-duration="10.5"
         data-track-index="1"
+      ></div>
+
+      <div
+        id="el-06b-changelog"
+        class="scene"
+        data-composition-id="06b-changelog"
+        data-composition-src="compositions/frames/06b-changelog.html"
+        data-start="80"
+        data-duration="4.4"
+        data-track-index="0"
       ></div>
 
       <div data-hf-id="hf-6ech"
@@ -119,11 +129,11 @@
         data-track-index="2002"
       ></video>
 
-      <video data-hf-id="hf-wtuy" id="f03-console-layouts-layout-clip" src="assets/console-layout-switch.mp4" preload="auto" data-media-start="2.8" muted playsinline
+      <video data-hf-id="hf-wtuy" id="f03-console-dock-clip" src="assets/console-dock-drag.mp4" preload="auto" data-media-start="0.69" muted playsinline
         class="clip"
-        style="position:absolute;left:106.6px;top:238.6px;width:1073.2px;height:602.8px;object-fit:cover"
+        style="position:absolute;left:106.6px;top:238.6px;width:1073.2px;height:602.8px;object-fit:cover;z-index:2"
         data-start="28"
-        data-duration="6"
+        data-duration="4.47"
         data-track-index="3005"
       ></video>
 
@@ -151,12 +161,20 @@
         data-track-index="4005"
       ></video>
 
-      <video data-hf-id="hf-tkt5" id="f05-safety-net-clip" src="assets/safety-history-restore.mp4" data-media-start="0" muted playsinline
+      <video data-hf-id="hf-tkt5" id="f05-safety-net-clip" src="assets/safety-history-restore.mp4" data-media-start="1.35" muted playsinline
         class="clip"
         style="position:absolute;left:739.2px;top:237.6px;width:1075.2px;height:604.8px;object-fit:cover"
-        data-start="59"
-        data-duration="15"
+        data-start="57.4"
+        data-duration="12.6"
         data-track-index="5001"
+      ></video>
+
+      <video id="f06b-changelog-clip" src="assets/changelog-sheet.mp4" preload="auto" data-media-start="2.0" muted playsinline
+        class="clip"
+        style="position:absolute;left:268.8px;top:302.4px;width:1382.4px;height:777.6px;object-fit:cover;z-index:2"
+        data-start="80.5"
+        data-duration="1.6"
+        data-track-index="6001"
       ></video>
 
       <!-- BGM -->
@@ -197,12 +215,20 @@
       <audio data-hf-id="hf-imf2"
         id="el-sfx-3"
         src="assets/sfx/whoosh.mp3"
-        data-start="74"
+        data-start="70"
         data-duration="0.57"
         data-track-index="23"
         data-volume="0.35"
       ></audio>
       <audio data-hf-id="hf-nvak"
+        id="el-sfx-5"
+        src="assets/sfx/click-soft.mp3"
+        data-start="81.1"
+        data-duration="0.4"
+        data-track-index="25"
+        data-volume="0.35"
+      ></audio>
+      <audio
         id="el-sfx-4"
         src="assets/sfx/typing.mp3"
         data-start="84"
@@ -220,14 +246,16 @@
         tl.to("#el-01-hook-word", { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" }, 9);
         tl.fromTo("#el-02-promise-focus", { scale: 0.5, opacity: 0, filter: "blur(8px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, 9);
         tl.to("#el-02-promise-focus", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 23);
-        tl.fromTo("#el-03-console-layouts", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, 23);
-        tl.to("#el-03-console-layouts", { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" }, 34);
+        tl.fromTo("#el-03-console-dock", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, 23);
+        tl.to("#el-03-console-dock", { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" }, 34);
         tl.fromTo("#el-04-together", { scale: 0.5, opacity: 0, filter: "blur(8px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, 34);
         tl.to("#el-04-together", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 54);
         tl.fromTo("#el-05-safety-net", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, 54);
-        tl.to("#el-05-safety-net", { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" }, 74);
-        tl.fromTo("#el-06-home-amoxtli", { scale: 0.5, opacity: 0, filter: "blur(8px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, 74);
-        tl.to("#el-06-home-amoxtli", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 84);
+        tl.to("#el-05-safety-net", { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" }, 70);
+        tl.fromTo("#el-06-home-amoxtli", { scale: 0.5, opacity: 0, filter: "blur(8px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" }, 70);
+        tl.to("#el-06-home-amoxtli", { opacity: 0, duration: 0.4, ease: "power2.inOut" }, 80);
+        tl.fromTo("#el-06b-changelog", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.inOut" }, 80);
+        tl.to("#el-06b-changelog", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 84);
         tl.fromTo("#el-07-close-wordmark", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" }, 84);
         tl.to({}, { duration: 90 }, 0); // full-span anchor — main.duration() == composition total (Studio master duration)
       })();

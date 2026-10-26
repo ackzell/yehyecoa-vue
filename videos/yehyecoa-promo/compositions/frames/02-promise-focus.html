@@ -155,10 +155,10 @@
       // Applied identically to the still and the hoisted live clip, so the 7.4s handoff is seamless.
       const W = 998.4, H = 561.6, k = W / 1920;
       // Targets measured on the clip's frames (1920x1080 source px):
-      //   line 4 string literal 'Vue Workshop' centre ≈ (271, 157); preview heading centre ≈ (1440, 233).
+      //   line 4 string literal 'Vue Workshop' centre ≈ (454, 157) (dock layout: file tree on the left); preview heading centre ≈ (1440, 233).
       const ZOOM = 3.0;
       const WIDE = { s: 1, cx: W / 2, cy: H / 2 };
-      const LINE4 = { s: ZOOM, cx: 271 * k, cy: 157 * k };
+      const LINE4 = { s: ZOOM, cx: 454 * k, cy: 157 * k };
       const HEADING = { s: ZOOM, cx: 1440 * k, cy: 233 * k };
       const KEYS = [
         { t0: 0, t1: 7.4, a: WIDE, b: WIDE, ease: "none" },

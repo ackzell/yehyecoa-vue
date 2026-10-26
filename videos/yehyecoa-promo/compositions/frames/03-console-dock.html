@@ -1,0 +1,254 @@
+<template>
+  <style>
+    @font-face { font-family: "Work Sans"; font-weight: 400; src: url("assets/fonts/work-sans-400.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 500; src: url("assets/fonts/work-sans-500.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 600; src: url("assets/fonts/work-sans-600.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 700; src: url("assets/fonts/space-mono-700.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; }
+    #f03-console-dock-ground { position: absolute; inset: 0; container-type: size; overflow: hidden;
+      background: #0b0c07; color: #f5f5f5; font-family: "Work Sans", sans-serif; }
+    #f03-console-dock-ground .kicker { font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #e4007c; white-space: nowrap; min-height: 1.4em; }
+    #f03-console-dock-ground .accent { color: #e4007c; }
+    /* Slot: hairline-bordered capture surface (sketch geometry, centered without a CSS transform). */
+    #f03-console-dock-ground .f3-shot { position: absolute; box-sizing: border-box; left: 5.5cqw; top: calc(50% - 15.75cqw);
+      width: 56cqw; height: 31.5cqw; border: 1px solid #282627; overflow: hidden; background: #0b0c07; }
+    #f03-console-dock-ground .f3-fit { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    #f03-console-dock-ground .f3-world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    #f03-console-dock-ground .f3-world > * { position: absolute; }
+    #f03-console-dock-ground .f3-plate { left: 0; top: 0; width: 1920px; height: 1080px; display: block; }
+    #f03-console-dock-ground .f3-patch { display: flex; align-items: center; justify-content: center; line-height: 1; }
+    #f03-console-dock-ground .f3-btn-digit { left: 1443px; top: 309px; width: 16px; height: 22px; background: #42b883;
+      color: #0d1117; font-weight: 600; font-size: 22.4px; }
+    #f03-console-dock-ground .f3-dbl-digit { left: 1478px; top: 372px; width: 17px; height: 24px; background: #1e1e1e;
+      color: #9ca3af; font-weight: 400; font-size: 22.4px; }
+    #f03-console-dock-ground .f3-rowmask { left: 961px; width: 958px; height: 25px; background: #1a1a1a; }
+    #f03-console-dock-ground .f3-rowglow { left: 1058px; width: 21px; height: 19px; background: rgba(228, 0, 124, 0.22);
+      box-shadow: 0 0 12px 4px rgba(228, 0, 124, 0.85); opacity: 0; }
+    #f03-console-dock-ground .f3-panel { left: 959.5px; top: 545px; width: 960px; height: 495px; opacity: 0; }
+    #f03-console-dock-ground .f3-ring { left: 0; top: 0; box-sizing: border-box; border: 3px solid #e4007c; border-radius: 50%; opacity: 0; }
+    #f03-console-dock-ground .f3-cursor { left: 0; top: 0; width: 64px; height: 64px; opacity: 0; transform-origin: 13.33px 8px; }
+    #f03-console-dock-ground .f3-cursor path { fill: #f5f5f5; stroke: #0b0c07; stroke-width: 1.4; stroke-linejoin: round; }
+    /* Over-layer: sits above the hoisted dock clip (z-index 2) so the pointer and the
+       handle cue read over the footage. Outside the ground on purpose: the ground's size
+       containment would trap these z-indexes. Geometry = the slot's inner rect. */
+    #f03-console-dock-over { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+    #f03-console-dock-over-slot { position: absolute; left: 106.6px; top: 238.6px; width: 1073.2px; height: 602.8px; overflow: hidden; }
+    #f03-console-dock-over-fit { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    #f03-console-dock-over-fit > * { position: absolute; }
+    #f03-console-dock-over .f3-handle { left: 960px; top: 545px; width: 960px; height: 38px; box-sizing: border-box;
+      border: 3px solid #e4007c; opacity: 0; }
+    #f03-console-dock-over .f3-ring { left: 0; top: 0; box-sizing: border-box; border: 3px solid #e4007c; border-radius: 50%; opacity: 0; }
+    #f03-console-dock-over .f3-cursor { left: 0; top: 0; width: 64px; height: 64px; opacity: 0; transform-origin: 13.33px 8px; }
+    #f03-console-dock-over .f3-cursor path { fill: #f5f5f5; stroke: #0b0c07; stroke-width: 1.4; stroke-linejoin: round; }
+    #f03-console-dock-ground .f3-text { position: absolute; right: 5.5cqw; top: 50%; transform: translateY(-50%); width: 28cqw;
+      display: flex; flex-direction: column; gap: 1.6cqw; }
+    #f03-console-dock-ground .f3-head { font-size: 4.5cqw; font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; }
+    #f03-console-dock-ground .f3-sub { font-size: 2.4cqw; font-weight: 600; line-height: 1.2; color: #a7a4a3; }
+    #f03-console-dock-ground .f3-w { display: inline-block; }
+  </style>
+  <div data-hf-id="hf-aau0" id="root" data-composition-id="03-console-dock" data-start="0" data-duration="11.4" data-width="1920" data-height="1080">
+    <div data-hf-id="hf-s5vl" id="f03-console-dock-ground" class="clip" data-start="0" data-duration="11.4" data-track-index="0">
+      <div data-hf-id="hf-bk10" class="f3-shot" id="f03-console-dock-slot">
+        <div data-hf-id="hf-jr8i" class="f3-fit" id="f03-console-dock-fit">
+          <div data-hf-id="hf-9n4b" class="f3-world" id="f03-console-dock-world" data-layout-allow-overflow>
+            <img data-hf-id="hf-70ox" class="f3-plate" src="assets/console-log-output.png" alt="" />
+            <img data-hf-id="hf-8yot" class="f3-plate" id="f03-console-dock-docked" src="assets/console-dock-docked.png" alt="" style="opacity: 0" />
+            <div data-hf-id="hf-fwe8" class="f3-patch f3-btn-digit" id="f03-console-dock-btn">0</div>
+            <div data-hf-id="hf-rv0o" class="f3-patch f3-dbl-digit" id="f03-console-dock-dbl">0</div>
+            <div data-hf-id="hf-hvdp" class="f3-rowglow" id="f03-console-dock-glow1" style="top: 586px"></div>
+            <div data-hf-id="hf-69w4" class="f3-rowglow" id="f03-console-dock-glow2" style="top: 611px"></div>
+            <div data-hf-id="hf-p6gw" class="f3-rowglow" id="f03-console-dock-glow3" style="top: 636px"></div>
+            <div data-hf-id="hf-kc3m" class="f3-rowmask" id="f03-console-dock-mask1" style="top: 583px; height: 25px"></div>
+            <div data-hf-id="hf-ycsv" class="f3-rowmask" id="f03-console-dock-mask2" style="top: 609px; height: 24px"></div>
+            <div data-hf-id="hf-9v0e" class="f3-rowmask" id="f03-console-dock-mask3" style="top: 634px; height: 24px"></div>
+            <img data-hf-id="hf-5tj5" class="f3-panel" id="f03-console-dock-panel" src="assets/console-panel-crop.png" alt="" />
+            <div data-hf-id="hf-198o" class="f3-ring" id="f03-console-dock-ring"></div>
+            <svg data-hf-id="hf-017v" class="f3-cursor" id="f03-console-dock-cursor" viewBox="0 0 24 24" aria-hidden="true">
+              <path data-hf-id="hf-fueh" d="M5 3 L5 19 L9 15 L12 22 L15 20.5 L11.5 14 L18 14 Z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <!-- Dock clip (assets/console-dock-drag.mp4): hoisted to the host root at the slot's inner
+           geometry. Mounted at frame 5.0s from clip in-point 0.69s (frame time = clip time + 4.31s),
+           cut at frame 9.47s (clip 5.16s, the last clean frame before the drop re-mounts the preview). -->
+      <div data-hf-id="hf-3vc3" class="f3-text">
+        <div data-hf-id="hf-w876" class="kicker" id="f03-console-dock-kicker"></div>
+        <div data-hf-id="hf-4if0" class="f3-head"><span data-hf-id="hf-d0u2" class="f3-w" id="f03-console-dock-h1">see</span> <span data-hf-id="hf-72tr" class="f3-w" id="f03-console-dock-h2">every</span> <span data-hf-id="hf-yksr" class="f3-w accent" id="f03-console-dock-h3">log.</span></div>
+        <div data-hf-id="hf-bzy8" class="f3-sub"><span data-hf-id="hf-21hn" class="f3-w f3-s">dock</span> <span data-hf-id="hf-s5mk" class="f3-w f3-s">it</span> <span data-hf-id="hf-ox5a" class="f3-w f3-s">your</span> <span data-hf-id="hf-kgnm" class="f3-w f3-s">way.</span></div>
+      </div>
+    </div>
+    <div id="f03-console-dock-over" class="clip" data-start="0" data-duration="11.4" data-track-index="2">
+      <div id="f03-console-dock-over-slot">
+        <div id="f03-console-dock-over-fit">
+          <div class="f3-handle" id="f03-console-dock-handle"></div>
+          <div class="f3-ring" id="f03-console-dock-dropring"></div>
+          <svg class="f3-cursor" id="f03-console-dock-pointer" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 3 L5 19 L9 15 L12 22 L15 20.5 L11.5 14 L18 14 Z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var $ = function (s) { return document.getElementById("f03-console-dock-" + s); };
+      var W = 1920, H = 1080;
+      var SLOT_INNER_W = 1073.2;
+      var FIT = SLOT_INNER_W / W;
+      var world = $("world"), fit = $("fit"), cursor = $("cursor"), ring = $("ring");
+      var btn = $("btn"), dbl = $("dbl"), docked = $("docked"), panel = $("panel"), kicker = $("kicker");
+      var overFit = $("over-fit"), pointer = $("pointer"), handle = $("handle"), dropRing = $("dropring");
+      var masks = [$("mask1"), $("mask2"), $("mask3")];
+      var glows = [$("glow1"), $("glow2"), $("glow3")];
+      fit.style.transform = "scale(" + FIT.toFixed(5) + ")";
+      overFit.style.transform = "scale(" + FIT.toFixed(5) + ")";
+
+      // Clicks measured on console-log-output.mp4 (button label flips at ~1.75 / 2.65 / 3.65s).
+      var CLICKS = [1.75, 2.65, 3.65];
+      var BUTTON = [{ x: 1452, y: 326 }, { x: 1446, y: 322 }, { x: 1456, y: 328 }];
+      var START = { x: 1990, y: 1010 };
+      // Dock drag, measured on console-dock-drag.mp4 (pointer path from console-dock-drag.json,
+      // re-anchored on the clip's visible drop; frame time = clip time + 4.31s):
+      //   grab the console header at G, press 5.9, glide to the editor's right zone R (6.10-7.07),
+      //   then to its bottom zone B (7.65-8.62), release 9.47 (console docks under the editor).
+      var G = { x: 1261, y: 564 }, R = { x: 840, y: 470 }, B = { x: 520, y: 900 }, EXIT = { x: 1760, y: 1120 };
+      var PRESS = 5.9, G1 = [6.10, 7.07], G2 = [7.65, 8.62], DROP = 9.47, EXIT_AT = [9.75, 10.35];
+      var END = G;
+      // Camera target: button at top, console rows below, rows' left edge in frame.
+      var ZOOM = 2.0, TX = 1270, TY = 490;
+      var PUSH_AT = 1.0, PUSH_END = 1.65, PULL_AT = 4.55, PULL_END = 5.0;
+
+      var e3io = gsap.parseEase("power3.inOut"), e2io = gsap.parseEase("power2.inOut");
+      var arrive = gsap.parseEase("power3.out"), eIn = gsap.parseEase("power2.in"), eOut = gsap.parseEase("power2.out");
+      function c01(u) { return u < 0 ? 0 : u > 1 ? 1 : u; }
+      function mix(a, b, u) { return a + (b - a) * u; }
+      function arc(p0, p1, u, bend) {
+        var cx = (p0.x + p1.x) / 2 - (p1.y - p0.y) * bend, cy = (p0.y + p1.y) / 2 + (p1.x - p0.x) * bend, w = 1 - u;
+        return { x: w * w * p0.x + 2 * w * u * cx + u * u * p1.x, y: w * w * p0.y + 2 * w * u * cy + u * u * p1.y };
+      }
+      function camU(t) {
+        if (t < PUSH_AT) return 0;
+        if (t < PUSH_END) return e3io((t - PUSH_AT) / (PUSH_END - PUSH_AT));
+        if (t < PULL_AT) return 1;
+        if (t < PULL_END) return 1 - e2io((t - PULL_AT) / (PULL_END - PULL_AT));
+        return 0;
+      }
+      function cursorAt(t) {
+        if (t < PUSH_AT) return START;
+        if (t < 1.6) return arc(START, BUTTON[0], arrive(c01((t - PUSH_AT) / 0.6)), 0.12);
+        if (t < 2.0) return BUTTON[0];
+        if (t < 2.5) return arc(BUTTON[0], BUTTON[1], arrive(c01((t - 2.0) / 0.5)), 0.2);
+        if (t < 3.0) return BUTTON[1];
+        if (t < 3.5) return arc(BUTTON[1], BUTTON[2], arrive(c01((t - 3.0) / 0.5)), 0.2);
+        if (t < PULL_AT) return BUTTON[2];
+        return arc(BUTTON[2], END, e2io(c01((t - PULL_AT) / (PULL_END - PULL_AT))), -0.1);
+      }
+      function quadIO(u) { return u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; }
+      function lerpP(a, b, u) { return { x: mix(a.x, b.x, u), y: mix(a.y, b.y, u) }; }
+      function pointerAt(t) {
+        if (t < G1[0]) return G;
+        if (t < G1[1]) return lerpP(G, R, quadIO((t - G1[0]) / (G1[1] - G1[0])));
+        if (t < G2[0]) return R;
+        if (t < G2[1]) return lerpP(R, B, quadIO((t - G2[0]) / (G2[1] - G2[0])));
+        if (t < EXIT_AT[0]) return B;
+        return arc(B, EXIT, eIn(c01((t - EXIT_AT[0]) / (EXIT_AT[1] - EXIT_AT[0]))), 0.08);
+      }
+      function pressAt(since) {
+        if (since < 0 || since >= 0.28) return 0;
+        return since < 0.08 ? since / 0.08 : 1 - eOut((since - 0.08) / 0.2);
+      }
+
+      function render(t) {
+        var u = camU(t), z = mix(1, ZOOM, u);
+        var cx = mix(W / 2, TX, u), cy = mix(H / 2, TY, u);
+        var hw = W / (2 * z), hh = H / (2 * z);
+        cx = Math.max(hw, Math.min(W - hw, cx));
+        cy = Math.max(hh, Math.min(H - hh, cy));
+        world.style.transform = "translate(" + (W / 2 - cx * z).toFixed(2) + "px," + (H / 2 - cy * z).toFixed(2) + "px) scale(" + z.toFixed(4) + ")";
+
+        var n = 0, last = -1;
+        for (var i = 0; i < CLICKS.length; i++) if (t >= CLICKS[i]) { n = i + 1; last = i; }
+        var since = last >= 0 ? t - CLICKS[last] : 99;
+
+        var p = cursorAt(t);
+        cursor.style.opacity = t >= PUSH_AT && t < PULL_END ? "1" : "0";
+        cursor.style.transform = "translate(" + (p.x - 13.33).toFixed(2) + "px," + (p.y - 8).toFixed(2) + "px) scale(" + (1 - 0.15 * pressAt(since)).toFixed(3) + ")";
+
+        var rr = since / 0.35;
+        ring.style.opacity = rr < 1 ? (1 - rr).toFixed(3) : "0";
+        if (rr < 1) {
+          var r = 12 + 32 * eOut(rr), hp = BUTTON[last];
+          ring.style.width = ring.style.height = (2 * r).toFixed(2) + "px";
+          ring.style.transform = "translate(" + (hp.x - r).toFixed(2) + "px," + (hp.y - r).toFixed(2) + "px)";
+        }
+
+        // App state rebuilt on the measured still: counter digits + rows land per click.
+        btn.textContent = String(n);
+        dbl.textContent = String(n * 2);
+        btn.style.opacity = dbl.style.opacity = n < 3 ? "1" : "0";
+        for (var k = 0; k < 3; k++) {
+          var land = c01((t - CLICKS[k] - 0.06) / 0.1);
+          masks[k].style.opacity = (1 - land).toFixed(3);
+          var g = t - CLICKS[k] - 0.08;
+          glows[k].style.opacity = g < 0 ? "0" : g < 0.12 ? (g / 0.12).toFixed(3) : (1 - c01((g - 0.12) / 0.5)).toFixed(3);
+        }
+        // Tight read 3.9–4.6: crisp panel plate at identical geometry.
+        panel.style.opacity = t >= 3.9 && t < 4.6 ? "1" : "0";
+        // The dock clip opens on this same still state (3 logs, default layout), so the hand-off at
+        // 5.0 is invisible; after the clip is cut at the drop the docked plate holds the result.
+        docked.style.opacity = t >= DROP ? "1" : "0";
+
+        // Over-layer pointer: takes over from the world cursor at 5.0 (camera is wide by then).
+        var q = pointerAt(t);
+        var held = t >= PRESS && t < DROP;
+        var pressIn = held ? 1 - 0.15 * eOut(c01((t - PRESS) / 0.12)) : 1 - 0.15 * (1 - eOut(c01((t - DROP) / 0.2)));
+        pointer.style.opacity = t >= PULL_END && t < EXIT_AT[1] ? "1" : "0";
+        pointer.style.transform = "translate(" + (q.x - 13.33).toFixed(2) + "px," + (q.y - 8).toFixed(2) + "px) scale(" + (t >= PRESS ? pressIn : 1).toFixed(3) + ")";
+        var dr = (t - DROP) / 0.45;
+        dropRing.style.opacity = dr >= 0 && dr < 1 ? (1 - dr).toFixed(3) : "0";
+        if (dr >= 0 && dr < 1) {
+          var rad = 16 + 44 * eOut(dr);
+          dropRing.style.width = dropRing.style.height = (2 * rad).toFixed(2) + "px";
+          dropRing.style.transform = "translate(" + (B.x - rad).toFixed(2) + "px," + (B.y - rad).toFixed(2) + "px)";
+        }
+      }
+
+      var tl = gsap.timeline({ paused: true });
+      var clock = { t: 0 };
+      tl.to(clock, { t: 11.4, duration: 11.4, ease: "none", onUpdate: function () { render(clock.t); } }, 0);
+
+      // Scene 1: surface slides in from the left edge on a long-tail settle.
+      tl.fromTo($("slot"), { x: -760, opacity: 0 }, { x: 0, opacity: 1, duration: 1.0, ease: "power4.out" }, 0);
+      // Kicker types on (smooth slice).
+      var KICK = "Built in", kl = { v: 0 };
+      tl.fromTo(kl, { v: 0 }, { v: KICK.length, duration: 0.55, ease: "none", onUpdate: function () {
+        kicker.textContent = KICK.substring(0, Math.floor(kl.v + 0.0001));
+      } }, 0.25);
+
+      // Scene 3: headline assembles on the click beats.
+      var heads = [$("h1"), $("h2"), $("h3")];
+      heads.forEach(function (el, i) {
+        tl.fromTo(el, { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", immediateRender: true }, CLICKS[i] + 0.04);
+      });
+
+      // Scene 6: subline word by word; one magenta glow outlines the console header (the drag handle) before the grab.
+      var subs = document.querySelectorAll('#f03-console-dock-ground .f3-s');
+      for (var s = 0; s < subs.length; s++) {
+        tl.fromTo(subs[s], { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out", immediateRender: true }, 5.2 + s * 0.12);
+      }
+      tl.fromTo(handle, { opacity: 0, boxShadow: "0 0 0px 0px rgba(228,0,124,0)" },
+        { opacity: 1, boxShadow: "0 0 22px 6px rgba(228,0,124,0.85)", duration: 0.25, ease: "power2.out", immediateRender: true }, 5.3);
+      tl.to(handle, { opacity: 0, boxShadow: "0 0 0px 0px rgba(228,0,124,0)", duration: 0.35, ease: "power2.in" }, 6.0);
+
+      render(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["03-console-dock"] = tl;
+    })();
+  </script>
+</template>

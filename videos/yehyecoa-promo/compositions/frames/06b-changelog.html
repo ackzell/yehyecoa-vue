@@ -1,0 +1,141 @@
+<template>
+  <style>
+    @font-face { font-family: "Work Sans"; font-weight: 600; src: url("assets/fonts/work-sans-600.woff2") format("woff2"); }
+    @font-face { font-family: "Work Sans"; font-weight: 700; src: url("assets/fonts/work-sans-700.woff2") format("woff2"); }
+    @font-face { font-family: "Space Mono"; font-weight: 400; src: url("assets/fonts/space-mono-400.woff2") format("woff2"); }
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #f06b-changelog-ground { position: absolute; inset: 0; container-type: size; overflow: hidden;
+      background: #e4007c; color: #0b0c07; font-family: "Work Sans", sans-serif; }
+    .f06b-head { position: absolute; left: 5.5cqw; top: 5.5cqw; display: flex; flex-direction: column; gap: 1cqw; }
+    .f06b-kicker { font-family: "Space Mono", monospace; font-size: 0.9cqw; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(17,17,17,0.55); white-space: pre; min-width: 12cqw; height: 1.4cqw; }
+    .f06b-title { font-size: 4.5cqw; font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; white-space: nowrap; }
+    .f06b-lead { position: absolute; right: 5.5cqw; top: 8.6cqw; font-size: 2.0cqw; font-weight: 600;
+      color: rgba(17,17,17,0.75); white-space: nowrap; }
+    .f06b-word { display: inline-block; }
+    /* Slot: bottom-anchored 16:9 capture surface (inner rect = the hoisted clip's geometry). */
+    #f06b-changelog-slot { position: absolute; left: 268.8px; top: 302.4px; width: 1382.4px; height: 777.6px;
+      overflow: hidden; background: #0b0c07; box-shadow: 0 0 0 1px rgba(17,17,17,0.2); }
+    .f06b-fit { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    .f06b-world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+    .f06b-plate { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: block; }
+    /* Over-layer: above the hoisted clip (z-index 2) so the pointer reads over the footage. */
+    #f06b-changelog-over { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+    #f06b-changelog-over-slot { position: absolute; left: 268.8px; top: 302.4px; width: 1382.4px; height: 777.6px; overflow: hidden; }
+    #f06b-changelog-over-fit > * { position: absolute; }
+    .f06b-ring { left: 0; top: 0; box-sizing: border-box; border: 3px solid #e4007c; border-radius: 50%; opacity: 0; }
+    .f06b-cursor { left: 0; top: 0; width: 64px; height: 64px; opacity: 0; transform-origin: 13.33px 8px; }
+    .f06b-cursor path { fill: #f5f5f5; stroke: #0b0c07; stroke-width: 1.4; stroke-linejoin: round; }
+  </style>
+  <div id="root" data-composition-id="06b-changelog" data-start="0" data-duration="4.4" data-width="1920" data-height="1080">
+    <div id="f06b-changelog-ground" class="clip" data-start="0" data-duration="4.4" data-track-index="0">
+      <div class="f06b-head">
+        <div class="f06b-kicker" id="f06b-changelog-kicker"></div>
+        <div class="f06b-title"><span class="f06b-word">always</span> <span class="f06b-word">evolving.</span></div>
+      </div>
+      <div class="f06b-lead"><span class="f06b-word f06b-lw">what's</span> <span class="f06b-word f06b-lw">new,</span> <span class="f06b-word f06b-lw">one</span> <span class="f06b-word f06b-lw">click</span> <span class="f06b-word f06b-lw">away.</span></div>
+      <div id="f06b-changelog-slot">
+        <div class="f06b-fit" id="f06b-changelog-fit">
+          <div class="f06b-world" id="f06b-changelog-world">
+            <img class="f06b-plate" id="f06b-changelog-before" src="assets/changelog-footer-version.png" alt="" />
+            <img class="f06b-plate" id="f06b-changelog-sheet" src="assets/changelog-sheet.png" alt="" style="opacity: 0" />
+          </div>
+        </div>
+      </div>
+      <!-- Changelog clip (assets/changelog-sheet.mp4): hoisted to the host root at the slot rect.
+           Mounted at frame 0.5s from clip in-point 2.0s (frame time = clip time - 1.5s): the footer
+           version is clicked at clip 2.6 (frame 1.1), the sheet is fully open by clip 3.4 (frame 1.9).
+           Cut at frame 2.1; the crisp sheet still takes over and the camera pushes onto it. -->
+    </div>
+    <div id="f06b-changelog-over" class="clip" data-start="0" data-duration="4.4" data-track-index="2">
+      <div id="f06b-changelog-over-slot">
+        <div class="f06b-fit" id="f06b-changelog-over-fit">
+          <div class="f06b-ring" id="f06b-changelog-ring"></div>
+          <svg class="f06b-cursor" id="f06b-changelog-cursor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 3 L5 19 L9 15 L12 22 L15 20.5 L11.5 14 L18 14 Z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var ID = "06b-changelog";
+      var $ = function (s) { return document.getElementById("f06b-changelog-" + s); };
+      var W = 1920, H = 1080, FIT = 1382.4 / W; // 0.72
+      $("fit").style.transform = "scale(" + FIT + ")";
+      $("over-fit").style.transform = "scale(" + FIT + ")";
+
+      // Measured on changelog-sheet.mp4 / changelog-sheet.png (native 1920x1080 px):
+      // footer version badge centre and the sheet's release list.
+      var BADGE = { x: 1809, y: 1060 }, ENTER = { x: 1460, y: 720 }, LEAVE = { x: 1640, y: 1180 };
+      var CLICK = 1.1, ARRIVE = [0.45, 1.0], AWAY = [1.35, 1.85];
+      var SHEET = { s: 1.85, cx: 1696, cy: 300 };
+
+      var eOut = gsap.parseEase("power3.out"), eIn = gsap.parseEase("power2.in");
+      function c01(u) { return u < 0 ? 0 : u > 1 ? 1 : u; }
+      function mix(a, b, u) { return a + (b - a) * u; }
+      function cursorAt(t) {
+        if (t < ARRIVE[1]) { var u = eOut(c01((t - ARRIVE[0]) / (ARRIVE[1] - ARRIVE[0]))); return { x: mix(ENTER.x, BADGE.x, u), y: mix(ENTER.y, BADGE.y, u) }; }
+        if (t < AWAY[0]) return BADGE;
+        var v = eIn(c01((t - AWAY[0]) / (AWAY[1] - AWAY[0])));
+        return { x: mix(BADGE.x, LEAVE.x, v), y: mix(BADGE.y, LEAVE.y, v) };
+      }
+
+      var cursor = $("cursor"), ring = $("ring");
+      function renderPointer(t) {
+        var p = cursorAt(t), since = t - CLICK;
+        var press = since >= 0 && since < 0.28 ? (since < 0.08 ? since / 0.08 : 1 - (since - 0.08) / 0.2) : 0;
+        cursor.style.opacity = t >= ARRIVE[0] && t < AWAY[1] ? "1" : "0";
+        cursor.style.transform = "translate(" + (p.x - 13.33).toFixed(2) + "px," + (p.y - 8).toFixed(2) + "px) scale(" + (1 - 0.15 * press).toFixed(3) + ")";
+        var rr = since / 0.4;
+        ring.style.opacity = rr >= 0 && rr < 1 ? (1 - rr).toFixed(3) : "0";
+        if (rr >= 0 && rr < 1) {
+          var r = 14 + 40 * eOut(rr);
+          ring.style.width = ring.style.height = (2 * r).toFixed(2) + "px";
+          ring.style.transform = "translate(" + (BADGE.x - r).toFixed(2) + "px," + (BADGE.y - r).toFixed(2) + "px)";
+        }
+      }
+
+      var tl = gsap.timeline({ paused: true });
+      var clock = { t: 0 };
+      tl.to(clock, { t: 4.4, duration: 4.4, ease: "none", onUpdate: function () { renderPointer(clock.t); } }, 0);
+
+      // Scene 1 (0.0-0.45): the surface settles up into its slot (done before the clip mounts at 0.5).
+      tl.fromTo($("slot"), { y: 40 }, { y: 0, duration: 0.45, ease: "power3.out", immediateRender: true }, 0);
+      // Kicker types on, headline assembles word by word.
+      var KICK = "CHANGELOG", kl = { v: 0 }, kickerEl = $("kicker");
+      tl.fromTo(kl, { v: 0 }, { v: KICK.length, duration: 0.45, ease: "none", onUpdate: function () {
+        kickerEl.textContent = KICK.substring(0, Math.floor(kl.v + 0.0001));
+      } }, 0.1);
+      tl.fromTo(".f06b-title .f06b-word", { y: 36, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, ease: "power3.out", stagger: 0.14, immediateRender: true }, 0.3);
+
+      // Scene 2 (0.45-1.9): the pointer clicks the footer version; the sheet slides in (in the clip).
+      // Scene 3 (2.1-2.9): clip cut to the crisp still; one push onto the release list, then lock.
+      tl.set($("sheet"), { opacity: 1 }, 2.1);
+      var world = $("world");
+      var cam = { s: 1, cx: W / 2, cy: H / 2 };
+      function applyCam() {
+        var hw = W / (2 * cam.s), hh = H / (2 * cam.s);
+        var cx = Math.max(hw, Math.min(W - hw, cam.cx)), cy = Math.max(hh, Math.min(H - hh, cam.cy));
+        world.style.transform = "translate(" + (W / 2 - cx * cam.s).toFixed(2) + "px," + (H / 2 - cy * cam.s).toFixed(2) + "px) scale(" + cam.s.toFixed(4) + ")";
+      }
+      tl.set(cam, { s: 1, cx: W / 2, cy: H / 2, onUpdate: applyCam }, 0);
+      tl.to(cam, { s: SHEET.s, cx: SHEET.cx, cy: SHEET.cy, duration: 0.8, ease: "power3.out", onUpdate: applyCam }, 2.15);
+      // Lead line lands on the push.
+      tl.fromTo(".f06b-lw", { y: 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, ease: "power3.out", stagger: 0.08, immediateRender: true }, 2.3);
+
+      // Scene 4 (3.0-4.0): held read; the root crossfade is the exit.
+      tl.set({}, {}, 4.4);
+
+      applyCam();
+      renderPointer(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines[ID] = tl;
+    })();
+  </script>
+</template>

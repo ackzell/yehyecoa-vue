@@ -2,7 +2,7 @@
 format: 1920x1080
 duration: 90s
 message: "yehyecoa is where you try, experiment, and rehearse Vue together"
-arc: Feature-Benefit Cascade — name hook → promise → focus → together → safety net → home → wordmark
+arc: Feature-Benefit Cascade — name hook → promise → focus → together → safety net → home → always evolving → wordmark
 audience: Vue learners and workshop instructors
 mode: collaborative
 music: warm curious upbeat minimal electronic, light percussion, steady build, no vocals
@@ -16,7 +16,7 @@ music: warm curious upbeat minimal electronic, light percussion, steady build, n
 - camera grammar: every camera move is MOTIVATED by a clip action (a click, a selection, a drawer opening, a diff appearing) — a fast push that lands and HOLDS, then one decelerating pull back. No slow drift, no back-half creeping push, no breathing. Camera moves run inside the capture slot's clipped window (the surface's content zooms/pans; the headline column and the confirmed layout around it stay put) via `coordinate-target-zoom` / `viewport-change`. Every push lands its target at the centre of the slot.
 - clip timing: all clips are framework-owned muted `<video>` clips mounted at the frame times and in-points stated per frame. Action times quoted in Scenes come from the clips (approximate, ±0.3s) — the worker confirms them on the real clip and retimes the camera/cursor beats to the actual action, never the reverse. When a clip ends before its frame, its last frame holds to the cut.
 - center-safe for the later 9:16 reframe: key text and each camera push's focal region stay out of the outer ~20% of width at the moment they are read; side-by-side layouts (frames 1–5) will restack at reframe, so no read may depend on two elements sitting left/right at the frame edges.
-- rhythm / held-frame allocation: frame 1 is a measured reveal (calm open); frames 2–5 are the busy demo run; held reads are deliberate at the tail of frame 2 (12.4–14.0s), frame 4 (18.2–20.0s), frame 5 (17.6–20.0s), the whole post-lock half of frame 6 (7.2–10.0s, the breather before the close) and frame 7 (3.4–5.4s). During holds: stillness; at most a single keyword glow — no jitter loops needed.
+- rhythm / held-frame allocation: frame 1 is a measured reveal (calm open); frames 2–5 are the busy demo run; held reads are deliberate at the tail of frame 2 (12.4–14.0s), frame 4 (18.2–20.0s), frame 5 (15.0–16.0s), the whole post-lock half of frame 6 (7.2–10.0s), frame 6b (2.95–4.0s) and frame 7 (3.4–5.4s). During holds: stillness; at most a single keyword glow — no jitter loops needed.
 - caption band: no voiceover and no captions in this video. The confirmed sketch poses that reach into the bottom band (frame 4's foot line, frame 6's bottom-anchored screenshot) stand as confirmed.
 - handoffs: none. Every frame boundary is a clean harness transition (`transition_in`); no element visibly continues across a cut (frame 1's typed name, frame 3's/5's surfaces and frame 6's screenshot all change position, scale or content at their seams), so no `handoff_out` / `handoff_in` pairs are written.
 - registry blocks to pre-install at Step 5: `cursor-zoom-follow` (frame 3), `oversized-cursor` (frame 5). Both found with `npx hyperframes catalog --query "mouse cursor pointer click" --json`; restyle both to the palette (magenta ring/press, cream or ink arrow), no other looks are named.
@@ -85,37 +85,37 @@ Scene 7 (10.6–11.4s): as the preview heading re-renders to "Vue Playground" (~
 Scene 8 (11.4–12.4s): a magenta marker highlight sweeps under "just you and your code" (a plain magenta underline bar scaling in from the left, scaleX 0→1, 0.5s power2.out); the camera makes one decelerating pull back out to the full surface, landing at 12.4s → `coordinate-target-zoom` (zoom-out).
 Scene 9 (12.4–14.0s): held read — the clip ends at ~12.5s and its last frame ("Vue Playground") holds to the cut; everything still.
 
-## Frame 3 — Focus: console + layouts
+## Frame 3 — Focus: console + dock your panels
 
-- scene: the console catches three "count is now N" logs as the preview is clicked; then the layout menu cycles panes
+- scene: the console catches three "count is now N" logs as the preview is clicked; then the console panel is grabbed by its header and docked under the editor
 - voiceover: ""
-- on_screen: "see every log." · "arrange it your way."
+- on_screen: "see every log." · "dock it your way."
 - duration: 11s
 - transition_in: crossfade
 - status: animated
-- src: compositions/frames/03-console-layouts.html
+- src: compositions/frames/03-console-dock.html
 - type: feature_showcase
 - persuasion: Show-don't-tell proof
 - beat: control
 - blueprint: device-surface-showcase (Adapt)
 - registry: cursor-zoom-follow (component — drawn cursor + push toward each click + press/ring per click + ease back out; restyle ring to magenta, arrow cream)
-- focal: assets/console-log-output.mp4 (driven by the `cursor-zoom-follow` block for 1.0–5.0s), then assets/console-layout-switch.mp4
-- roles: console-log-output.mp4 = focal (left slot, 0.0–5.0s) · console-layout-switch.mp4 = focal (same slot, 5.0–11.0s) · console-panel-crop.png = supporting (crisp plate over the console rows during the tight hold 3.9–4.6s, identical geometry) · console-layout-menu-open.png = supporting (seam plate under the 4.6–5.2s cut — its menu-open state matches the layout clip at its in-point)
+- focal: assets/console-log-output.png rebuilt per click (0.0–5.0s), then assets/console-dock-drag.mp4
+- roles: console-log-output.png = focal still (left slot, 0.0–5.0s; counter digits and log rows rebuilt on it per click, crisp at the 2x push) · console-dock-drag.mp4 = focal (same slot, 5.0–9.47s; opens on the same state as the still, so the hand-off is invisible) · console-panel-crop.png = supporting (crisp plate over the console rows during the tight hold 3.9–4.6s, identical geometry) · console-dock-docked.png = supporting (holds the docked result after the clip is cut at the drop, 9.47–11.0s — it covers the preview re-mount flash in the raw clip) · console-dock-drag.json = pointer path for the drawn cursor
 - sfx: none
-- asset_candidates: assets/console-log-output.mp4 — three clicks, three log rows land in the console; assets/console-panel-crop.png — console panel close-up; assets/console-layout-switch.mp4 — cycles through all layouts; assets/console-layout-menu-open.png — layout menu open
+- asset_candidates: assets/console-log-output.png — three logs landed; assets/console-panel-crop.png — console panel close-up; assets/console-dock-drag.mp4 — console header dragged over the editor's right then bottom drop zone (blurred highlight), dropped under the editor, later dragged back; assets/console-dock-hover.png — bottom drop zone highlighted; assets/console-dock-docked.png — editor over console, preview full height
 
-narrativeRole: finish the "focus" argument — the essentials a learner needs are built in.
+narrativeRole: finish the "focus" argument — the essentials a learner needs are built in, arranged the way you like.
 keyMessage: everything you need to learn, nothing you don't.
 
-Adapt: keep the signature — one held surface whose screens advance through a real flow on its own face, presented by a camera push-in on a target region that then zooms back out to re-frame the whole surface (floating-window variant); change: no gradient backdrop or browser chrome — the surface is the confirmed hairline-bordered capture slot on ink-black (asymmetric 60/40: slot left, text right), and two clips play in sequence in the one slot. The clips have no pointer, so the drawn cursor comes from `cursor-zoom-follow`.
-Scene 1 (0.0–1.0s): the surface establishes — console-log-output.mp4 (mounted at 0.0s from in-point 0.0s) slides in from the left edge into its slot on a long-tail settle → a GSAP translate + opacity tween; only the kicker "BUILT IN" types on in the right column → `discrete-text-sequence`.
-Scene 2 (1.0–1.6s): the drawn cursor enters and the camera pushes in toward the preview's "Clicked N times" button, framing the button at top and the console rows below it in one tight centred shot (the output column, right half of the surface) → `cursor-zoom-follow` block (camera = `coordinate-target-zoom`).
-Scene 3 (1.6–3.9s): three clicks synced to the clip (~1.5s, ~2.5s, ~3.5s — confirm on the clip): each click presses the button with a magenta ring → a small ring ripple at the click point (inside the block); each `count is now N` row lands in the console and flares once with a magenta keyword glow → a soft magenta glow on the key word (text-shadow tween). The headline assembles on the same beats — "see" on click 1, "every" on click 2, "log." (magenta) on click 3 → a staggered word-by-word reveal. This is the requested push-in on the console rows.
-Scene 4 (3.9–4.6s): hold tight on the three rows — the read; the crisp console-panel crop sits over the clip at identical geometry for legibility. Still.
-Scene 5 (4.6–5.2s): the cursor leaves and the camera eases back out to the full surface; at the pull's peak velocity the slot cuts to console-layout-switch.mp4 (mounted at 5.0s from in-point 2.8s; frame time = clip time + 2.2s) → `cut-catalog.md` cut-the-curve.
-Scene 6 (5.2–5.9s): "arrange it your way." reveals word by word beneath the headline in muted h3 → a staggered word-by-word reveal; a single magenta keyword glow touches the layout-menu strip at the surface's top-right → a soft magenta glow on the key word (text-shadow tween).
-Scene 7 (5.9–10.3s): camera locked wide; the panes rearrange on the surface's own face — vertical stack (~5.2s), back to horizontal (~7.1s), preview|console side by side (~8.6s), reversed with the editor on the right (~10.3s). The layout changes ARE the screen advances; no camera move, no extra copy.
-Scene 8 (10.3–11.0s): the reversed layout holds; still read; the harness zoom-through into frame 4 is the exit.
+Adapt: keep the signature — one held surface whose screens advance through a real flow on its own face, presented by a camera push-in on a target region that then zooms back out to re-frame the whole surface (floating-window variant); change: no gradient backdrop or browser chrome — the surface is the confirmed hairline-bordered capture slot on ink-black (asymmetric 60/40: slot left, text right). The clip has no pointer, so the drawn cursor comes from `cursor-zoom-follow` and, for the drag, an over-layer cursor driven by the captured pointer path.
+Scene 1 (0.0–1.0s): the surface establishes — the log still slides in from the left edge into its slot on a long-tail settle → a GSAP translate + opacity tween; only the kicker "BUILT IN" types on in the right column → `discrete-text-sequence`.
+Scene 2 (1.0–1.6s): the drawn cursor enters and the camera pushes in toward the preview's "Clicked N times" button, framing the button at top and the console rows below it → `cursor-zoom-follow` block (camera = `coordinate-target-zoom`).
+Scene 3 (1.6–3.9s): three clicks (1.75 / 2.65 / 3.65s): each click presses the button with a magenta ring; each `count is now N` row lands in the console and flares once with a magenta glow. The headline assembles on the same beats — "see" / "every" / "log." (magenta).
+Scene 4 (3.9–4.6s): hold tight on the three rows — the read; the crisp console-panel crop sits over them. Still.
+Scene 5 (4.55–5.0s): the camera eases back out to the full surface while the cursor travels to the console header; at 5.0s console-dock-drag.mp4 takes over the slot (mounted at 5.0s from in-point 0.69s; frame time = clip time + 4.31s).
+Scene 6 (5.2–6.1s): "dock it your way." reveals word by word in muted h3; a magenta outline glows once around the console header — the drag handle — then the cursor presses on it (5.9s).
+Scene 7 (6.1–9.47s): camera locked wide; the console is dragged over the editor — its right drop zone highlights (~6.5–7.6s), then its bottom zone (~8.3–9.4s) — and dropped at 9.47s with a magenta ring at the drop point. No camera move, no extra copy.
+Scene 8 (9.47–11.0s): the new arrangement holds (editor over console, preview full height) on the docked plate; the cursor exits; the harness zoom-through into frame 4 is the exit.
 
 ## Frame 4 — Together: rehearse as a room
 
@@ -155,7 +155,7 @@ Scene 10 (18.2–20.0s): held wide read; "in sync." flares once at 18.4s → a s
 - scene: snapshots stack in the history drawer, a diff opens (Current vs Snapshot), Restore brings the old code back and an "auto" snapshot appears
 - voiceover: ""
 - on_screen: "every try is saved." · "compare." · "restore." · "experiment fearlessly."
-- duration: 20s
+- duration: 16s
 - transition_in: crossfade
 - status: animated
 - src: compositions/frames/05-safety-net.html
@@ -165,25 +165,25 @@ Scene 10 (18.2–20.0s): held wide read; "in sync." flares once at 18.4s → a s
 - blueprint: camera-journey (Adapt)
 - registry: oversized-cursor (component — drawn arrow lands its tip on Restore, clicks, settles just below so the result stays visible, exits; restyle click ring magenta)
 - focal: assets/safety-history-restore.mp4
-- roles: safety-history-restore.mp4 = focal (right slot, 5.0–20.0s) · safety-snapshot-saved-toast.png = supporting (the slot's prologue plate, 0.4–5.0s) · safety-diff-view-crop.png = supporting (crisp plate over the diff popover during the tight hold 10.0–13.6s, identical geometry) · safety-history-drawer-crop.png = supporting (crisp plate over the drawer during the Restore approach 14.2–15.5s, identical geometry)
+- roles: safety-history-restore.mp4 = focal (right slot, 3.4–16.0s) · safety-snapshot-saved-toast.png = supporting (the slot's prologue plate, 0.3–3.4s) · safety-diff-view-crop.png = supporting (crisp plate over the diff popover during the tight hold 8.4–11.0s, identical geometry) · safety-history-drawer-crop.png = supporting (crisp plate over the drawer during the Restore approach 11.35–11.95s, identical geometry)
 - sfx: none
 - asset_candidates: assets/safety-history-restore.mp4 — drawer opens, diff, restore, auto snapshot appears; assets/safety-diff-view-crop.png — side-by-side diff card; assets/safety-history-drawer-crop.png — snapshot timeline; assets/safety-snapshot-saved-toast.png — "Snapshot saved" toasts
 
 narrativeRole: pay off "to try / to experiment" — trying is safe because nothing is lost.
 keyMessage: break things freely; history has your back.
 
-Adapt: keep the signature — the camera is the storyteller over ONE world, a multi-leg journey (dive → hinge action → travel to the consequence → landing at rest) where the Restore click motivates the final leg (sub-shape A, action roundtrip); change: the world is the confirmed capture slot (asymmetric 40/60: text left, slot right) and every leg runs inside its clipped window, with a static prologue on the "Snapshot saved" still before the clip. safety-history-restore.mp4 mounts at 5.0s from in-point 0.0s (frame time = clip time + 5.0s).
-Scene 1 (0.0–1.4s): kicker "HISTORY" then "every try is saved." word by word, "saved." in magenta at ~1.2s → a staggered word-by-word reveal; the prologue surface (safety-snapshot-saved-toast.png) slides in from the right into its slot from 0.4s → a GSAP translate + opacity tween.
-Scene 2 (1.4–2.6s): LEG 1, dive — the camera pushes tight onto the two green "Snapshot saved" toasts at the top centre of the still, landing centred → `coordinate-target-zoom`; "saved." flares once in the headline as it lands → a soft magenta glow on the key word (text-shadow tween).
-Scene 3 (2.6–4.6s): hold tight on the toasts — the read. Still.
-Scene 4 (4.6–5.2s): pull back out to the full surface; at peak velocity the slot cuts to the clip (same app view, its own toast still showing) → `cut-catalog.md` cut-the-curve.
-Scene 5 (5.2–7.4s): wide on the clip, editor at 'Vue Lab'; camera locked.
-Scene 6 (7.4–8.8s): LEG 2, travel — as the history drawer slides in (~clip 2.4–3.0s → 7.4–8.0s) the camera pans right and settles on the drawer's snapshot timeline → `coordinate-target-zoom`.
-Scene 7 (9.0–13.9s): LEG 3, dive — as the diff popover opens (~clip 4.3s → 9.3s) the camera dives tight onto it, Current vs Snapshot centred by ~9.8s → `coordinate-target-zoom`; "compare" reveals in the bullet list at 9.8s → a staggered word-by-word reveal; at ~11.0s a hand-drawn magenta circle rings the changed line-4 pair ('Vue Lab' vs 'Vue Workshop') → a hand-drawn magenta marker shape (SVG stroke draw) (circle). The crisp diff crop sits over the popover for the hold. This is the requested push-in on the diff.
-Scene 8 (13.9–15.6s): the popover closes (~clip 8.9s → 13.9s) and the camera swoops down the drawer to the oldest snapshot's Restore button → `coordinate-target-zoom`; the drawn cursor glides in and lands its tip on Restore; "restore" reveals in the list at 15.0s; the click lands on the clip's own click (~clip 10.6s → 15.6s) with a magenta ring → `oversized-cursor` block (a small ring ripple at the click point).
-Scene 9 (15.6–16.6s): the hinge's consequence — one decelerating pull back to the full surface as the code and preview revert to "Vue Workshop" and the blue "auto" snapshot appears at the top of the drawer (~clip 10.7–11.0s); the cursor settles below and exits → `coordinate-target-zoom` (zoom-out).
-Scene 10 (16.6–17.6s): "experiment fearlessly" reveals as the last bullet, "fearlessly" flaring once in magenta → a staggered word-by-word reveal + a soft magenta glow on the key word (text-shadow tween). The clip has ended (~16.6s); its last frame holds.
-Scene 11 (17.6–20.0s): held wide read — still; the harness zoom-through into frame 6 is the exit.
+Adapt: keep the signature — the camera is the storyteller over ONE world, a multi-leg journey (dive → hinge action → travel to the consequence → landing at rest) where the Restore click motivates the final leg (sub-shape A, action roundtrip); change: the world is the confirmed capture slot (asymmetric 40/60: text left, slot right) and every leg runs inside its clipped window, with a static prologue on the "Snapshot saved" still before the clip. safety-history-restore.mp4 mounts at 3.4s from in-point 1.35s (frame time = clip time + 2.05s). Retimed 20s → 16s in the 2026-10 refresh: the toast prologue is tightened and the clip mounts 1.0s deeper, so every clip-locked beat lands 2.6s earlier.
+Scene 1 (0.0–1.2s): kicker "HISTORY" then "every try is saved." word by word, "saved." in magenta at ~1.0s; the prologue surface (safety-snapshot-saved-toast.png) slides in from the right from 0.3s → a GSAP translate + opacity tween.
+Scene 2 (1.1–2.1s): LEG 1, dive — the camera pushes tight onto the two green "Snapshot saved" toasts at the top centre of the still → `coordinate-target-zoom`; "saved." flares once as it lands.
+Scene 3 (2.1–3.0s): hold tight on the toasts — the read.
+Scene 4 (3.0–3.8s): pull back out to the full surface; at peak velocity (3.4s) the slot cuts to the clip → `cut-catalog.md` cut-the-curve.
+Scene 5 (3.8–4.6s): wide on the clip, editor at 'Vue Lab'; camera locked.
+Scene 6 (4.6–6.0s): LEG 2, travel — as the history drawer slides in (~clip 2.1–3.1s → 4.15–5.15s) the camera pans right and settles on the drawer's snapshot timeline.
+Scene 7 (7.7–11.0s): LEG 3, dive — as the diff popover opens (~clip 5.8s → 7.85s) the camera dives tight onto it; "compare" reveals at 8.5s; at 9.2s a hand-drawn magenta circle rings the changed line-4 pair ('Vue Lab' vs 'Vue Workshop'). The crisp diff crop sits over the popover for the hold.
+Scene 8 (11.25–13.0s): the popover closes (~clip 9.2s → 11.25s) and the camera swoops down the drawer to the oldest snapshot's Restore; the drawn cursor glides in; "restore" reveals at 12.4s; the click lands on the clip's own click (~clip 10.9s → 12.95s) with a magenta ring → `oversized-cursor`.
+Scene 9 (13.05–14.0s): the consequence — one decelerating pull back as the code reverts to "Vue Workshop" and the blue "auto" snapshot appears (~clip 11.0–11.2s); the cursor settles below and exits.
+Scene 10 (14.0–15.0s): "experiment fearlessly" reveals as the last bullet, "fearlessly" flaring once in magenta. The clip has ended (~13.85s); its last frame holds.
+Scene 11 (15.0–16.0s): held wide read; the harness zoom-through into frame 6 is the exit.
 
 ## Frame 6 — Home: inside amoxtli-vue lessons
 
@@ -212,6 +212,33 @@ Scene 2 (2.6–3.8s): THE reveal — one fast, heavily decelerating zoom-out: th
 Scene 3 (4.0–5.4s): on the locked wide, the kicker "ITS HOME" types on (ink 55% label) → `discrete-text-sequence`, then "built into amoxtli-vue lessons." assembles word by word in ink-black h2, top-left → a staggered word-by-word reveal.
 Scene 4 (5.8–7.2s): element payoff — a rough ink-black outline sketches around the playground pane of the screenshot (the yehyecoa half of the lesson) → a hand-drawn magenta marker shape (SVG stroke draw) (sketchout). No camera.
 Scene 5 (7.2–10.0s): the deliberate breather — held, completely still read before the close.
+
+## Frame 6b — Always evolving: in-app changelog
+
+- scene: the footer version badge is clicked and the changelog sheet slides in with the latest releases
+- voiceover: ""
+- on_screen: "always evolving." · "what's new, one click away."
+- duration: 4s
+- transition_in: crossfade
+- status: animated
+- src: compositions/frames/06b-changelog.html
+- type: feature_showcase
+- persuasion: Momentum (the tool keeps improving)
+- beat: confidence
+- blueprint: device-surface-showcase (Adapt, compressed)
+- focal: assets/changelog-sheet.mp4, then assets/changelog-sheet.png
+- roles: changelog-footer-version.png = supporting (slot plate before the clip mounts, 0.0–0.5s; same pre-click state) · changelog-sheet.mp4 = focal (0.5–2.1s; mounted at 0.5s from in-point 2.0s, frame time = clip time − 1.5s) · changelog-sheet.png = focal still (2.1–4.0s, crisp under the push)
+- sfx: click-soft on the version click (1.1s)
+- asset_candidates: assets/changelog-sheet.mp4 — footer version clicked, sheet slides in; assets/changelog-sheet.png — sheet open; assets/changelog-sheet-crop.png — sheet alone; assets/changelog-footer-version.png — pointer over the footer version
+
+narrativeRole: a short coda before the close — the playground keeps getting better and says so in-app.
+keyMessage: always evolving.
+
+Sits on the magenta register like frames 6–7 (ink-black type, ink 55% kicker); bottom-anchored 16:9 slot under the top-left headline.
+Scene 1 (0.0–0.75s): the slot settles up into place; kicker "CHANGELOG" types on; "always evolving." assembles word by word.
+Scene 2 (0.45–1.9s): a drawn cursor glides to the footer version badge and clicks it (1.1s, magenta ring); the changelog sheet slides in from the right inside the clip.
+Scene 3 (2.1–2.95s): the clip cuts to the crisp sheet still and the camera makes one push onto the release list, then locks; "what's new, one click away." lands top-right.
+Scene 4 (2.95–4.0s): held read; the harness crossfade into frame 7 is the exit.
 
 ## Frame 7 — Close: the wordmark
 

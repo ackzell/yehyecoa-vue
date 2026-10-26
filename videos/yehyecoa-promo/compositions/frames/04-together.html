@@ -162,8 +162,8 @@
       // ---- Scene 5 (4.6–9.0): wide hold — the live edits are the motion ----
 
       // ---- Scene 6 (9.0–12.6): push in on the LIGHT student's editor, increment() painted pink ----
-      // target = light clip point (420, 330) of 1920x1080 → canvas (1409.3, 751.0); S 3.5 (≤ source res)
-      const P1 = [3.5, GEOM.light.x + 420 * (GEOM.light.w / 1920), GEOM.light.y + 330 * (GEOM.light.h / 1080)];
+      // target = light clip point (610, 330) of 1920x1080 (dock layout: file tree shifts code +190px); S 3.5 (≤ source res)
+      const P1 = [3.5, GEOM.light.x + 610 * (GEOM.light.w / 1920), GEOM.light.y + 330 * (GEOM.light.h / 1080)];
       camMove(WIDE, P1, 9.0, 1.4, "power3.inOut");
       rack(["inst", "dark"], SHARP, SOFT, 9.0, 1.0, "power2.out");
       dimChrome([WIN.inst, WIN.dark, TAG.inst, TAG.dark, badge], 1, 0.35, 9.0, 1.0, "power2.out");
