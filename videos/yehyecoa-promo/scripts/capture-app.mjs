@@ -10,7 +10,7 @@
  * Run from the repository root:
  *   node videos/yehyecoa-promo/scripts/capture-app.mjs
  *
- * Optional: BEATS=focus,console,together,safety to run a subset.
+ * Optional: BEATS=focus,console,together,safety,changelog to run a subset.
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -30,7 +30,7 @@ const SHOTS = path.join(PROMO, 'capture/screenshots');
 const ASSETS = path.join(PROMO, 'capture/assets');
 const RAW = path.join(ASSETS, '.raw');
 const VIEWPORT = { width: 1920, height: 1080 };
-const BEATS = (process.env.BEATS || 'focus,console,together,safety').split(',');
+const BEATS = (process.env.BEATS || 'focus,console,together,safety,changelog').split(',');
 const ROOM = 'vue-workshop';
 
 for (const d of [SHOTS, ASSETS, RAW]) fs.mkdirSync(d, { recursive: true });
@@ -138,11 +138,11 @@ async function newSession(browser, { name, role = 'no', offline = false, record 
     if (!sessionStorage.getItem('yv-capture-init')) {
       sessionStorage.setItem('yv-capture-init', '1');
       localStorage.setItem('yehyecoa-vue-theme', theme);
-      localStorage.setItem('yehyecoa-vue-layout', 'horizontal');
-      localStorage.setItem('yehyecoa-vue-show-output', 'true');
+      // Dock layout: drop any persisted tree so the app uses DEFAULT_LAYOUT_TREE
+      // (editor | preview over console).
+      localStorage.removeItem('yehyecoa-vue-layout-tree');
+      localStorage.setItem('yehyecoa-vue-show-preview', 'true');
       localStorage.setItem('yehyecoa-vue-show-console', 'true');
-      localStorage.setItem('yehyecoa-vue-output-layout', 'vertical');
-      localStorage.setItem('yehyecoa-vue-layout-reverse', 'false');
     }
     // Hide the dev-only Vue DevTools floating anchor (not part of the product UI).
     const hide = () => {
@@ -267,7 +267,7 @@ async function beatFocus(browser) {
   await page.mouse.move(1900, 1070);
   await shot(page, 'focus-hero.png');
   await shot(page, 'focus-default-layout.png');
-  await crop(page.locator('.split-pane > .left'), 'focus-editor-crop.png');
+  await crop(page.locator('.editor-panel'), 'focus-editor-crop.png');
   await crop(page.locator('.iframe-container'), 'focus-preview-crop.png');
 
   // Live edit: retitle the app, the preview re-renders as you type.
@@ -305,41 +305,75 @@ async function beatConsole(browser) {
   await shot(page, 'console-log-output.png');
   await crop(page.locator('.console-wrapper'), 'console-panel-crop.png');
 
-  // Layout menu
+  // Drag-and-dock: grab the console header, sweep it over the editor's drop
+  // zones so the highlight shows, dock it under the editor, then drag it back.
   await sleep(500);
-  s.mark('layoutStart');
-  await sleep(500);
-  await page.locator('button[aria-haspopup], nav button').filter({ has: page.locator('.i-mynaui\\:layout, .i-mynaui\\:layout-solid') }).first().click();
-  await sleep(900);
-  await shot(page, 'console-layout-menu-open.png');
-  const menu = page.locator('[role="menu"]');
-  await crop(menu, 'console-layout-menu-crop.png');
-  const menuBtn = i => menu.locator('button.sc-toolbar-btn').nth(i);
-
-  // 1: vertical (stacked) layout
-  await menuBtn(1).click();
-  await sleep(1400);
-  await shot(page, 'console-layout-vertical.png');
-  // back to horizontal, then output split side-by-side (preview | console)
-  await menuBtn(1).click();
-  await sleep(1200);
-  await menuBtn(4).click();
-  await sleep(1400);
-  await shot(page, 'console-layout-output-horizontal.png');
-  // reverse (editor on the right)
-  await menuBtn(2).click();
-  await sleep(2500);
-  await shot(page, 'console-layout-reversed.png');
-  // restore defaults
-  await menuBtn(2).click();
+  s.mark('dockStart');
+  const trail = [];
+  const pt = (k, x, y) => trail.push({ k, t: +((Date.now() - s.t0) / 1000 - s.marks.dockStart).toFixed(3), x: Math.round(x), y: Math.round(y) });
+  const handle = await page.locator('.console-title').boundingBox();
+  const grab = { x: handle.x + 300, y: handle.y + handle.height / 2 };
+  await sleep(300);
+  await page.mouse.move(grab.x, grab.y);
+  pt('grab', grab.x, grab.y);
+  await sleep(300);
+  await page.mouse.down();
+  await sleep(200);
+  // Drift over the editor: its right zone, then its bottom zone (highlight follows).
+  // Holds are kept short; the stills are taken inside each hold.
+  await glide(page, grab, { x: 840, y: 470 }, 22, pt, 'over-right');
+  await sleep(300);
+  await shot(page, 'console-dock-hover-right.png');
+  await glide(page, { x: 840, y: 470 }, { x: 520, y: 900 }, 22, pt, 'over-bottom');
+  await sleep(300);
+  await shot(page, 'console-dock-hover.png');
+  await cropPad(page, page.locator('.editor-panel'), 'console-dock-zone-crop.png', 0);
+  await page.mouse.up();
+  pt('drop', 520, 900);
+  await sleep(1800);
+  await page.mouse.move(1900, 1070);
+  await shot(page, 'console-dock-docked.png');
   await sleep(600);
-  await menuBtn(4).click();
-  await sleep(1200);
-  s.mark('layoutEnd');
+  // Drag it back under the preview to restore the default arrangement.
+  const back = await page.locator('.console-title').boundingBox();
+  const grab2 = { x: back.x + 300, y: back.y + back.height / 2 };
+  await page.mouse.move(grab2.x, grab2.y);
+  pt('grab', grab2.x, grab2.y);
+  await sleep(400);
+  await page.mouse.down();
+  await sleep(300);
+  await glide(page, grab2, { x: 1440, y: 920 }, 30, pt, 'over-preview-bottom');
+  await sleep(1000);
+  await shot(page, 'console-dock-hover-back.png');
+  await page.mouse.up();
+  pt('drop', 1440, 920);
+  await sleep(1600);
+  s.mark('dockEnd');
+  await page.mouse.move(1900, 1070);
+  await shot(page, 'console-dock-restored.png');
+  const tree = await page.evaluate(() => localStorage.getItem('yehyecoa-vue-layout-tree'));
+  log('layout tree after dock round trip:', tree);
+  // Cursor path sidecar (clip-relative seconds, 1920x1080 px) for the composition overlay.
+  const lead = Math.min(0.4, s.marks.dockStart);
+  fs.writeFileSync(path.join(ASSETS, 'console-dock-drag.json'), JSON.stringify({
+    note: 'Pointer path during console-dock-drag.mp4; t is seconds from the clip in-point.',
+    points: trail.map(p => ({ ...p, t: +(p.t + lead).toFixed(3) })),
+  }, null, 2));
   await finish(s, [
     { out: 'console-log-output.mp4', from: 'logStart', to: 'logEnd' },
-    { out: 'console-layout-switch.mp4', from: 'layoutStart', to: 'layoutEnd' },
+    { out: 'console-dock-drag.mp4', from: 'dockStart', to: 'dockEnd' },
   ]);
+}
+
+/** Move the pointer from `a` to `b` in `steps` eased steps, logging the end point. */
+async function glide(page, a, b, steps, pt, label) {
+  for (let i = 1; i <= steps; i++) {
+    const u = i / steps;
+    const e = u < 0.5 ? 2 * u * u : 1 - (-2 * u + 2) ** 2 / 2; // ease in-out
+    await page.mouse.move(a.x + (b.x - a.x) * e, a.y + (b.y - a.y) * e);
+    await sleep(40);
+  }
+  pt(label, b.x, b.y);
 }
 
 async function beatTogether(browser) {
@@ -400,7 +434,7 @@ async function beatTogether(browser) {
   await shot(ins.page, 'together-instructor-broadcast.png');
   await shot(st.page, 'together-student-sync.png');
   await shot(st2.page, 'together-student-light-sync.png');
-  await crop(st.page.locator('.split-pane > .left'), 'together-student-editor-crop.png');
+  await crop(st.page.locator('.editor-panel'), 'together-student-editor-crop.png');
 
   // Side-by-side composite still of both windows after the sync.
   execFileSync('ffmpeg', [
@@ -491,6 +525,38 @@ async function beatSafety(browser) {
   await finish(s, [{ out: 'safety-history-restore.mp4', from: 'historyStart', to: 'historyEnd' }]);
 }
 
+async function beatChangelog(browser) {
+  const s = await newSession(browser, { name: 'changelog', offline: true });
+  const { page } = s;
+  await boot(s);
+  await setCode(page, BASE_CODE);
+  await waitToastsGone(page);
+  await page.mouse.move(1500, 800);
+  await sleep(400);
+
+  s.mark('changelogStart');
+  await sleep(500);
+  const version = page.locator('button[title="View changelog"]');
+  const vb = await version.boundingBox();
+  await page.mouse.move(vb.x + vb.width / 2, vb.y + vb.height / 2, { steps: 20 });
+  await sleep(600);
+  await shot(page, 'changelog-footer-version.png');
+  await version.click();
+  const sheet = page.locator('[role="dialog"]').filter({ hasText: 'Changelog' }).first();
+  await sheet.waitFor();
+  await sleep(1200);
+  await shot(page, 'changelog-sheet.png');
+  await crop(sheet, 'changelog-sheet-crop.png');
+  // Scroll the release list a little.
+  const sb = await sheet.boundingBox();
+  await page.mouse.move(sb.x + sb.width / 2, sb.y + sb.height * 0.6, { steps: 10 });
+  for (let i = 0; i < 16; i++) { await page.mouse.wheel(0, 30); await sleep(45); }
+  await sleep(1200);
+  s.mark('changelogEnd');
+  await shot(page, 'changelog-sheet-scrolled.png');
+  await finish(s, [{ out: 'changelog-sheet.mp4', from: 'changelogStart', to: 'changelogEnd' }]);
+}
+
 // ---------------------------------------------------------------- main
 
 const browser = await chromium.launch();
@@ -499,6 +565,7 @@ try {
   if (BEATS.includes('console')) { log('beat: console'); await beatConsole(browser); }
   if (BEATS.includes('together')) { log('beat: together'); await beatTogether(browser); }
   if (BEATS.includes('safety')) { log('beat: safety'); await beatSafety(browser); }
+  if (BEATS.includes('changelog')) { log('beat: changelog'); await beatChangelog(browser); }
 }
 finally {
   await browser.close();

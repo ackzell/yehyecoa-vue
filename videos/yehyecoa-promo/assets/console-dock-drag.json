@@ -1,0 +1,47 @@
+{
+  "note": "Pointer path during console-dock-drag.mp4; t is seconds from the clip in-point.",
+  "points": [
+    {
+      "k": "grab",
+      "t": 0.706,
+      "x": 1261,
+      "y": 564
+    },
+    {
+      "k": "over-right",
+      "t": 2.181,
+      "x": 840,
+      "y": 470
+    },
+    {
+      "k": "over-bottom",
+      "t": 3.734,
+      "x": 520,
+      "y": 900
+    },
+    {
+      "k": "drop",
+      "t": 4.59,
+      "x": 520,
+      "y": 900
+    },
+    {
+      "k": "grab",
+      "t": 7.245,
+      "x": 301,
+      "y": 564
+    },
+    {
+      "k": "over-preview-bottom",
+      "t": 9.227,
+      "x": 1440,
+      "y": 920
+    },
+    {
+      "k": "drop",
+      "t": 10.501,
+      "x": 1440,
+      "y": 920
+    }
+  ]
+}
