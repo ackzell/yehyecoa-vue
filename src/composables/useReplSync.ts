@@ -8,9 +8,15 @@ import { watch } from 'vue';
 
 import { useToastsStore } from '@/components/toasts/useToastsStore';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
-import { usePartyKitStore } from '@/composables/usePartyKitStore';
+import { isCollabEnabled, usePartyKitStore } from '@/composables/usePartyKitStore';
 
 export function useReplSync(): void {
+  // No PartyKit server in the public build, so install nothing: no watchers,
+  // no decorations and no serialization on every keystroke.
+  if (!isCollabEnabled) {
+    return;
+  }
+
   const fm = useFileManagerStore();
   const pks = usePartyKitStore();
   const { toast } = useToastsStore();

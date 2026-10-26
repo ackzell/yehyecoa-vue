@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import YvChangelogSheet from '@/components/YvChangelogSheet.vue';
+import { isCollabEnabled } from '@/composables/usePartyKitStore';
 import YvWorkshopJoiner from './YvWorkshopJoiner.vue';
 
 const version = import.meta.env.PACKAGE_VERSION;
@@ -20,7 +21,7 @@ const isChangelogOpen = ref(false);
       transition="background-color 0.2s ease"
     >
       <div>
-        <YvWorkshopJoiner />
+        <YvWorkshopJoiner v-if="isCollabEnabled" />
         <slot name="begin" />
       </div>
       <div>

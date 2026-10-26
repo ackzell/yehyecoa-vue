@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import YvOnlineStatus from '@/components/YvOnlineStatus.vue';
 import { useFileManagerStore } from '@/composables/useFileManagerStore';
+import { isCollabEnabled } from '@/composables/usePartyKitStore';
 import { useSettingsStore } from '@/composables/useSettingsStore';
 import YvLayoutMenu from './YvLayoutMenu.vue';
 
@@ -36,7 +37,7 @@ const fm = useFileManagerStore();
         absolute w-max
         class="-translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"
       >
-        <YvOnlineStatus />
+        <YvOnlineStatus v-if="isCollabEnabled" />
       </div>
 
       <div flex gap-4 text-neutral-500>

@@ -9,6 +9,15 @@ import { useToastsStore } from '@/components/toasts/useToastsStore';
 
 type MessageHandler = (message: any) => void;
 
+/**
+ * Collaboration needs a PartyKit server. The public build has none, so the
+ * app must not call a dead host on mount. Set VITE_ENABLE_COLLAB=true and
+ * VITE_PARTYKIT_HOST to turn it back on.
+ */
+export const isCollabEnabled: boolean = import.meta.env.VITE_ENABLE_COLLAB === 'true';
+
+const partyKitHost: string = import.meta.env.VITE_PARTYKIT_HOST ?? '';
+
 export const usePartyKitStore = defineStore('partyKitStore', () => {
   let connection: PartySocket | null = null;
   const isConnected = ref(false);
@@ -30,27 +39,36 @@ export const usePartyKitStore = defineStore('partyKitStore', () => {
   if (!initialized) {
     initialized = true;
 
-    onBeforeMount(async () => {
-      await checkForAvailableWorkshop(currentRoomId.value);
-      if (isWorkshopAvailable.value) {
-        initializeConnection(currentRoomId.value);
-      }
-    });
+    // Without a server there is nothing to probe, so the public build stays
+    // quiet and never requests a host that does not exist.
+    if (isCollabEnabled) {
+      onBeforeMount(async () => {
+        await checkForAvailableWorkshop(currentRoomId.value);
+        if (isWorkshopAvailable.value) {
+          initializeConnection(currentRoomId.value);
+        }
+      });
 
-    onUnmounted(() => {
-      connection?.close();
-      messageHandlers.clear();
-      initialized = false; // Reset for HMR or next full page load
-    });
+      onUnmounted(() => {
+        connection?.close();
+        messageHandlers.clear();
+        initialized = false; // Reset for HMR or next full page load
+      });
+    }
   }
 
   function initializeConnection(room: string): void {
+    if (!partyKitHost) {
+      console.warn('VITE_PARTYKIT_HOST is not set; collaboration stays off.');
+      return;
+    }
+
     currentId.value = isUserInstructor.value
       ? 'instructor'
       : `attendee-${crypto.randomUUID().slice(0, 8)}`;
 
     connection = new PartySocket({
-      host: 'http://127.0.0.1:1999',
+      host: partyKitHost,
       room,
       id: currentId.value,
     });
@@ -150,13 +168,18 @@ export const usePartyKitStore = defineStore('partyKitStore', () => {
    * Returns true if available, false otherwise.
    */
   async function checkForAvailableWorkshop(room?: string): Promise<boolean> {
+    if (!partyKitHost) {
+      isWorkshopAvailable.value = false;
+      return false;
+    }
+
     // Use the same logic as connection for room name
     const urlParams = new URLSearchParams(window.location.search);
     const roomName = room || urlParams.get('room') || 'test-workshop';
     // Use PartySocket.fetch to check the /status endpoint
     try {
       const res = await PartySocket.fetch({
-        host: 'http://127.0.0.1:1999',
+        host: partyKitHost,
         room: roomName,
         path: 'status',
       }, {
@@ -176,6 +199,10 @@ export const usePartyKitStore = defineStore('partyKitStore', () => {
   }
 
   async function joinWorkshop(): Promise<void> {
+    if (!isCollabEnabled) {
+      return;
+    }
+
     await checkForAvailableWorkshop();
     if (isWorkshopAvailable.value) {
       initializeConnection('test-workshop');
