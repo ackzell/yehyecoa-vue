@@ -87,10 +87,14 @@ function deserializeMessage(arg: any): any {
       return undefined
 
     case 'function': {
-      // Approximated with a Function constructor (non-invocable stub)
-      const fn = new Function(`/* [Function ${arg.name}] */`)
+      // A plain function keeps the console's rendering path working without
+      // calling an evaluator, which a strict CSP forbids.
+      const preview = `[Function ${arg.name}]${arg.isNative ? ' [native]' : ''}`
+      const fn = function stub() { /* display only, never invoked */ }
+      Object.defineProperty(fn, 'name', { value: arg.name })
         ; (fn as any).__isStub = true
-        ; (fn as any).__preview = `[Function ${arg.name}]${arg.isNative ? ' [native]' : ''}`
+        ; (fn as any).__preview = preview
+        ; (fn as any).toString = () => preview
       return fn
     }
 
