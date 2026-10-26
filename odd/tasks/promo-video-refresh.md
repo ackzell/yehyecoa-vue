@@ -30,9 +30,9 @@ changelog opens from the footer version (5db4903).
 ## Tasks
 
 - [x] T0 Bump HyperFrames pin 0.8.184 → 0.8.203; `check` ok. (inline)
-- [ ] T1 Update capture script: dock layout-tree defaults, drag-and-dock segment, changelog segment; re-run captures. (delegated: writer)
-- [ ] T2 Update STORYBOARD.md, Frame 3, Frame 5 timing, new changelog frame, index.html retime. (delegated: same writer)
-- [ ] T3 `check`, snapshots, preview, final render. (inline/verification)
+- [x] T1 Update capture script: dock layout-tree defaults, drag-and-dock segment, changelog segment; re-run captures. (delegated: writer) — 55d8ccb
+- [x] T2 Update STORYBOARD.md, Frame 3, Frame 5 timing, new changelog frame, index.html retime. (delegated: same writer) — 2f66424
+- [ ] T3 User review in Studio preview, then final render. (inline)
 
 ## Acceptance criteria
 
@@ -42,7 +42,10 @@ changelog opens from the footer version (5db4903).
 ## Progress / evidence
 
 - T0: pin bumped, check ok (report 8a23d206).
+- T1/T2: `hyperframes check` 0 errors; `timeline` 90s; no console-layout-switch.mp4 reference.
+  Frame starts 0, 9, 23, 34, 54, 70, 80, 84. boards/sketches keep old names (historical, unrendered).
+- Review points: Frame 5 cursor at ~66.9s; preview reload after dock drop; 6b 4s pacing.
 
 ## Next step
 
-T1.
+T3: user reviews preview, then one final render.
